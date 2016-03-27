@@ -82,7 +82,10 @@ help us out a lot:
     <LINK FOR BUG TRACKING>
     
 If you have any questions or concerns, or even any suggestions, don't hesitate to contact me at:
+
     npandolfi@wpi.edu
+
 Happy compiling!!
+
 Tags: Cyther, antibug, vcvarsall.bat, MinGW32, Python, Cython, Python 3.x, compiler, command-line, script
 user-friendly, setup.py, gcc
