@@ -1,0 +1,69 @@
+MAINTAIN
+
+    Keep __all__ up to date with all the useful functions
+
+    Make the functions that are not in __all__ private. Is one underscore enough?
+
+    Comment and properly docstring everything
+
+    Make sure that the version specified makes sense (major.minor.patch)
+
+    Make sure that all the message passoffs make sense. Update 'ERROR_PASSOFF' value?
+
+    Keep the -h follow all the other common -h practices
+
+    Make sure that the -h is up to date, including all the version info of all the external features (gcc/Cython)
+
+    Make sure that you constantly search for the assumptions cyther makes. Make no mistake
+
+EASY FIX
+
+HARD FIX
+
+    When the -w (watch) option is used, and the contents of the source file are being imported, the file will not be
+    able to recompile
+
+    Get the operating system dependant flags that are passed to gcc by distutils and inject them when building the
+    preset
+
+EASY NEW FEATURES
+
+    Function to clean a directory of everything cyther related, has an option to remove the .pyd or .so files
+
+    Function to clean a directory of everything 'locally build' related
+
+    Add more presets, including one that compiles really fast, for testing purposes
+
+    Extend the -l option to take a specific directory to build the files in
+
+    Specify how to give pass off args and 3rd party modules to include in the epilog section of '-h'
+    Do this also with the cython and gcc pass-off arguments
+
+HARD NEW FEATURES
+
+    Have an option to run the code under `if __name__ == '__main__'` statement directly in the terminal
+
+    Always back up the previous compile if there was one. Then if there is an error, don't overwrite it with anything,
+    but instead, keep the backup version. Have the new compilation attempt be built in the __cythercache__ directory
+
+    An option to just build the C, or to just take the C and build only the extension
+
+    Get -w (watch), to exit safely and keep the same command prompt open. Is this possible?
+
+    Make sure that the file order provided doesn't matter when compiling multiple files that may depend on one another
+
+    Recompile the libpythonXY.a static library if it does not exist:
+
+        Possible tool to help: dlltool, reimp, pexports, gendef
+
+            It would be best to use a tool that always exists on each and every platform
+
+        Possible usage: reimp.exe -d %lib_file%\ndlltool.exe -d %def_file% -D %dll_file% -k -l %a_file%
+
+QUESTIONS:
+
+    Should we even give the option to build locally in the same file?
+
+    Is it useful to give different options to different files during compilation? How would this even be done?
+
+    Turn the distribution of cyther into a package instead of a single module? Is this useful?
