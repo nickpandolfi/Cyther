@@ -2,8 +2,6 @@ MAINTAIN
 
     Keep __all__ up to date with all the useful functions
 
-    Make the functions that are not in __all__ private. Is one underscore enough?
-
     Comment and properly docstring everything
 
     Make sure that the version specified makes sense (major.minor.patch)
@@ -18,6 +16,17 @@ MAINTAIN
 
 EASY FIX
 
+    Put the line: platform.platform().strip().lower().startswith('windows') in the script checker
+
+    Change the name of should_compile to isOutdated, it makes more sense.
+
+    Format all the system constant strings
+
+    How to deal with non-standard extensions that people might be using? Don't error, but just have it print that
+    it is non standard, and work anyway?
+
+MEDIUM FIX
+
 HARD FIX
 
     When the -w (watch) option is used, and the contents of the source file are being imported, the file will not be
@@ -30,7 +39,7 @@ EASY NEW FEATURES
 
     Function to clean a directory of everything cyther related, has an option to remove the .pyd or .so files
 
-    Function to clean a directory of everything 'locally build' related
+    Function to clean a directory of everything 'locally build' related, or move it to a cythercache
 
     Add more presets, including one that compiles really fast, for testing purposes
 
@@ -52,6 +61,8 @@ HARD NEW FEATURES
 
     Make sure that the file order provided doesn't matter when compiling multiple files that may depend on one another
 
+    Don't have args and file, have only one object with everything in it
+
     Recompile the libpythonXY.a static library if it does not exist:
 
         Possible tool to help: dlltool, reimp, pexports, gendef
@@ -60,10 +71,27 @@ HARD NEW FEATURES
 
         Possible usage: reimp.exe -d %lib_file%\ndlltool.exe -d %def_file% -D %dll_file% -k -l %a_file%
 
+        Take a look at your favorites page for instructions on pexport
+
 QUESTIONS:
+
+    What about bcpp or cygwin or cl??
 
     Should we even give the option to build locally in the same file?
 
-    Is it useful to give different options to different files during compilation? How would this even be done?
+    Use a 'subparser' to process the commands to cython and gcc??
 
-    Turn the distribution of cyther into a package instead of a single module? Is this useful?
+    Do the commands to argparse need to be changed. Maybe give them better names, and give each a long name.
+
+    Is it necessary to make sure that os.pardir will never be a problem??
+
+    How about using tempfile for the building files??
+
+On Hold:
+
+    Where is the best spot to put the README and all the other files?
+
+    Explicitly state that neither Cython nor any GNU product nor Python is yours, and all rights belong to their
+    respective owners
+
+    Should we make CytherError traceback invisible?

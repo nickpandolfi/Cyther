@@ -1,45 +1,50 @@
-from distutils.core import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
-#python setup.py register -r pypi
-#python setup.py sdist --formats=zip,gztar,bztar bdist_wininst check upload -r pypi
 
-long_description = open('README.txt').read()
+NAME = 'Cyther'
+VERSION = '0.4.2'
+SHORT_DESCRIPTION = 'The Cross-Platform Cython/Python Compiler'
+LONG_DESCRIPTION = open('README.txt').read()
+PACKAGES = ['cyther']
+SCRIPTS = ['cytherize.py']
+DATA_FILES = [('cyther', ['CHANGELOG.txt', 'README.txt', 'TODO.txt', 'LICENSE.txt'])]
+PLATFORMS = ['Windows', 'MacOS', 'POSIX', 'Unix']
+AUTHOR = 'Nicholas C. Pandolfi'
+AUTHOR_EMAIL = 'npandolfi@wpi.edu'
+URL = 'https://github.com/nickpandolfi/Cyther'
+LICENSE = 'MIT'
+KEYWORDS = ['Cyther', 'Cython', 'Python', 'MinGW32',
+            'vcvarsall.bat', 'vcvarsall not found',
+            'setup.py', 'gcc', 'Python 3',
+            'user-friendly', 'command-line',
+            'script', 'auto-compiler']
+CLASSIFIERS = ['Development Status :: 3 - Alpha',
+               'Environment :: Console',
+               'Topic :: Software Development :: Compilers',
+               'Topic :: Software Development :: Build Tools',
+               'Topic :: Desktop Environment :: File Managers',
+               'Intended Audience :: Developers',
+               'Intended Audience :: Science/Research',
+               'Operating System :: OS Independent',
+               'Programming Language :: Python',
+               'Programming Language :: Python :: 3.5',
+               'Programming Language :: Cython',
+               'License :: OSI Approved :: MIT License']
 
-version = '0.4.1'
-
-short_description = 'The Cross-Platform Cython/Python Compiler'
-
-setup(name='Cyther',
-      version=version,
-      description=short_description,
-      long_description=long_description,
-
-      packages=['cyther'],
-      data_files=[('', ['LICENSE.txt','TODO.txt'])],
-
-      platforms=['Windows', 'MacOS', 'POSIX', 'Unix'],
-      author='Nicholas C. Pandolfi',
-      author_email='npandolfi@wpi.edu',
-      url='https://github.com/nickpandolfi/Cyther',
-      license='MIT',
-      keywords=['Cyther', 'Cython', 'Python', 'MinGW32',
-                'vcvarsall.bat', 'vcvarsall not found',
-                'setup.py', 'gcc', 'Python 3',
-                'user-friendly', 'command-line',
-                'script', 'auto-compiler'],
-      classifiers=[
-          'Development Status :: 3 - Alpha',
-          'Environment :: Console',
-          'Topic :: Software Development :: Compilers',
-          'Topic :: Software Development :: Build Tools',
-          'Topic :: Desktop Environment :: File Managers',
-          'Intended Audience :: Developers',
-          'Intended Audience :: Science/Research',
-          'Operating System :: OS Independent',
-          'Programming Language :: Python',
-          'Programming Language :: Python :: 3.5',
-          'Programming Language :: Cython',
-          'License :: OSI Approved :: MIT License',
-          ]
-
-     )
+setup(name=NAME,
+      version=VERSION,
+      description=SHORT_DESCRIPTION,
+      long_description=LONG_DESCRIPTION,
+      packages=PACKAGES,
+      scripts=SCRIPTS,
+      data_files=DATA_FILES,
+      platforms=PLATFORMS,
+      author=AUTHOR,
+      author_email=AUTHOR_EMAIL,
+      url=URL,
+      license=LICENSE,
+      keywords=KEYWORDS,
+      classifiers=CLASSIFIERS)

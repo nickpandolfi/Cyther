@@ -1,0 +1,13 @@
+0.0.0 - 0.4.0
+
+    Private development, not documented.
+
+0.4.1
+
+    Creation of everything needed to push to PYPI, and a few bug fixes.
+
+0.4.2
+    Reformatting and renaming of key functions to make everything more understandable
+    A few bug fixes involving directories to include
+    Started using setuptools if possible
+    Fixed and elaborated on setup.py
