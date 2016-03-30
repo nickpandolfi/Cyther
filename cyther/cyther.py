@@ -4,7 +4,17 @@ import os, sys, subprocess
 import argparse, platform
 import time
 
-from shutil import which
+
+class CytherError(Exception):
+    """A helpful custom error to be called when a general python error just doesn't make sense in context"""
+    def __init__(self, *args, **kwargs):
+        super(CytherError, self).__init__(*args, **kwargs)
+
+
+try:
+    from shutil import which
+except ImportError:
+    raise CytherError("The current version of Python doesn't support the function 'which', normally located in shutil") # Eventually, can this be circumvented?
 
 
 CYTHER_FAIL = 0
@@ -12,9 +22,9 @@ CYTHER_SUCCESS = 1
 ERROR_PASSOFF = -3
 INTERVAL = .25
 
-CYTHONIZABLE_FILE_EXTS = ('.pyx', '.py')
+CYTHONIZABLE_FILE_EXTS = ('.pyx', '.py')                                                                                # Need to fix this line
 
-PLEASE_ADD = ", please add it to the system's path"
+PLEASE_ADD = ", please add it to the system's path"                                                                     # Need the formatting
 NOT_NEEDED_MESSAGE = "Module '{}' does not have to be included, or has no .get_include() method"
 
 LIB_A_MISSING_MESSAGE = '''
@@ -31,17 +41,12 @@ extract from the python{0}.dll and inject into the libpython{0}.a static library
 
 ASSUMPTIONS = """
 Assumptions cyther makes about your system:
-1) Cython and gcc are both installed, and accessible from the system console
-2) Your environment path variable is able to be found by `shutil.which`
-3) gcc can work with the option -l pythonXY (libpythonXY.a exists in your python libs directory)
-4) Almost any gcc compiled C program will work on Windows
+1) Cython and gcc are both installed, and accessible from the system console                                            # Need to update assumptions
+2) Python supports 'shutil.which'
+3) Your environment path variable is able to be found by `shutil.which`
+4) gcc can work with the option -l pythonXY (libpythonXY.a exists in your python libs directory)
+5) Almost any gcc compiled C program will work on Windows
 """
-
-
-class CytherError(Exception):
-    """A helpful custom error to be called when a general python error just doesn't make sense in context"""
-    def __init__(self, *args, **kwargs):
-        super(CytherError, self).__init__(*args, **kwargs)
 
 
 def where(cmd, mode=os.X_OK, path=None):
@@ -298,12 +303,14 @@ INFO = str()
 
 INFO += "\nSystem:"
 
-OPERATING_SYSTEM = platform.platform().split('-')[0]
+OPERATING_SYSTEM = platform.platform()
+# OPERATING_SYSTEM = platform.platform().split('-')[0]
 INFO += "\n\tOperating System: {}".format(OPERATING_SYSTEM)
-IS_WINDOWS = OPERATING_SYSTEM == 'Windows'
+IS_WINDOWS = OPERATING_SYSTEM.lower().startswith('windows')
+# IS_WINDOWS = OPERATING_SYSTEM == 'Windows'
 INFO += "\n\t\tOS is Windows: {}".format(IS_WINDOWS)
-DLL_EXTENSION = '.dll' if IS_WINDOWS else '.so'
-INFO += "\n\tLinked Library Extension: {}".format(DLL_EXTENSION)
+LIBRARY_EXTENSION = '.dll' if IS_WINDOWS else '.so'
+INFO += "\n\tLinked Library Extension: {}".format(LIBRARY_EXTENSION)
 DEFAULT_OUTPUT_EXTENSION = '.pyd' if IS_WINDOWS else '.so'
 INFO += "\n\tDefault Output Extension: {}".format(DEFAULT_OUTPUT_EXTENSION)
 
@@ -348,12 +355,12 @@ if not LIB_A_DIRECTORY_EXISTS:
 INFO += "\n\tLibrary '.a' Directory: {}".format(LIB_A_DIRECTORY)
 INFO += "\n\t\tExists: {}".format(LIB_A_DIRECTORY_EXISTS)
 
-DLL_NAME = LIB_A_NAME + DLL_EXTENSION
+DLL_NAME = LIB_A_NAME + LIBRARY_EXTENSION
 DLL_LOCATION = where(DLL_NAME)
 DLL_EXISTS = os.path.exists(DLL_LOCATION)
 
 DLL_DIRECTORY = os.path.normpath(DLL_LOCATION)
-INFO += "\n\tPython '{}' Directory: {}".format(DLL_EXTENSION, DLL_LOCATION)
+INFO += "\n\tPython '{}' Directory: {}".format(LIBRARY_EXTENSION, DLL_LOCATION)
 INFO += "\n\t\tExists: {}".format(DLL_EXISTS)
 
 cython_found = where('cython')
