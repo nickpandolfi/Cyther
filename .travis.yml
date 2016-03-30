@@ -1,14 +1,21 @@
 os:
-	- linux
-	- osx
+    - linux
 
 language: python
 
 python:
-	- 3.4
-	- 3.5
+    - 2.7
+    - 3.3
+    - 3.4
+    - 3.5
 
 install: 
-	- pip install cython
+    - pip install cython
+
+deploy:
+    provider: pypi
+    user: ...
+    password: ...
+    distributions: "sdist --formats=zip,gztar bdist_wheel bdist_wininst"
 
 script: nosetests
