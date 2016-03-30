@@ -1,3 +1,11 @@
+# Custom
+__cythercache__
+.idea
+DO_NOT_DISTRIBUTE.txt
+test_cyther.py
+to_pypi.py
+import_cyther.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
