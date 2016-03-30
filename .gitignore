@@ -5,6 +5,8 @@ DO_NOT_DISTRIBUTE.txt
 test_cyther.py
 to_pypi.py
 import_cyther.py
+MANIFEST
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
