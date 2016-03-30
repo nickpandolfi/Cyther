@@ -1,6 +1,6 @@
 # Custom
-__cythercache__
-.idea
+__cythercache__/
+.idea/
 DO_NOT_DISTRIBUTE.txt
 test_cyther.py
 to_pypi.py
