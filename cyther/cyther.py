@@ -49,13 +49,24 @@ Assumptions cyther makes about your system:
 """
 
 
-def where(cmd, mode=os.X_OK, path=None):
+def where(cmd, mode=os.X_OK, directory = False, path=None):
     """This function will wrap the shutil.which function to return the abspath every time, or a empty string"""
-    raw_result = which(cmd, mode, path)
-    if raw_result:
-        return os.path.abspath(raw_result)
+    if directory:
+        for path in os.environ["PATH"].split(os.pathsep):
+            path = path.strip('"')
+            raw_result = os.path.join(path, cmd)
+            if os.path.exists(raw_result):
+                break
+        else:
+            return ''
+        return raw_result
     else:
-        return ''
+        raw_result = which(cmd, mode, path)
+
+        if raw_result:
+            return os.path.abspath(raw_result)
+        else:
+            return ''
 
 
 def dealWithLibA(direc, message):
@@ -303,12 +314,18 @@ INFO = str()
 
 INFO += "\nSystem:"
 
+
+
+# Updated the operating system finder to be safer.
+# Fixed the hardcoding of the python environment structure to not be primary.
+
+
+
 OPERATING_SYSTEM = platform.platform()
-# OPERATING_SYSTEM = platform.platform().split('-')[0]
 INFO += "\n\tOperating System: {}".format(OPERATING_SYSTEM)
 IS_WINDOWS = OPERATING_SYSTEM.lower().startswith('windows')
-# IS_WINDOWS = OPERATING_SYSTEM == 'Windows'
 INFO += "\n\t\tOS is Windows: {}".format(IS_WINDOWS)
+
 LIBRARY_EXTENSION = '.dll' if IS_WINDOWS else '.so'
 INFO += "\n\tLinked Library Extension: {}".format(LIBRARY_EXTENSION)
 DEFAULT_OUTPUT_EXTENSION = '.pyd' if IS_WINDOWS else '.so'
@@ -332,15 +349,21 @@ if not PYTHON_DIRECTORY_EXISTS:
 INFO += "\n\tInstallation Directory: {}".format(PYTHON_DIRECTORY)
 INFO += "\n\t\tExists: {}".format(PYTHON_DIRECTORY_EXISTS)
 
-LIBS_DIRECTORY = os.path.normpath(os.path.join(PYTHON_DIRECTORY, 'libs'))
+LIBS_DIRECTORY = where('libs', directory = True)
 LIBS_DIRECTORY_EXISTS = os.path.exists(LIBS_DIRECTORY)
+if not LIBS_DIRECTORY_EXISTS:
+    LIBS_DIRECTORY = os.path.normpath(os.path.join(PYTHON_DIRECTORY, 'libs'))
+    LIBS_DIRECTORY_EXISTS = os.path.exists(LIBS_DIRECTORY)
 if not LIBS_DIRECTORY_EXISTS:
     raise CytherError("The Python 'libs' directory doesn't exist")
 INFO += "\n\tDirectory 'libs': {}".format(LIBS_DIRECTORY)
 INFO += "\n\t\tExists: {}".format(LIBS_DIRECTORY_EXISTS)
 
-INCLUDE_DIRECTORY = os.path.normpath(os.path.join(PYTHON_DIRECTORY, 'include'))
+INCLUDE_DIRECTORY = where('include', directory = True)
 INCLUDE_DIRECTORY_EXISTS = os.path.exists(INCLUDE_DIRECTORY)
+if not INCLUDE_DIRECTORY_EXISTS:
+    INCLUDE_DIRECTORY = os.path.normpath(os.path.join(PYTHON_DIRECTORY, 'include'))
+    INCLUDE_DIRECTORY_EXISTS = os.path.exists(INCLUDE_DIRECTORY)
 if not INCLUDE_DIRECTORY_EXISTS:
     raise CytherError("The Python 'include' directory doesn't exist")
 INFO += "\n\tDirectory 'include': {}".format(INCLUDE_DIRECTORY)
@@ -348,6 +371,8 @@ INFO += "\n\t\tExists: {}".format(INCLUDE_DIRECTORY_EXISTS)
 
 LIB_A_NAME = 'python' + VER
 LIB_A = 'lib' + LIB_A_NAME + '.a'
+
+
 LIB_A_DIRECTORY = os.path.normpath(os.path.join(LIBS_DIRECTORY, LIB_A))
 LIB_A_DIRECTORY_EXISTS = os.path.exists(LIB_A_DIRECTORY)
 if not LIB_A_DIRECTORY_EXISTS:
