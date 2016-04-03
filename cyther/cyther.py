@@ -78,8 +78,6 @@ def where(cmd, mode=os.X_OK, path=None, error=True, crawl=False, datafile=False)
                                     error_string += 'not setting it\n'
                             else:
                                 found[w] = string
-                    else:
-                        error_string += "\t\t\t\tW: '{}'\n\t\t\t\tCMD: '{}'\n".format(w, cmd)
         for item in cmd:
             if item not in found:
                 raise CytherError("The item '{}' was not found searching drive '{}'\n\n{}".format(item, DRIVE, error_string))
