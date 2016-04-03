@@ -69,8 +69,8 @@ def where(cmd, mode=os.X_OK, path=None, error=True, crawl=False, datafile=False)
                 for w in container:
                     if w in cmd:
                         string = os.path.abspath(os.path.join(source, root, w))
-                        if 'python' in string.lower():
-                            error_string += "'python' is in '{}'\n".format(string)
+                        if PYTHON_NAME in string.lower():
+                            error_string += "'{}' is in '{}'\n".format(PYTHON_NAME, string)
                             if w in found:
                                 if len(found[w]) > len(string):
                                     found[w] = string
