@@ -69,11 +69,16 @@ def where(cmd, mode=os.X_OK, path=None, error=True, crawl=False, datafile=False)
                     if w in cmd:
                         string = os.path.abspath(os.path.join(source, root, w))
                         if 'python' in string.lower():
+                            print("'python' is in '{}'".format(string))
                             if w in found:
                                 if len(found[w]) > len(string):
                                     found[w] = string
+                                else:
+                                    print('not setting it')
                             else:
                                 found[w] = string
+                    else:
+                        print("\t\t\t\tW: '{}'\n\t\t\t\tCMD: '{}'".format(w, cmd))
         for item in cmd:
             if item not in found:
                 raise CytherError("The item '{}' was not found searching drive '{}'".format(item, DRIVE))
