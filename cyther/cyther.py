@@ -59,6 +59,7 @@ if not DRIVE:
 def where(cmd, mode=os.X_OK, path=None, error=True, crawl=False, datafile=False):
     """This function will wrap the shutil.which function to return the abspath every time, or a empty string"""
     found = {}
+    error_string = ''
     if crawl:
         if isinstance(cmd, str):
             cmd = [cmd]
@@ -69,19 +70,19 @@ def where(cmd, mode=os.X_OK, path=None, error=True, crawl=False, datafile=False)
                     if w in cmd:
                         string = os.path.abspath(os.path.join(source, root, w))
                         if 'python' in string.lower():
-                            print("'python' is in '{}'".format(string))
+                            error_string += "'python' is in '{}'\n".format(string)
                             if w in found:
                                 if len(found[w]) > len(string):
                                     found[w] = string
                                 else:
-                                    print('not setting it')
+                                    error_string += 'not setting it\n'
                             else:
                                 found[w] = string
                     else:
-                        print("\t\t\t\tW: '{}'\n\t\t\t\tCMD: '{}'".format(w, cmd))
+                        error_string += "\t\t\t\tW: '{}'\n\t\t\t\tCMD: '{}'\n".format(w, cmd)
         for item in cmd:
             if item not in found:
-                raise CytherError("The item '{}' was not found searching drive '{}'".format(item, DRIVE))
+                raise CytherError("The item '{}' was not found searching drive '{}'\n\n{}".format(item, DRIVE, error_string))
     else:
         if isinstance(cmd, str):
             cmd = [cmd]
