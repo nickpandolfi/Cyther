@@ -40,7 +40,7 @@ extract from the python{0}.dll and inject into the libpython{0}.a static library
 
 ASSUMPTIONS = """
 Assumptions cyther makes about your system:
-1) Cython and gcc are both installed, and accessible from the system console                                            # Need to update assumptions
+1) Cython and gcc are both installed, and accessible from the system console
 2) Python supports 'shutil.which'
 3) Your environment path variable is able to be found by `shutil.which`
 4) gcc can work with the option -l pythonXY (libpythonXY.a exists in your python libs directory)
@@ -52,6 +52,8 @@ PYTHON_DIRECTORY = sys.exec_prefix
 DRIVE_AND_NAME = os.path.splitdrive(PYTHON_DIRECTORY)
 PYTHON_NAME = os.path.basename(DRIVE_AND_NAME[1]).lower()
 DRIVE = DRIVE_AND_NAME[0]
+if not DRIVE:
+    DRIVE = os.path.normpath('/')
 
 
 def where(cmd, mode=os.X_OK, path=None, error=True, crawl=False, datafile=False):

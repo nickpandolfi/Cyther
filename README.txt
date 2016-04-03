@@ -93,9 +93,11 @@ Assumptions cyther makes about your system:
 -------------------------------------------
 
 1) Cython and gcc are both installed, and accessible from the system console
-2) Your environment path variable is able to be found by ``shutil.which``
-3) gcc can work with the option ``-l pythonXY`` (libpythonXY.a exists in your python libs directory)
-4) Almost any gcc compiled C program will work on Windows
+2) Python supports 'shutil.which'
+3) Your environment path variable is able to be found by `shutil.which`
+4) gcc can work with the option -l pythonXY (libpythonXY.a exists in your python libs directory)
+5) Almost any gcc compiled C program will work on Windows
+6) Python's 'libs' and 'include' directories are in the same drive that python is installed
 
 Hey you! Yes you. If you notice any bugs or peculiarities, please report them to our bug tracker, it will
 help us out a lot:

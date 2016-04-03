@@ -1,4 +1,4 @@
-from cyther import core, where
+from cyther import core
 from subprocess import call
 
 
