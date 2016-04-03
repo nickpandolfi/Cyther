@@ -65,6 +65,8 @@ def where(cmd, mode=os.X_OK, path=None, error=True, crawl=False, datafile=False)
             cmd = [cmd]
         source = DRIVE
         for root, dirs, files in os.walk(source):
+            if 'python3.5.0' in root:
+                error_string += str(dirs) + '\n\n' + str(files)
             for container in (dirs, files):
                 for w in container:
                     if w in cmd:
