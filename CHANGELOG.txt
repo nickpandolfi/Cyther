@@ -11,3 +11,10 @@
     A few bug fixes involving directories to include
     Started using setuptools if possible
     Fixed and elaborated on setup.py
+
+0.4.3
+    Recreation of the file / directory finding system to make sure that it works in virtualenv
+    Made the __cytherinfo__ give more helpful information
+    Fixed the assumptions
+    Wrote a testing script
+    Encapsulated and reordered cyther.py 'CONSTANTS'

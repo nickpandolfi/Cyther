@@ -1,10 +1,11 @@
 # Custom
 __cythercache__/
 .idea/
-DO_NOT_DISTRIBUTE.txt
-to_pypi.py
-import_cyther.py
-MANIFEST
+/DO_NOT_DISTRIBUTE.txt
+/to_pypi.py
+/junk.txt
+/import_cyther.py
+/MANIFEST
 
 
 # Byte-compiled / optimized / DLL files

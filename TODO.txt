@@ -95,3 +95,8 @@ On Hold:
     respective owners
 
     Should we make CytherError traceback invisible?
+
+    If is windows, just call subprocess with where
+    If is unix, just call subprocess with which
+    If unable to do this, THEN try to import and use which
+    If this doesnot exist, raise error?

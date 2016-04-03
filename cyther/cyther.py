@@ -1,4 +1,3 @@
-# coding=utf-8
 
 import os, sys, subprocess
 import argparse, platform
@@ -14,7 +13,7 @@ class CytherError(Exception):
 try:
     from shutil import which
 except ImportError:
-    raise CytherError("The current version of Python doesn't support the function 'which', normally located in shutil") # Eventually, can this be circumvented?
+    raise CytherError("The current version of Python doesn't support the function 'which', normally located in shutil")
 
 
 CYTHER_FAIL = 0
@@ -22,9 +21,9 @@ CYTHER_SUCCESS = 1
 ERROR_PASSOFF = -3
 INTERVAL = .25
 
-CYTHONIZABLE_FILE_EXTS = ('.pyx', '.py')                                                                                # Need to fix this line
+CYTHONIZABLE_FILE_EXTS = ('.pyx', '.py')
 
-PLEASE_ADD = ", please add it to the system's path"                                                                     # Need the formatting
+
 NOT_NEEDED_MESSAGE = "Module '{}' does not have to be included, or has no .get_include() method"
 
 LIB_A_MISSING_MESSAGE = '''
@@ -46,27 +45,46 @@ Assumptions cyther makes about your system:
 3) Your environment path variable is able to be found by `shutil.which`
 4) gcc can work with the option -l pythonXY (libpythonXY.a exists in your python libs directory)
 5) Almost any gcc compiled C program will work on Windows
+6) Python's 'libs' and 'include' directories are in the same drive that python is installed
 """
 
+PYTHON_DIRECTORY = sys.exec_prefix
+DRIVE_AND_NAME = os.path.splitdrive(PYTHON_DIRECTORY)
+PYTHON_NAME = os.path.basename(DRIVE_AND_NAME[1]).lower()
+DRIVE = DRIVE_AND_NAME[0]
 
-def where(cmd, mode=os.X_OK, directory = False, path=None):
+
+def where(cmd, mode=os.X_OK, path=None, error=True, crawl=False, datafile=False):
     """This function will wrap the shutil.which function to return the abspath every time, or a empty string"""
-    if directory:
-        for path in os.environ["PATH"].split(os.pathsep):
-            path = path.strip('"')
-            raw_result = os.path.join(path, cmd)
-            if os.path.exists(raw_result):
-                break
-        else:
-            return ''
-        return raw_result
+    found = {}
+    if crawl:
+        if isinstance(cmd, str):
+            cmd = [cmd]
+        source = DRIVE
+        for root, dirs, files in os.walk(source):
+            for container in (dirs, files):
+                for w in container:
+                    if w in cmd:
+                        string = os.path.abspath(os.path.join(source, root, w))
+                        if 'python' in string.lower():
+                            if w in found:
+                                if len(found[w]) > len(string):
+                                    found[w] = string
+                            else:
+                                found[w] = string
+        for item in cmd:
+            if item not in found:
+                raise CytherError("The item '{}' was not found searching drive '{}'".format(item, DRIVE))
     else:
-        raw_result = which(cmd, mode, path)
-
-        if raw_result:
-            return os.path.abspath(raw_result)
-        else:
-            return ''
+        if isinstance(cmd, str):
+            cmd = [cmd]
+        for find_this in cmd:
+            raw_result = which(find_this, mode, path)
+            if raw_result:
+                found[find_this] = os.path.abspath(raw_result)
+            else:
+                raise CytherError("Could not find '{}' in the path".format(find_this))
+    return found
 
 
 def dealWithLibA(direc, message):
@@ -148,16 +166,16 @@ def makeCommands(preset, file):
         cython_command = ['cython', '-a', '-p', '-o', file['c_name'], file['file_path']]
         gcc_command = ['gcc', '-shared', '-w', '-O3', '-I', INCLUDE_DIRECTORY, '-L', LIBS_DIRECTORY, '-o',
                        file['output_name'], file['c_name'],
-                       '-l', LIB_A_NAME]
+                       '-l', PYTHON_NAME]
     elif preset == 'beast':
         cython_command = ['cython', '-a', '-l', '-p', '-o', file['c_name'], file['file_path']]
         gcc_command = ['gcc', '-shared', '-Wall', '-O3', '-I', INCLUDE_DIRECTORY, '-L', LIBS_DIRECTORY, '-o',
                        file['output_name'],
-                       file['c_name'], '-l', LIB_A_NAME]
+                       file['c_name'], '-l', PYTHON_NAME]
     elif preset == 'minimal':
         cython_command = ['cython', '-o', file['c_name'], file['file_path']]
         gcc_command = ['gcc', '-shared', '-I', INCLUDE_DIRECTORY, '-L', LIBS_DIRECTORY, '-o', file['output_name'],
-                       file['c_name'], '-l', LIB_A_NAME]
+                       file['c_name'], '-l', PYTHON_NAME]
     else:
         raise CytherError("The preset '{}' is not supported".format(preset))
 
@@ -309,96 +327,52 @@ def core(args):
         else:
             time.sleep(interval)
 
-
-INFO = str()
-
-INFO += "\nSystem:"
-
-
-
 # Updated the operating system finder to be safer.
 # Fixed the hardcoding of the python environment structure to not be primary.
 
-
-
 OPERATING_SYSTEM = platform.platform()
-INFO += "\n\tOperating System: {}".format(OPERATING_SYSTEM)
 IS_WINDOWS = OPERATING_SYSTEM.lower().startswith('windows')
-INFO += "\n\t\tOS is Windows: {}".format(IS_WINDOWS)
 
 LIBRARY_EXTENSION = '.dll' if IS_WINDOWS else '.so'
-INFO += "\n\tLinked Library Extension: {}".format(LIBRARY_EXTENSION)
 DEFAULT_OUTPUT_EXTENSION = '.pyd' if IS_WINDOWS else '.so'
-INFO += "\n\tDefault Output Extension: {}".format(DEFAULT_OUTPUT_EXTENSION)
-
-INFO += "\nPython:"
-
-python_found = where('python')
-if not python_found:
-    raise CytherError("Python is not able to be called, please add it to the system's path")
 
 VER = str(sys.version_info.major) + str(sys.version_info.minor)
-INFO += "\n\tVersion: {}".format('.'.join(list(VER)))
 
-LIB_A_MISSING_MESSAGE = LIB_A_MISSING_MESSAGE.format(VER)
+LIB_A = 'lib' + PYTHON_NAME + '.a'
+DLL_NAME = PYTHON_NAME + LIBRARY_EXTENSION
 
-PYTHON_DIRECTORY = sys.exec_prefix
-PYTHON_DIRECTORY_EXISTS = os.path.exists(PYTHON_DIRECTORY)
-if not PYTHON_DIRECTORY_EXISTS:
-    raise CytherError("The Python main installation directory doesn't exist")
-INFO += "\n\tInstallation Directory: {}".format(PYTHON_DIRECTORY)
-INFO += "\n\t\tExists: {}".format(PYTHON_DIRECTORY_EXISTS)
+EXECUTABLE_FINDINGS = where(['python', 'cython', 'gcc'])  # Just to make sure they exist
 
-LIBS_DIRECTORY = where('libs', directory = True)
-LIBS_DIRECTORY_EXISTS = os.path.exists(LIBS_DIRECTORY)
-if not LIBS_DIRECTORY_EXISTS:
-    LIBS_DIRECTORY = os.path.normpath(os.path.join(PYTHON_DIRECTORY, 'libs'))
-    LIBS_DIRECTORY_EXISTS = os.path.exists(LIBS_DIRECTORY)
-if not LIBS_DIRECTORY_EXISTS:
-    raise CytherError("The Python 'libs' directory doesn't exist")
-INFO += "\n\tDirectory 'libs': {}".format(LIBS_DIRECTORY)
-INFO += "\n\t\tExists: {}".format(LIBS_DIRECTORY_EXISTS)
+DIRECTORY_FINDINGS = where(['libs', 'include', DLL_NAME], crawl=True)  # To make sure they exist, and find the paths
 
-INCLUDE_DIRECTORY = where('include', directory = True)
-INCLUDE_DIRECTORY_EXISTS = os.path.exists(INCLUDE_DIRECTORY)
-if not INCLUDE_DIRECTORY_EXISTS:
-    INCLUDE_DIRECTORY = os.path.normpath(os.path.join(PYTHON_DIRECTORY, 'include'))
-    INCLUDE_DIRECTORY_EXISTS = os.path.exists(INCLUDE_DIRECTORY)
-if not INCLUDE_DIRECTORY_EXISTS:
-    raise CytherError("The Python 'include' directory doesn't exist")
-INFO += "\n\tDirectory 'include': {}".format(INCLUDE_DIRECTORY)
-INFO += "\n\t\tExists: {}".format(INCLUDE_DIRECTORY_EXISTS)
-
-LIB_A_NAME = 'python' + VER
-LIB_A = 'lib' + LIB_A_NAME + '.a'
+LIBS_DIRECTORY = DIRECTORY_FINDINGS['libs']
+INCLUDE_DIRECTORY = DIRECTORY_FINDINGS['include']
+DLL_DIRECTORY = DIRECTORY_FINDINGS[DLL_NAME]
 
 
-LIB_A_DIRECTORY = os.path.normpath(os.path.join(LIBS_DIRECTORY, LIB_A))
-LIB_A_DIRECTORY_EXISTS = os.path.exists(LIB_A_DIRECTORY)
-if not LIB_A_DIRECTORY_EXISTS:
-    dealWithLibA(LIB_A_DIRECTORY, LIB_A_MISSING_MESSAGE)
-INFO += "\n\tLibrary '.a' Directory: {}".format(LIB_A_DIRECTORY)
-INFO += "\n\t\tExists: {}".format(LIB_A_DIRECTORY_EXISTS)
+LIB_A_DIRECTORY = os.path.normpath(os.path.join(LIBS_DIRECTORY, LIB_A))  # Have to hardcode this one in
+if not os.path.exists(LIB_A_DIRECTORY):
+    dealWithLibA(LIB_A_DIRECTORY, LIB_A_MISSING_MESSAGE.format(VER))
 
-DLL_NAME = LIB_A_NAME + LIBRARY_EXTENSION
-DLL_LOCATION = where(DLL_NAME)
-DLL_EXISTS = os.path.exists(DLL_LOCATION)
+INFO = str()
+INFO += "\nSystem:"
 
-DLL_DIRECTORY = os.path.normpath(DLL_LOCATION)
-INFO += "\n\tPython '{}' Directory: {}".format(LIBRARY_EXTENSION, DLL_LOCATION)
-INFO += "\n\t\tExists: {}".format(DLL_EXISTS)
+INFO += "\n\tPython:"
+INFO += "\n\t\tVersion: {}".format('.'.join(list(VER)))
+INFO += "\n\t\tOperating System: {}".format(OPERATING_SYSTEM)
+INFO += "\n\t\t\tOS is Windows: {}".format(IS_WINDOWS)
+INFO += "\n\t\tLinked Library Extension: {}".format(LIBRARY_EXTENSION)
+INFO += "\n\t\tDefault Output Extension: {}".format(DEFAULT_OUTPUT_EXTENSION)
+INFO += "\n\t\tInstallation Directory: {}".format(PYTHON_DIRECTORY)
+INFO += "\n\t\tDirectory 'libs' Location: {}".format(LIBS_DIRECTORY)
+INFO += "\n\t\tDirectory 'include' Location: {}".format(INCLUDE_DIRECTORY)
+INFO += "\n\t\tLibrary '.a' Location: {}".format(LIB_A_DIRECTORY)
+INFO += "\n\t\tPython '{}' Location: {}".format(LIBRARY_EXTENSION, DLL_DIRECTORY)
 
-cython_found = where('cython')
-if not cython_found:
-    try:
-        import cython
-        raise CytherError("Cython exists and is able to be imported by Python, but is unable to be called" + PLEASE_ADD)
-    except ImportError:
-        raise CytherError("Cython is unable to be imported, and is probably not installed")
-
-gcc_found = where('gcc')
-if not gcc_found:
-    raise CytherError("gcc is not able to be called" + PLEASE_ADD)
+INFO += "\n\tCython:"
+INFO += "\n\t\tNothing Here Yet"
+INFO += "\n\tGCC:"
+INFO += "\n\t\tNothing Here Yet"
 
 __cytherinfo__ = INFO
 
