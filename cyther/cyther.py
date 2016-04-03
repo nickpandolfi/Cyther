@@ -341,21 +341,21 @@ def core(args):
 OPERATING_SYSTEM = platform.platform()
 IS_WINDOWS = OPERATING_SYSTEM.lower().startswith('windows')
 
-LIBRARY_EXTENSION = '.dll' if IS_WINDOWS else '.so'
+#LIBRARY_EXTENSION = '.dll' if IS_WINDOWS else '.so'
 DEFAULT_OUTPUT_EXTENSION = '.pyd' if IS_WINDOWS else '.so'
 
 VER = str(sys.version_info.major) + str(sys.version_info.minor)
 
 LIB_A = 'lib' + PYTHON_NAME + '.a'
-DLL_NAME = PYTHON_NAME + LIBRARY_EXTENSION
+#DLL_NAME = PYTHON_NAME + LIBRARY_EXTENSION
 
 EXECUTABLE_FINDINGS = where(['python', 'cython', 'gcc'])  # Just to make sure they exist
 
-DIRECTORY_FINDINGS = where(['libs', 'include', DLL_NAME], crawl=True)  # To make sure they exist, and find the paths
+DIRECTORY_FINDINGS = where(['libs', 'include'], crawl=True)  # To make sure they exist, and find the paths
 
 LIBS_DIRECTORY = DIRECTORY_FINDINGS['libs']
 INCLUDE_DIRECTORY = DIRECTORY_FINDINGS['include']
-DLL_DIRECTORY = DIRECTORY_FINDINGS[DLL_NAME]
+#DLL_DIRECTORY = DIRECTORY_FINDINGS[DLL_NAME]
 
 
 LIB_A_DIRECTORY = os.path.normpath(os.path.join(LIBS_DIRECTORY, LIB_A))  # Have to hardcode this one in
@@ -369,13 +369,13 @@ INFO += "\n\tPython:"
 INFO += "\n\t\tVersion: {}".format('.'.join(list(VER)))
 INFO += "\n\t\tOperating System: {}".format(OPERATING_SYSTEM)
 INFO += "\n\t\t\tOS is Windows: {}".format(IS_WINDOWS)
-INFO += "\n\t\tLinked Library Extension: {}".format(LIBRARY_EXTENSION)
+#INFO += "\n\t\tLinked Library Extension: {}".format(LIBRARY_EXTENSION)
 INFO += "\n\t\tDefault Output Extension: {}".format(DEFAULT_OUTPUT_EXTENSION)
 INFO += "\n\t\tInstallation Directory: {}".format(PYTHON_DIRECTORY)
 INFO += "\n\t\tDirectory 'libs' Location: {}".format(LIBS_DIRECTORY)
 INFO += "\n\t\tDirectory 'include' Location: {}".format(INCLUDE_DIRECTORY)
 INFO += "\n\t\tLibrary '.a' Location: {}".format(LIB_A_DIRECTORY)
-INFO += "\n\t\tPython '{}' Location: {}".format(LIBRARY_EXTENSION, DLL_DIRECTORY)
+#INFO += "\n\t\tPython '{}' Location: {}".format(LIBRARY_EXTENSION, DLL_DIRECTORY)
 
 INFO += "\n\tCython:"
 INFO += "\n\t\tNothing Here Yet"
