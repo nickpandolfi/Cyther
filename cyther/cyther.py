@@ -1,7 +1,26 @@
+#from distutils.ccompiler import show_compilers
+#import setuptools_bootstrap
+#setuptools_bootstrap.use_setuptools()
+#from setuptools import setup, Extension
+#module1 = Extension('demo', sources=['demo.c'])
+#setup(name='PackageName', ext_modules=[module1])
 
-import os, sys, subprocess
-import argparse, platform
-import time
+
+import site
+from distutils import sysconfig
+from distutils import msvccompiler
+
+MSVC_VERSION = int(msvccompiler.get_build_version())
+PLATFORM = sys.platform
+BASENAME = "python" + sysconfig.get_python_version()
+
+
+
+
+
+import os, sys, subprocess, platform
+import re, collections
+import time, argparse
 
 
 class CytherError(Exception):
@@ -9,19 +28,22 @@ class CytherError(Exception):
     def __init__(self, *args, **kwargs):
         super(CytherError, self).__init__(*args, **kwargs)
 
-
 try:
     from shutil import which
 except ImportError:
     raise CytherError("The current version of Python doesn't support the function 'which', normally located in shutil")
 
+MAJOR = str(sys.version_info.major)
+MINOR = str(sys.version_info.minor)
+
+VER = MAJOR + MINOR
 
 CYTHER_FAIL = 0
 CYTHER_SUCCESS = 1
 ERROR_PASSOFF = -3
 INTERVAL = .25
 
-CYTHONIZABLE_FILE_EXTS = ('.pyx', '.py')
+CYTHONIZABLE_FILE_EXTS = ('.pyx', '.py') # TODO make a regular expression right here
 
 
 NOT_NEEDED_MESSAGE = "Module '{}' does not have to be included, or has no .get_include() method"
@@ -56,44 +78,137 @@ if not DRIVE:
     DRIVE = os.path.normpath('/')
 
 
-def where(cmd, mode=os.X_OK, path=None, error=True, crawl=False, datafile=False):
+EXPRESSIONS = collections.defaultdict() # will always return everything
+
+EXPRESSIONS['include'] = r'(.+)([pP][yY][tT][hH][oO][nN])(\s?' + MAJOR + \
+                         r'\.?' + MINOR + \
+                         r'(\.\d)?)(\/|\\)(include)(\/|\\)?(\n|$)'
+
+EXPRESSIONS['libs'] = r'(.+)([pP][yY][tT][hH][oO][nN])(\s?' + MAJOR + \
+                      r'\.?' + MINOR + \
+                      r'(\.\d)?)(\/|\\)(libs)(\/|\\)?(\n|$)'
+
+EXPRESSIONS['python'] = None
+
+CYTHER_CONFIG_FILE = os.path.join(os.path.expanduser('~'), '.cyther')
+
+def crawl(*to_find, source=DRIVE):
     """This function will wrap the shutil.which function to return the abspath every time, or a empty string"""
     found = {}
-    error_string = ''
-    if crawl:
-        if isinstance(cmd, str):
-            cmd = [cmd]
-        source = DRIVE
-        for root, dirs, files in os.walk(source):
-            if 'python3.5.0' in root:
-                error_string += str(dirs) + '\n\n' + str(files)
-            for container in (dirs, files):
-                for w in container:
-                    if w in cmd:
-                        string = os.path.abspath(os.path.join(source, root, w))
-                        if PYTHON_NAME in string.lower():
-                            error_string += "'{}' is in '{}'\n".format(PYTHON_NAME, string)
-                            if w in found:
-                                if len(found[w]) > len(string):
-                                    found[w] = string
-                                else:
-                                    error_string += 'not setting it\n'
-                            else:
-                                found[w] = string
-        for item in cmd:
-            if item not in found:
-                raise CytherError("The item '{}' was not found searching drive '{}'\n\n{}".format(item, DRIVE, error_string))
-    else:
-        if isinstance(cmd, str):
-            cmd = [cmd]
-        for find_this in cmd:
-            raw_result = which(find_this, mode, path)
-            if raw_result:
-                found[find_this] = os.path.abspath(raw_result)
-            else:
-                raise CytherError("Could not find '{}' in the path".format(find_this))
-    return found
+    cmd = set(to_find)
 
+    for root, dirs, files in os.walk(source):
+        for directory in cmd.intersection(set(dirs)):
+            if directory in cmd:
+                string = os.path.abspath(os.path.join(source, root, directory))
+                expression = EXPRESSIONS[directory]
+                dna = False
+
+                # This little block will perfect the selection
+                if expression:
+                    matches = re.search(expression, string)
+                    if (not matches) or (matches.end() != len(string)):
+                        dna = True
+
+                if not dna:
+                    if directory not in found:
+                        found[directory] = []
+                    found[directory].append(string)
+
+    for item in cmd:
+        if item not in found:
+            raise CytherError("The item '{}' was not found searching drive '{}'\n\n'{}'".format(item, DRIVE, found[item]))
+        elif len(found[item]) > 1:
+            raise CytherError("The item '{}' was found more than once in drive '{}'\n\n'{}'".format(item, DRIVE, found[item]))
+
+    return {item: found[item][0] for item in found}
+
+
+def where(cmd, mode=os.X_OK, path=None):
+    raw_result = which(cmd, mode, path)
+    if raw_result:
+        return os.path.abspath(raw_result)
+    else:
+        raise CytherError("Could not find '{}' in the path".format(cmd))
+
+
+def getDirs():
+    # What is the difference between os.name and sys.platform
+    # Why do some return operating systems, and some return processor architectures
+    # Get current path instead of using '.'
+    # Figure out where 'user' comes from
+
+    include_dirs, library_dirs = [], []
+
+    py_include = sysconfig.get_python_inc()
+    plat_py_include = sysconfig.get_python_inc(plat_specific=1)
+
+    include_dirs.append(py_include)
+    if plat_py_include != py_include:
+        include_dirs.append(plat_py_include)
+
+    if os.name == 'nt':
+        library_dirs.append(os.path.join(sys.exec_prefix, 'libs'))
+        include_dirs.append(os.path.join(sys.exec_prefix, 'PC'))
+
+        if MSVC_VERSION == 14:
+            library_dirs.append(os.path.join(sys.exec_prefix, 'PC', 'VS14', 'win32release'))
+        elif MSVC_VERSION == 9:
+            suffix = '' if PLATFORM == 'win32' else PLATFORM[4:]
+            new_lib = os.path.join(sys.exec_prefix, 'PCbuild')
+            if suffix:
+                new_lib = os.path.join(new_lib, suffix)
+            library_dirs.append(new_lib)
+        elif MSVC_VERSION == 8:
+            library_dirs.append(os.path.join(sys.exec_prefix, 'PC', 'VS8.0', 'win32release'))
+        elif MSVC_VERSION == 7:
+            library_dirs.append(os.path.join(sys.exec_prefix, 'PC', 'VS7.1'))
+        else:
+            library_dirs.append(os.path.join(sys.exec_prefix, 'PC', 'VC6'))
+
+    if os.name == 'os2':
+        library_dirs.append(os.path.join(sys.exec_prefix, 'Config'))
+
+    is_cygwin = sys.platform[:6] == 'cygwin'
+    is_atheos = sys.platform[:6] == 'atheos'
+    is_shared = sysconfig.get_config_var('Py_ENABLE_SHARED')
+    is_linux = sys.platform.startswith('linux')
+    is_gnu = sys.platform.startswith('gnu')
+    is_sunos = sys.platform.startswith('sunos')
+
+    if is_cygwin or is_atheos:
+        if sys.executable.startswith(os.path.join(sys.exec_prefix, "bin")):
+            library_dirs.append(os.path.join(sys.prefix, "lib", BASENAME, "config"))
+        else:
+            library_dirs.append(os.getcwd())
+
+    if (is_linux or is_gnu or is_sunos) and is_shared:
+        if sys.executable.startswith(os.path.join(sys.exec_prefix, "bin")):
+            library_dirs.append(sysconfig.get_config_var('LIBDIR'))
+        else:
+            library_dirs.append(os.getcwd())
+
+    user = True
+    if user:
+        user_include = os.path.join(site.USER_BASE, "include")
+        user_lib = os.path.join(site.USER_BASE, "lib")
+        if os.path.isdir(user_include):
+            include_dirs.append(user_include)
+        if os.path.isdir(user_lib):
+            library_dirs.append(user_lib)
+
+    ret_object = (include_dirs, library_dirs)
+
+    filter_that = True
+    if filter_that:
+        for x, obj in enumerate(ret_object):
+            for y, item in enumerate(obj):
+                if not os.path.isdir(item):
+                    del ret_object[x][y]
+
+    return ret_object
+
+raise ValueError(str(getDirs()))
 
 def dealWithLibA(direc, message):
     """What to do if the libpythonXY.a is missing. Currently, it raises an error, and prints a helpful message"""
@@ -344,14 +459,15 @@ IS_WINDOWS = OPERATING_SYSTEM.lower().startswith('windows')
 #LIBRARY_EXTENSION = '.dll' if IS_WINDOWS else '.so'
 DEFAULT_OUTPUT_EXTENSION = '.pyd' if IS_WINDOWS else '.so'
 
-VER = str(sys.version_info.major) + str(sys.version_info.minor)
 
 LIB_A = 'lib' + PYTHON_NAME + '.a'
 #DLL_NAME = PYTHON_NAME + LIBRARY_EXTENSION
 
-EXECUTABLE_FINDINGS = where(['python', 'cython', 'gcc'])  # Just to make sure they exist
+where('python')
+where('cython')
+where('gcc')
 
-DIRECTORY_FINDINGS = where(['libs', 'include'], crawl=True)  # To make sure they exist, and find the paths
+DIRECTORY_FINDINGS = crawl('libs', 'include') # To make sure they exist, and find the paths
 
 LIBS_DIRECTORY = DIRECTORY_FINDINGS['libs']
 INCLUDE_DIRECTORY = DIRECTORY_FINDINGS['include']

@@ -1,8 +1,22 @@
-from cyther import core
-from subprocess import call
+from distutils.ccompiler import new_compiler
 
 
-core('example_file.pyx')
-call(['python', 'cytherize.py', 'example_file.pyx',  '-t'])
 
-core('-h')
+
+
+
+
+
+
+
+
+
+
+
+
+
+#from cyther import *
+#from subprocess import call
+#core('example_file.pyx')
+#call(['python', 'cytherize.py', 'example_file.pyx',  '-t'])
+#core('-h')
