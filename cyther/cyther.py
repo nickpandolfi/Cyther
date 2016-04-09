@@ -17,6 +17,7 @@ MSVC_VERSION = int(msvccompiler.get_build_version())
 PLATFORM = sys.platform
 BASENAME = "python" + sysconfig.get_python_version()
 
+
 class CytherError(Exception):
     """A helpful custom error to be called when a general python error just doesn't make sense in context"""
     def __init__(self, *args, **kwargs):
