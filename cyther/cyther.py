@@ -5,23 +5,17 @@
 #module1 = Extension('demo', sources=['demo.c'])
 #setup(name='PackageName', ext_modules=[module1])
 
-
 import site
 from distutils import sysconfig
 from distutils import msvccompiler
-
-MSVC_VERSION = int(msvccompiler.get_build_version())
-PLATFORM = sys.platform
-BASENAME = "python" + sysconfig.get_python_version()
-
-
-
-
 
 import os, sys, subprocess, platform
 import re, collections
 import time, argparse
 
+MSVC_VERSION = int(msvccompiler.get_build_version())
+PLATFORM = sys.platform
+BASENAME = "python" + sysconfig.get_python_version()
 
 class CytherError(Exception):
     """A helpful custom error to be called when a general python error just doesn't make sense in context"""
