@@ -31,7 +31,12 @@ MEDIUM FIX
 
     Get Travis to deploy automatically
 
+    Make CytherError traceback invisible. Make sure that the error doesn't look like cyther.cyther.CytherError...
+
 HARD FIX
+
+    Make a generation script that automatically sets the version and generates a rst and md readme files. Think of
+    other stuff that this script cound do.
 
     When the -w (watch) option is used, and the contents of the source file are being imported, the file will not be
     able to recompile
@@ -40,6 +45,8 @@ HARD FIX
     preset
 
 EASY NEW FEATURES
+
+    Use http://shields.io/ to generate non changing badges
 
     Function to clean a directory of everything cyther related, has an option to remove the .pyd or .so files
 
@@ -91,14 +98,14 @@ QUESTIONS:
 
     How about using tempfile for the building files??
 
+    How about packaging cython with cyther? Is this even useful?
+
 On Hold:
 
     Where is the best spot to put the README and all the other files?
 
     Explicitly state that neither Cython nor any GNU product nor Python is yours, and all rights belong to their
     respective owners
-
-    Should we make CytherError traceback invisible? NO CURRENTLY
 
     If is windows, just call subprocess with where
     If is unix, just call subprocess with which

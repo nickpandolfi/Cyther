@@ -3,17 +3,39 @@
 Cyther: The Cross-Platform Cython/Python Compiler
 ==================================================
 
+.. repo version
 .. image:: https://badge.fury.io/py/cyther.svg
     :target: https://badge.fury.io/py/cyther
 
+.. travis
 .. image:: https://secure.travis-ci.org/nickpandolfi/Cyther.png
     :target: http://travis-ci.org/nickpandolfi/Cyther
 
+.. Do not include
 .. image:: https://coveralls.io/repos/github/nickpandolfi/Cyther/badge.svg?branch=master
     :target: https://coveralls.io/github/nickpandolfi/Cyther?branch=master
 
+.. waffle
 .. image:: https://badge.waffle.io/nickpandolfi/Cyther.png?label=ready&title=Ready
    :target: https://waffle.io/nickpandolfi/Cyther
+
+.. codacy
+.. image:: https://img.shields.io/pypi/l/cyther.svg?maxAge=2592000   :target:
+
+.. license
+.. image:: https://img.shields.io/pypi/l/cyther.svg?maxAge=2592000   :target:
+
+.. format
+.. image:: https://img.shields.io/pypi/format/cyther.svg?maxAge=2592000   :target:
+
+.. python versions
+.. image:: https://img.shields.io/pypi/pyversions/cyther.svg?maxAge=2592000   :target:
+
+.. implementation
+.. image:: https://img.shields.io/pypi/implementation/cyther.svg?maxAge=2592000   :target:
+
+.. status
+.. image:: https://img.shields.io/pypi/status/cyther.svg?maxAge=2592000   :target:
 
 
 We all know the beauties of Cython:
