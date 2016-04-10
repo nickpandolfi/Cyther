@@ -80,14 +80,13 @@ def crawl(*to_find, source=DRIVE):
     found = {}
     cmd = set(to_find)
 
-    for root, dirs, files in os.walk(source):
+    for root, dirs, _ in os.walk(source):
         for directory in cmd.intersection(set(dirs)):
             if directory in cmd:
                 string = os.path.abspath(os.path.join(source, root, directory))
                 expression = EXPRESSIONS[directory]
                 dna = False
 
-                # This little block will perfect the selection
                 if expression:
                     matches = re.search(expression, string)
                     if (not matches) or (matches.end() != len(string)):
@@ -348,9 +347,15 @@ def getDirsToInclude(string):
     return dirs
 
 
-def callCompilers(args, commands, actions):
-    """The function where the actual compilation takes place"""
-    for command, action in zip(commands, actions):
+#def callCompilers(args, commands, actions):
+def callCompilers(args, commands):
+    """
+    The function where the actual compilation takes place
+
+    """
+    # TODO what does actions accomplish in this code??
+    #for command, action in zip(commands, actions):
+    for command in commands:
         ret = subprocess.call(command)
         if ret:
             if ret != 1:
