@@ -387,7 +387,7 @@ def cytherize(args, file, print_command):
         printCommands(cython_commands)
         printCommands(gcc_commands)
 
-    response = callCompilers(args, (cython_commands, gcc_commands), ('cython', 'gcc'))
+    response = callCompilers(args, (cython_commands, gcc_commands)) # , ('cython', 'gcc'))
     return response
 
 
