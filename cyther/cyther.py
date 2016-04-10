@@ -295,17 +295,17 @@ def makeCommands(preset, file):
 
     if preset == 'ninja':
         cython_command = ['cython', '-a', '-p', '-o', file['c_name'], file['file_path']]
-        gcc_command = ['gcc', '-shared', '-w', '-O3', file['include'], file['libs'], '-o',
+        gcc_command = ['gcc', '-fPIC', '-shared', '-w', '-O3', file['include'], file['libs'], '-o',
                        file['output_name'], file['c_name'],
                        '-l', PYTHON_NAME]
     elif preset == 'beast':
         cython_command = ['cython', '-a', '-l', '-p', '-o', file['c_name'], file['file_path']]
-        gcc_command = ['gcc', '-shared', '-Wall', '-O3', file['include'], file['libs'], '-o',
+        gcc_command = ['gcc', '-fPIC', '-shared', '-Wall', '-O3', file['include'], file['libs'], '-o',
                        file['output_name'],
                        file['c_name'], '-l', PYTHON_NAME]
     elif preset == 'minimal':
         cython_command = ['cython', '-o', file['c_name'], file['file_path']]
-        gcc_command = ['gcc', '-shared', file['include'], file['libs'], '-o', file['output_name'],
+        gcc_command = ['gcc', '-fPIC', '-shared', file['include'], file['libs'], '-o', file['output_name'],
                        file['c_name'], '-l', PYTHON_NAME]
     else:
         raise CytherError("The preset '{}' is not supported".format(preset))
