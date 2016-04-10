@@ -191,7 +191,7 @@ def getDirs():
 
     return ret_object
 
-#raise ValueError(str(getDirs()))
+raise ValueError(str([os.listdir(z) for d in getDirs() for z in d]))
 
 def dealWithLibA(direc, message):
     """What to do if the libpythonXY.a is missing. Currently, it raises an error, and prints a helpful message"""
