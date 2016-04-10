@@ -1,10 +1,3 @@
-#from distutils.ccompiler import show_compilers
-#import setuptools_bootstrap
-#setuptools_bootstrap.use_setuptools()
-#from setuptools import setup, Extension
-#module1 = Extension('demo', sources=['demo.c'])
-#setup(name='PackageName', ext_modules=[module1])
-
 import site
 from distutils import sysconfig
 from distutils import msvccompiler
@@ -23,6 +16,7 @@ class CytherError(Exception):
     def __init__(self, *args, **kwargs):
         super(CytherError, self).__init__(*args, **kwargs)
 
+
 try:
     from shutil import which
 except ImportError:
@@ -40,8 +34,25 @@ INTERVAL = .25
 
 CYTHONIZABLE_FILE_EXTS = ('.pyx', '.py') # TODO make a regular expression right here
 
-
 NOT_NEEDED_MESSAGE = "Module '{}' does not have to be included, or has no .get_include() method"
+
+PYTHON_DIRECTORY = sys.exec_prefix
+DRIVE_AND_NAME = os.path.splitdrive(PYTHON_DIRECTORY)
+PYTHON_NAME = 'python' + VER # os.path.basename(DRIVE_AND_NAME[1]).lower()
+DRIVE = DRIVE_AND_NAME[0]
+if not DRIVE:
+    DRIVE = os.path.normpath('/')
+
+
+EXPRESSIONS = collections.defaultdict() # will always return everything
+EXPRESSIONS['include'] = r'(.+)([pP][yY][tT][hH][oO][nN])(\s?' + MAJOR + r'\.?' + MINOR + \
+                         r'(\.\d)?)(\/|\\)(include)(\/|\\)?(\n|$)'
+EXPRESSIONS['libs'] = r'(.+)([pP][yY][tT][hH][oO][nN])(\s?' + MAJOR + r'\.?' + MINOR + \
+                      r'(\.\d)?)(\/|\\)(libs)(\/|\\)?(\n|$)'
+
+EXPRESSIONS['python'] = None
+
+CYTHER_CONFIG_FILE = os.path.join(os.path.expanduser('~'), '.cyther')
 
 LIB_A_MISSING_MESSAGE = '''
 Currently, cyther does not support the automatic construction of 'libpython{0}.a',
@@ -54,7 +65,6 @@ them in a .def file. Take this file, and pass it to dll tool to tell it what to
 extract from the python{0}.dll and inject into the libpython{0}.a static library.
 '''
 
-
 ASSUMPTIONS = """
 Assumptions cyther makes about your system:
 1) Cython and gcc are both installed, and accessible from the system console
@@ -64,28 +74,6 @@ Assumptions cyther makes about your system:
 5) Almost any gcc compiled C program will work on Windows
 6) Python's 'libs' and 'include' directories are in the same drive that python is installed
 """
-
-PYTHON_DIRECTORY = sys.exec_prefix
-DRIVE_AND_NAME = os.path.splitdrive(PYTHON_DIRECTORY)
-PYTHON_NAME = os.path.basename(DRIVE_AND_NAME[1]).lower()
-DRIVE = DRIVE_AND_NAME[0]
-if not DRIVE:
-    DRIVE = os.path.normpath('/')
-
-
-EXPRESSIONS = collections.defaultdict() # will always return everything
-
-EXPRESSIONS['include'] = r'(.+)([pP][yY][tT][hH][oO][nN])(\s?' + MAJOR + \
-                         r'\.?' + MINOR + \
-                         r'(\.\d)?)(\/|\\)(include)(\/|\\)?(\n|$)'
-
-EXPRESSIONS['libs'] = r'(.+)([pP][yY][tT][hH][oO][nN])(\s?' + MAJOR + \
-                      r'\.?' + MINOR + \
-                      r'(\.\d)?)(\/|\\)(libs)(\/|\\)?(\n|$)'
-
-EXPRESSIONS['python'] = None
-
-CYTHER_CONFIG_FILE = os.path.join(os.path.expanduser('~'), '.cyther')
 
 def crawl(*to_find, source=DRIVE):
     """This function will wrap the shutil.which function to return the abspath every time, or a empty string"""
@@ -296,20 +284,17 @@ def makeCommands(preset, file):
     if preset == 'ninja':
         cython_command = ['cython', '-a', '-p', '-o', file['c_name'], file['file_path']]
         gcc_command = ['gcc', '-fPIC', '-shared', '-w', '-O3', file['include'], file['libs'], '-o',
-                       file['output_name'], file['c_name'],
-                       '-l', PYTHON_NAME]
+                       file['output_name'], file['c_name'], '-l', PYTHON_NAME]
     elif preset == 'beast':
         cython_command = ['cython', '-a', '-l', '-p', '-o', file['c_name'], file['file_path']]
         gcc_command = ['gcc', '-fPIC', '-shared', '-Wall', '-O3', file['include'], file['libs'], '-o',
-                       file['output_name'],
-                       file['c_name'], '-l', PYTHON_NAME]
+                       file['output_name'], file['c_name'], '-l', PYTHON_NAME]
     elif preset == 'minimal':
         cython_command = ['cython', '-o', file['c_name'], file['file_path']]
         gcc_command = ['gcc', '-fPIC', '-shared', file['include'], file['libs'], '-o', file['output_name'],
                        file['c_name'], '-l', PYTHON_NAME]
     else:
         raise CytherError("The preset '{}' is not supported".format(preset))
-
     return cython_command, gcc_command
 
 
