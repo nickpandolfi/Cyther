@@ -191,7 +191,6 @@ def getDirs():
 
     return ret_object
 
-raise ValueError(str([os.listdir(z) for d in getDirs() for z in d]))
 
 def dealWithLibA(direc, message):
     """What to do if the libpythonXY.a is missing. Currently, it raises an error, and prints a helpful message"""
@@ -276,8 +275,13 @@ def isOutDated(file):
     return False
 
 
+sift = lambda obj: max(list(set(re.findall('(?<=lib)(.+?)(?=\.so|\.a)', '\n'.join([str(item) for name in obj for item in os.listdir(name)])))),key=len)
+# A rediculously powerful expression used to find the name of the python shared library
+
 def makeCommands(preset, file):
     """Given a high level preset, it will construct the basic args to pass over. 'ninja', 'beast', and 'minimal'"""
+    PYTHON_NAME = sift(getDirs()[1])
+
     if not preset:
         preset = 'ninja'
 
