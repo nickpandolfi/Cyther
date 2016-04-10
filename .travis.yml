@@ -5,14 +5,10 @@ language: python
 
 python:
     - 3.5
+    - 3.4
 
 install: 
     - pip install cython
 
-deploy:
-    provider: pypitest
-    user: ...
-    password: ...
-    distributions: "sdist --formats=zip,gztar bdist_wheel bdist_wininst"
-
-script: nosetests
+script:
+    test_cyther.py

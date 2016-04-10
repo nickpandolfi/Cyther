@@ -18,3 +18,10 @@
     Fixed the assumptions
     Wrote a testing script
     Encapsulated and reordered cyther.py 'CONSTANTS'
+
+0.5.0
+    Creation of a distutils-like function to find the include and libs directories in almost any installation
+    Now passes builds on Travis
+    Cyther is now in beta version
+    Took out auto-deployment
+    Changed the where and which function to be the crawl and where functions, respectively
