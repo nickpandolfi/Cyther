@@ -12,3 +12,5 @@ install:
     - pip install cython
 
 script: nosetests
+
+after_sucess: coveralls

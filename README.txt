@@ -3,6 +3,22 @@
 Cyther: The Cross-Platform Cython/Python Compiler
 ==================================================
 
+.. image:: https://badge.fury.io/py/cyther.svg
+    :target: https://badge.fury.io/py/cyther
+
+.. image:: https://pypip.in/d/Cyther/badge.png
+    :target: https://crate.io/packages/Cyther
+
+.. image:: https://secure.travis-ci.org/nickpandolfi/Cyther.png
+    :target: http://travis-ci.org/nickpandolfi/Cyther
+
+.. image:: https://coveralls.io/repos/nickpandolfi/Cyther/badge.png?branch=master
+    :target: https://coveralls.io/r/nickpandolfi/Cyther?branch=master
+
+.. image:: https://badge.waffle.io/nickpandolfi/Cyther.png?label=ready&title=Ready
+   :target: https://waffle.io/nickpandolfi/Cyther
+
+
 We all know the beauties of Cython:
 
 1) Writing C extensions is as easy as Python
