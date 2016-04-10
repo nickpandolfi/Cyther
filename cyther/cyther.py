@@ -203,7 +203,7 @@ def getDirs():
 
     return ret_object
 
-raise ValueError(str(getDirs()))
+#raise ValueError(str(getDirs()))
 
 def dealWithLibA(direc, message):
     """What to do if the libpythonXY.a is missing. Currently, it raises an error, and prints a helpful message"""
@@ -224,8 +224,21 @@ def getFullPath(filename):
 def processFiles(args):
     """Generates and error checks each file's information before the compilation actually starts"""
     to_process = []
+    i, l = getDirs()
+    if args['include']:
+        i.append(args['include'])
+
+    include_directories = ''
+    for d in i:
+        include_directories += '-I' + d
+    libs_directories = ''
+    for d in l:
+        libs_directories += '-L' + d
+
     for filename in args['filenames']:
         file = dict()
+        file['include'] = include_directories
+        file['libs'] = libs_directories
         file['file_path'] = getFullPath(filename)
         file['file_base_name'] = os.path.splitext(os.path.basename(file['file_path']))[0]
         file['no_extension'], file['extension'] = os.path.splitext(file['file_path'])
@@ -282,17 +295,17 @@ def makeCommands(preset, file):
 
     if preset == 'ninja':
         cython_command = ['cython', '-a', '-p', '-o', file['c_name'], file['file_path']]
-        gcc_command = ['gcc', '-shared', '-w', '-O3', '-I', INCLUDE_DIRECTORY, '-L', LIBS_DIRECTORY, '-o',
+        gcc_command = ['gcc', '-shared', '-w', '-O3', file['include'], file['libs'], '-o',
                        file['output_name'], file['c_name'],
                        '-l', PYTHON_NAME]
     elif preset == 'beast':
         cython_command = ['cython', '-a', '-l', '-p', '-o', file['c_name'], file['file_path']]
-        gcc_command = ['gcc', '-shared', '-Wall', '-O3', '-I', INCLUDE_DIRECTORY, '-L', LIBS_DIRECTORY, '-o',
+        gcc_command = ['gcc', '-shared', '-Wall', '-O3', file['include'], file['libs'], '-o',
                        file['output_name'],
                        file['c_name'], '-l', PYTHON_NAME]
     elif preset == 'minimal':
         cython_command = ['cython', '-o', file['c_name'], file['file_path']]
-        gcc_command = ['gcc', '-shared', '-I', INCLUDE_DIRECTORY, '-L', LIBS_DIRECTORY, '-o', file['output_name'],
+        gcc_command = ['gcc', '-shared', file['include'], file['libs'], '-o', file['output_name'],
                        file['c_name'], '-l', PYTHON_NAME]
     else:
         raise CytherError("The preset '{}' is not supported".format(preset))
@@ -373,8 +386,8 @@ def cytherize(args, file, print_command):
     filterCommands(cython_pass_off, cython_commands)
     filterCommands(gcc_pass_off, gcc_commands)
 
-    dirs = getDirsToInclude(args['include'])
-    gcc_commands.extend(dirs)
+    #dirs = getDirsToInclude(args['include'])
+    #gcc_commands.extend(dirs)
 
     if print_command:
         printCommands(cython_commands)
@@ -455,23 +468,23 @@ IS_WINDOWS = OPERATING_SYSTEM.lower().startswith('windows')
 DEFAULT_OUTPUT_EXTENSION = '.pyd' if IS_WINDOWS else '.so'
 
 
-LIB_A = 'lib' + PYTHON_NAME + '.a'
+STATIC = 'lib' + PYTHON_NAME + '.a'
 #DLL_NAME = PYTHON_NAME + LIBRARY_EXTENSION
 
 where('python')
 where('cython')
 where('gcc')
 
-DIRECTORY_FINDINGS = crawl('libs', 'include') # To make sure they exist, and find the paths
+#DIRECTORY_FINDINGS = crawl('libs', 'include') # To make sure they exist, and find the paths
 
-LIBS_DIRECTORY = DIRECTORY_FINDINGS['libs']
-INCLUDE_DIRECTORY = DIRECTORY_FINDINGS['include']
+#LIBS_DIRECTORY = DIRECTORY_FINDINGS['libs']
+#INCLUDE_DIRECTORY = DIRECTORY_FINDINGS['include']
 #DLL_DIRECTORY = DIRECTORY_FINDINGS[DLL_NAME]
 
 
-LIB_A_DIRECTORY = os.path.normpath(os.path.join(LIBS_DIRECTORY, LIB_A))  # Have to hardcode this one in
-if not os.path.exists(LIB_A_DIRECTORY):
-    dealWithLibA(LIB_A_DIRECTORY, LIB_A_MISSING_MESSAGE.format(VER))
+#LIB_A_DIRECTORY = os.path.normpath(os.path.join(LIBS_DIRECTORY, STATIC))  # Have to hardcode this one in
+#if not os.path.exists(LIB_A_DIRECTORY):
+#    dealWithLibA(LIB_A_DIRECTORY, LIB_A_MISSING_MESSAGE.format(VER))
 
 INFO = str()
 INFO += "\nSystem:"
@@ -483,9 +496,9 @@ INFO += "\n\t\t\tOS is Windows: {}".format(IS_WINDOWS)
 #INFO += "\n\t\tLinked Library Extension: {}".format(LIBRARY_EXTENSION)
 INFO += "\n\t\tDefault Output Extension: {}".format(DEFAULT_OUTPUT_EXTENSION)
 INFO += "\n\t\tInstallation Directory: {}".format(PYTHON_DIRECTORY)
-INFO += "\n\t\tDirectory 'libs' Location: {}".format(LIBS_DIRECTORY)
-INFO += "\n\t\tDirectory 'include' Location: {}".format(INCLUDE_DIRECTORY)
-INFO += "\n\t\tLibrary '.a' Location: {}".format(LIB_A_DIRECTORY)
+#INFO += "\n\t\tDirectory 'libs' Location: {}".format(LIBS_DIRECTORY)
+#INFO += "\n\t\tDirectory 'include' Location: {}".format(INCLUDE_DIRECTORY)
+#INFO += "\n\t\tLibrary '.a' Location: {}".format(LIB_A_DIRECTORY)
 #INFO += "\n\t\tPython '{}' Location: {}".format(LIBRARY_EXTENSION, DLL_DIRECTORY)
 
 INFO += "\n\tCython:"
