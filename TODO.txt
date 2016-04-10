@@ -18,14 +18,18 @@ EASY FIX
 
     Put the line: platform.platform().strip().lower().startswith('windows') in the script checker
 
-    Change the name of should_compile to isOutdated, it makes more sense.
-
-    Format all the system constant strings
+    Format all the system constant strings. Sort ou the unnecessary ones. Reorder them.
 
     How to deal with non-standard extensions that people might be using? Don't error, but just have it print that
-    it is non standard, and work anyway?
+    it is non standard, and work anyway? What about Regex?
 
 MEDIUM FIX
+
+    Encapsulate enerything correctly
+
+    Add all the other badges
+
+    Get Travis to deploy automatically
 
 HARD FIX
 
@@ -94,7 +98,7 @@ On Hold:
     Explicitly state that neither Cython nor any GNU product nor Python is yours, and all rights belong to their
     respective owners
 
-    Should we make CytherError traceback invisible?
+    Should we make CytherError traceback invisible? NO CURRENTLY
 
     If is windows, just call subprocess with where
     If is unix, just call subprocess with which
