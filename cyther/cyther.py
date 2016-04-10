@@ -38,7 +38,7 @@ NOT_NEEDED_MESSAGE = "Module '{}' does not have to be included, or has no .get_i
 
 PYTHON_DIRECTORY = sys.exec_prefix
 DRIVE_AND_NAME = os.path.splitdrive(PYTHON_DIRECTORY)
-PYTHON_NAME = 'python' + VER # os.path.basename(DRIVE_AND_NAME[1]).lower()
+PYTHON_NAME = 'python' + MAJOR + '.' + MINOR # os.path.basename(DRIVE_AND_NAME[1]).lower()
 DRIVE = DRIVE_AND_NAME[0]
 if not DRIVE:
     DRIVE = os.path.normpath('/')
