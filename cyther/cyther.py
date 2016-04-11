@@ -274,8 +274,12 @@ def isOutDated(file):
     return False
 
 
-sift = lambda obj: max(list(set(re.findall('(?<=lib)(.+?)(?=\.so|\.a)', '\n'.join([str(item) for name in obj for item in os.listdir(name)])))),key=len)
-# A rediculously powerful expression used to find the name of the python shared library
+def sift(obj): # TODO Is it necessary to make it so that this will return multiple results??
+    string = [str(item) for name in obj for item in os.listdir(name)]
+    s = set(re.findall('(?<=lib)(.+?)(?=\.so|\.a)', '\n'.join(string)))
+    result = max(list(s), key=len)
+    return result
+
 
 def makeCommands(preset, file):
     """Given a high level preset, it will construct the basic args to pass over. 'ninja', 'beast', and 'minimal'"""
