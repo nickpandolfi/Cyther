@@ -14,7 +14,11 @@ MAINTAIN
 
     Make sure that you constantly search for the assumptions cyther makes. Make no mistake
 
+    Make my getDirs() function is up to date with build_ext in distutils
+
 EASY FIX
+
+    Is it wise to take out the checking procedures with the getDirs() function. Why are they necessary??
 
     Reformat the README to include all info and more examples
 
@@ -31,7 +35,7 @@ MEDIUM FIX
 
     Add all the other badges
 
-    Get Travis to deploy automatically
+    Get Travis to deploy automatically. But before that, run a script to deploy to the test >> include in build process
 
     Make CytherError traceback invisible. Make sure that the error doesn't look like cyther.cyther.CytherError...
 

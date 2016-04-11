@@ -24,12 +24,15 @@ Code Quality
         :target: https://www.codacy.com/app/npandolfi/Cyther
 
 
-Formats
+Other
     .. license
     .. image:: https://img.shields.io/pypi/l/cyther.svg?maxAge=2592000
 
     .. format
     .. image:: https://img.shields.io/pypi/format/cyther.svg?maxAge=2592000
+
+    .. downloads
+    .. image:: https://img.shields.io/pypi/dm/cyther.svg?maxAge=2592000
 
 
 Workflow
