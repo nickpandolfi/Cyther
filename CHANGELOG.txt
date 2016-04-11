@@ -25,3 +25,11 @@
     Cyther is now in beta version
     Took out auto-deployment
     Changed the where and which function to be the crawl and where functions, respectively
+
+0.5.1
+    Fixed many of the unordered badges
+    Updated the operating system finder to be safer
+    Fixed the hardcoding of the python environment structure to not be primary
+
+0.5.2
+    Transferred the include_string and runtime_string to be partially defined outside the function

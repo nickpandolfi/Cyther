@@ -4,36 +4,35 @@ MAINTAIN
 
     Comment and properly docstring everything
 
-    Make sure that the version specified makes sense (major.minor.patch)
-
-    Make sure that all the message passoffs make sense. Update 'ERROR_PASSOFF' value?
-
     Keep the -h follow all the other common -h practices
 
     Make sure that the -h is up to date, including all the version info of all the external features (gcc/Cython)
 
-    Make sure that you constantly search for the assumptions cyther makes. Make no mistake
+    Make sure that you constantly search for the assumptions cyther makes
 
     Make my getDirs() function is up to date with build_ext in distutils
 
+    Any name cool badges to add? Make sure you got all the recent and useful ones
+    Use http://shields.io/ to generate non changing badges
+
 EASY FIX
+
+    Make sure that all the message passoffs make sense. Update 'ERROR_PASSOFF' value?
+
+    Rename the getDirs() function to make more sense
 
     Is it wise to take out the checking procedures with the getDirs() function. Why are they necessary??
 
     Reformat the README to include all info and more examples
-
-    Put the line: platform.platform().strip().lower().startswith('windows') in the script checker
-
-    Format all the system constant strings. Sort ou the unnecessary ones. Reorder them.
 
     How to deal with non-standard extensions that people might be using? Don't error, but just have it print that
     it is non standard, and work anyway? What about Regex?
 
 MEDIUM FIX
 
-    Encapsulate enerything correctly
+    For the love of god, reorganize everything to be encapsulated, then seperate it with blocks of '#'
 
-    Add all the other badges
+    Where is the best spot to put the README and all the other files?
 
     Get Travis to deploy automatically. But before that, run a script to deploy to the test >> include in build process
 
@@ -45,18 +44,16 @@ HARD FIX
     other stuff that this script cound do.
 
     When the -w (watch) option is used, and the contents of the source file are being imported, the file will not be
-    able to recompile
+    able to recompile. Will this fix need the if __name__ == '__cyther__' clause in it, to read and pass to exec()
 
     Get the operating system dependant flags that are passed to gcc by distutils and inject them when building the
     preset
 
+    Use a 'subparser' to process the commands to cython and gcc
+
+    Make sure that the file order provided doesn't matter when compiling multiple files that may depend on one another
+
 EASY NEW FEATURES
-
-    Use http://shields.io/ to generate non changing badges
-
-    Function to clean a directory of everything cyther related, has an option to remove the .pyd or .so files
-
-    Function to clean a directory of everything 'locally build' related, or move it to a cythercache
 
     Add more presets, including one that compiles really fast, for testing purposes
 
@@ -67,6 +64,9 @@ EASY NEW FEATURES
 
 HARD NEW FEATURES
 
+    Function to clean a directory of everything 'locally build' related, or move it to a cythercache
+    A function to remove EVERYTHING cyther related
+
     Have an option to run the code under `if __name__ == '__main__'` statement directly in the terminal
 
     Always back up the previous compile if there was one. Then if there is an error, don't overwrite it with anything,
@@ -76,9 +76,48 @@ HARD NEW FEATURES
 
     Get -w (watch), to exit safely and keep the same command prompt open. Is this possible?
 
-    Make sure that the file order provided doesn't matter when compiling multiple files that may depend on one another
-
     Don't have args and file, have only one object with everything in it
+
+    Add cl to the options that are available for compilers
+
+    Say the search for the directories necessary for the runtime compilation fails, and returns nothing. Then run the
+    crawl algorithm over the whole DRIVE to find a lib file that matches the REGEX definition
+
+BEFORE DEPLOY:
+
+    Make sure that the version specified makes sense (major.minor.patch)
+
+    Make sure that the README reflects the new interface changes
+
+    Make sure that the CHANGELOG is up to date and includes the current version change
+
+    Delete the comments that are no longer needed. Any junk or temporary commented code should be extracted
+
+QUESTIONS:
+
+    Will sift ever have to return multiple results for the lib directories??
+
+    What about lines like this platform.platform().strip().lower().startswith('windows')??
+    What do the platform names even look like? Is their structure reliable? Does it need to be?
+
+    What about bcpp or cygwin??
+
+    Should we even give the option to build locally in the same file?
+
+    Do the commands to argparse need to be changed. Maybe give them better names, and give each a long name.
+
+    Is it necessary to make sure that os.pardir will never be a problem??
+
+    How about using tempfile for the building files??
+
+    How about packaging cython with cyther? Is this even useful?
+
+    What about packaging the libraries with cyther?? Are they cross platform? How to even get these libs?
+
+    What is the difference between os.name and sys.platform and platform.platform?
+    Why do some return operating systems, and some return processor architectures
+
+ON HOLD:
 
     Recompile the libpythonXY.a static library if it does not exist:
 
@@ -89,26 +128,6 @@ HARD NEW FEATURES
         Possible usage: reimp.exe -d %lib_file%\ndlltool.exe -d %def_file% -D %dll_file% -k -l %a_file%
 
         Take a look at your favorites page for instructions on pexport
-
-QUESTIONS:
-
-    What about bcpp or cygwin or cl??
-
-    Should we even give the option to build locally in the same file?
-
-    Use a 'subparser' to process the commands to cython and gcc??
-
-    Do the commands to argparse need to be changed. Maybe give them better names, and give each a long name.
-
-    Is it necessary to make sure that os.pardir will never be a problem??
-
-    How about using tempfile for the building files??
-
-    How about packaging cython with cyther? Is this even useful?
-
-On Hold:
-
-    Where is the best spot to put the README and all the other files?
 
     Explicitly state that neither Cython nor any GNU product nor Python is yours, and all rights belong to their
     respective owners
