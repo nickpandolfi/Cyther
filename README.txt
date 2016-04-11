@@ -6,7 +6,6 @@ Cyther: The Cross-Platform Cython/Python Compiler
 Version Info
     .. repo version
     .. image:: https://badge.fury.io/py/cyther.svg
-        :target: https://badge.fury.io/py/cyther
 
     .. python versions
     .. image:: https://img.shields.io/pypi/pyversions/cyther.svg?maxAge=2592000
@@ -27,10 +26,10 @@ Code Quality
 
 Formats
     .. license
-    .. image:: https://img.shields.io/pypi/l/cyther.svg?maxAge=2592000   :target:
+    .. image:: https://img.shields.io/pypi/l/cyther.svg?maxAge=2592000
 
     .. format
-    .. image:: https://img.shields.io/pypi/format/cyther.svg?maxAge=2592000   :target:
+    .. image:: https://img.shields.io/pypi/format/cyther.svg?maxAge=2592000
 
 
 Workflow
@@ -39,7 +38,9 @@ Workflow
        :target: https://waffle.io/nickpandolfi/Cyther
 
     .. status
-    .. image:: https://img.shields.io/pypi/status/cyther.svg?maxAge=2592000   :target:
+    .. image:: https://img.shields.io/pypi/status/cyther.svg?maxAge=2592000
+
+
 
 
 We all know the beauties of Cython:
@@ -134,9 +135,8 @@ Assumptions cyther makes about your system:
 1) Cython and gcc are both installed, and accessible from the system console
 2) Python supports 'shutil.which'
 3) Your environment path variable is able to be found by `shutil.which`
-4) gcc can work with the option -l pythonXY (libpythonXY.a exists in your python libs directory)
+4) distuils is able to find the Python runtime static library (usually libpythonXY.a or libpythonXY.so)
 5) Almost any gcc compiled C program will work on Windows
-6) Python's 'libs' and 'include' directories are in the same drive that python is installed
 
 Hey you! Yes you. If you notice any bugs or peculiarities, please report them to our bug tracker, it will
 help us out a lot:

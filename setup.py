@@ -5,7 +5,7 @@ except ImportError:
 
 
 NAME = 'Cyther'
-VERSION = '0.5.1.2'
+VERSION = '0.5.1.3'
 SHORT_DESCRIPTION = 'The Cross-Platform Cython/Python Compiler'
 LONG_DESCRIPTION = open('README.txt').read()
 PACKAGES = ['cyther']
@@ -31,6 +31,8 @@ CLASSIFIERS = ['Development Status :: 4 - Beta',
                'Operating System :: OS Independent',
                'Programming Language :: Python',
                'Programming Language :: Python :: 3.5',
+               'Programming Language :: Python :: 3.4',
+               'Programming Language :: Python :: 3.3',
                'Programming Language :: Cython',
                'License :: OSI Approved :: MIT License']
 

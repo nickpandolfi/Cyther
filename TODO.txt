@@ -16,6 +16,8 @@ MAINTAIN
 
 EASY FIX
 
+    Reformat the README to include all info and more examples
+
     Put the line: platform.platform().strip().lower().startswith('windows') in the script checker
 
     Format all the system constant strings. Sort ou the unnecessary ones. Reorder them.
