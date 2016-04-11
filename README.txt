@@ -3,37 +3,43 @@
 Cyther: The Cross-Platform Cython/Python Compiler
 ==================================================
 
-.. repo version
-.. image:: https://badge.fury.io/py/cyther.svg
-    :target: https://badge.fury.io/py/cyther
+Version Info
+    .. repo version
+    .. image:: https://badge.fury.io/py/cyther.svg
+        :target: https://badge.fury.io/py/cyther
 
-.. travis
-.. image:: https://secure.travis-ci.org/nickpandolfi/Cyther.png
-    :target: http://travis-ci.org/nickpandolfi/Cyther
+    .. python versions
+    .. image:: https://img.shields.io/pypi/pyversions/cyther.svg?maxAge=2592000
 
-
-.. codacy
-.. image:: https://img.shields.io/pypi/l/cyther.svg?maxAge=2592000   :target:
-
-.. license
-.. image:: https://img.shields.io/pypi/l/cyther.svg?maxAge=2592000   :target:
-
-.. format
-.. image:: https://img.shields.io/pypi/format/cyther.svg?maxAge=2592000   :target:
-
-.. python versions
-.. image:: https://img.shields.io/pypi/pyversions/cyther.svg?maxAge=2592000   :target:
-
-.. implementation
-.. image:: https://img.shields.io/pypi/implementation/cyther.svg?maxAge=2592000   :target:
+    .. implementation
+    .. image:: https://img.shields.io/pypi/implementation/cyther.svg?maxAge=2592000
 
 
-.. waffle
-.. image:: https://badge.waffle.io/nickpandolfi/Cyther.png?label=ready&title=Ready
-   :target: https://waffle.io/nickpandolfi/Cyther
+Code Quality
+    .. travis
+    .. image:: https://secure.travis-ci.org/nickpandolfi/Cyther.png
+        :target: http://travis-ci.org/nickpandolfi/Cyther
 
-.. status
-.. image:: https://img.shields.io/pypi/status/cyther.svg?maxAge=2592000   :target:
+    .. codacy
+    .. image:: https://api.codacy.com/project/badge/grade/a26189501a8e4086ac0eda51de5fd752
+        :target: https://www.codacy.com/app/npandolfi/Cyther
+
+
+Formats
+    .. license
+    .. image:: https://img.shields.io/pypi/l/cyther.svg?maxAge=2592000   :target:
+
+    .. format
+    .. image:: https://img.shields.io/pypi/format/cyther.svg?maxAge=2592000   :target:
+
+
+Workflow
+    .. waffle
+    .. image:: https://badge.waffle.io/nickpandolfi/Cyther.png?label=ready&title=Ready
+       :target: https://waffle.io/nickpandolfi/Cyther
+
+    .. status
+    .. image:: https://img.shields.io/pypi/status/cyther.svg?maxAge=2592000   :target:
 
 
 We all know the beauties of Cython:
