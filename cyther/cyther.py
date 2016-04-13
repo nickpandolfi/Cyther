@@ -3,8 +3,8 @@ from distutils import sysconfig
 from distutils import msvccompiler
 
 import os, sys, subprocess, platform
-import re, collections
-import time, argparse
+import re, collections, argparse
+import time, timeit
 
 
 class CytherError(Exception):
@@ -24,7 +24,7 @@ def dealWithLibA(message):
     raise CytherError(message)
 
 
-def getDirs():
+def getIncludeAndRuntime():
     include_dirs, library_dirs = [], []
 
     py_include = sysconfig.get_python_inc()
@@ -114,18 +114,32 @@ BASENAME = "python" + sysconfig.get_python_version()
 
 CYTHONIZABLE_FILE_EXTS = ('.pyx', '.py')
 
-PYTHON_DIRECTORY = sys.exec_prefix
-DRIVE_AND_NAME = os.path.splitdrive(PYTHON_DIRECTORY)
-PYTHON_NAME = 'python' + MAJOR + '.' + MINOR
-PYTHON_NAME_2 = os.path.basename(DRIVE_AND_NAME[1]).lower()
-DRIVE = DRIVE_AND_NAME[0]
-
+DRIVE, _ = os.path.splitdrive(sys.exec_prefix)
 if not DRIVE:
     DRIVE = os.path.normpath('/')
 
 CYTHER_CONFIG_FILE = os.path.join(os.path.expanduser('~'), '.cyther')
 
-INCLUDE_DIRS, RUNTIME_DIRS = getDirs()
+
+def sift(obj):
+    string = [str(item) for name in obj for item in os.listdir(name)]
+    s = set(re.findall('(?<=lib)(.+?)(?=\.so|\.a)', '\n'.join(string)))
+    result = max(list(s), key=len)
+    return result
+
+
+INCLUDE_DIRS, RUNTIME_DIRS = getIncludeAndRuntime()
+
+L_OPTION = '-l' + sift(RUNTIME_DIRS)
+
+INCLUDE_STRING = ''
+for directory in INCLUDE_DIRS:
+    INCLUDE_STRING += '-I' + directory
+
+
+RUNTIME_STRING = ''
+for directory in RUNTIME_DIRS:
+    RUNTIME_STRING += '-L' + directory
 
 EXPRESSIONS = collections.defaultdict()
 
@@ -141,15 +155,40 @@ This is eiher a bug or you don't have Python correctly installed.
 
 NOT_NEEDED_MESSAGE = "Module '{}' does not have to be included, or has no .get_include() method"
 
-
 if not INCLUDE_DIRS:
     raise CytherError(MISSING_INCLUDE_DIRS)
 
 if not RUNTIME_DIRS:
     dealWithLibA(MISSING_RUNTIME_DIRS)
 
+pound_extract = re.compile(r"(?:#\s*@\s?[Cc]yther\s+)(?P<content>.+?)(?:\s*)(?:\n|$)")
+tripple_extract = re.compile(r"(?:(?:''')(?:(?:.|\n)+?)@[C|c]yther\s+)(?P<content>(?:.|\n)+?)(?:\s*)(?:''')")
+
+
 ########################################################################################################################
 ########################################################################################################################
+
+
+def run(filename, *, timer=False, repeat=3, number=10000, precision=2):
+    with open(filename, 'r') as file:
+        string = file.read()
+
+    obj = re.findall(pound_extract, string) + re.findall(tripple_extract, string)
+    if not obj:
+        print("There was no '@cyther' code collected from the file '{}'".format(filename))
+
+    code = ''.join([item + '\n' for item in obj])
+
+    if timer:
+        timer_obj = timeit.Timer(code)
+        try:
+            result = min(timer_obj.repeat(repeat, number)) / number
+            rounded = format(result, '.{}e'.format(precision))
+            print("{} loops, best of {}: ({}) sec per loop".format(number, repeat, rounded))
+        except:
+            timer_obj.print_exc()
+    else:
+        exec(code)
 
 
 def crawl(*to_find, source=DRIVE):
@@ -205,23 +244,15 @@ def getFullPath(filename):
 def processFiles(args):
     """Generates and error checks each file's information before the compilation actually starts"""
     to_process = []
-    i, l = getDirs()
-    if args['include']:
-        i.append(args['include'])
-
-    include_directories = ''
-    for d in i:
-        include_directories += '-I' + d
-
-    libs_directories = ''
-    for d in l:
-        libs_directories += '-L' + d
 
     for filename in args['filenames']:
         file = dict()
-        file['include'] = include_directories
-        file['libs'] = libs_directories
-        file['l_option'] = '-l' + sift(getDirs()[1])
+
+        if args['include']:
+            file['include'] = INCLUDE_STRING + ''.join(['-I' + item for item in args['include']])
+        else:
+            file['include'] = INCLUDE_STRING
+
         file['file_path'] = getFullPath(filename)
         file['file_base_name'] = os.path.splitext(os.path.basename(file['file_path']))[0]
         file['no_extension'], file['extension'] = os.path.splitext(file['file_path'])
@@ -271,13 +302,6 @@ def isOutDated(file):
     return False
 
 
-def sift(obj):
-    string = [str(item) for name in obj for item in os.listdir(name)]
-    s = set(re.findall('(?<=lib)(.+?)(?=\.so|\.a)', '\n'.join(string)))
-    result = max(list(s), key=len)
-    return result
-
-
 def makeCommands(preset, file):
     """Given a high level preset, it will construct the basic args to pass over. 'ninja', 'beast', and 'minimal'"""
 
@@ -286,18 +310,20 @@ def makeCommands(preset, file):
 
     if preset == 'ninja':
         cython_command = ['cython', '-a', '-p', '-o', file['c_name'], file['file_path']]
-        gcc_command = ['gcc', '-fPIC', '-shared', '-w', '-O3', file['include'], file['libs'], '-o',
-                       file['output_name'], file['c_name'], file['l_option']]
+        gcc_command = ['gcc', '-fPIC', '-shared', '-w', '-O3', file['include'], RUNTIME_STRING, '-o',
+                       file['output_name'], file['c_name'], L_OPTION]
     elif preset == 'beast':
         cython_command = ['cython', '-a', '-l', '-p', '-o', file['c_name'], file['file_path']]
-        gcc_command = ['gcc', '-fPIC', '-shared', '-Wall', '-O3', file['include'], file['libs'], '-o',
-                       file['output_name'], file['c_name'], file['l_option']]
+        gcc_command = ['gcc', '-fPIC', '-shared', '-Wall', '-O3', file['include'], RUNTIME_STRING, '-o',
+                       file['output_name'], file['c_name'], L_OPTION]
     elif preset == 'minimal':
         cython_command = ['cython', '-o', file['c_name'], file['file_path']]
-        gcc_command = ['gcc', '-fPIC', '-shared', file['include'], file['libs'], '-o', file['output_name'],
-                       file['c_name'], file['l_option']]
+        gcc_command = ['gcc', '-fPIC', '-shared', file['include'], RUNTIME_STRING, '-o', file['output_name'],
+                       file['c_name'], L_OPTION]
     elif preset == 'swift':
-        pass
+        cython_command = ['cython', '-o', file['c_name'], file['file_path']]
+        gcc_command = ['gcc', '-fPIC', '-shared', '-Os', file['include'], RUNTIME_STRING, '-o', file['output_name'],
+                       file['c_name'], L_OPTION]
     else:
         raise CytherError("The preset '{}' is not supported".format(preset))
     return cython_command, gcc_command
@@ -445,6 +471,8 @@ def core(args):
         else:
             time.sleep(interval)
 
+########################################################################################################################
+########################################################################################################################
 
 OPERATING_SYSTEM = platform.platform()
 
@@ -465,7 +493,7 @@ INFO += "\n\t\tVersion: {}".format('.'.join(list(VER)))
 INFO += "\n\t\tOperating System: {}".format(OPERATING_SYSTEM)
 INFO += "\n\t\t\tOS is Windows: {}".format(IS_WINDOWS)
 INFO += "\n\t\tDefault Output Extension: {}".format(DEFAULT_OUTPUT_EXTENSION)
-INFO += "\n\t\tInstallation Directory: {}".format(PYTHON_DIRECTORY)
+INFO += "\n\t\tInstallation Directory: {}".format(sys.exec_prefix)
 
 INFO += "\n\tCython ({}):".format(CYTHON_EXECUTABLE)
 INFO += "\n\t\tNothing Here Yet"
@@ -487,15 +515,16 @@ help_assumptions = 'Print the list of assumptions cyther makes about your system
 help_local = 'When not flagged, builds in __cythercache__, when flagged, it builds locally in the same directory'
 help_watch = "When given, cyther will watch the directory with the 't' option implied and compile," \
              "when necessary, the files given"
-help_cython = "Arguments to pass to Cython (use '_' or '__' instead of '-' or '--'"
-help_gcc = "Arguments to pass to gcc (use '_' or '__' instead of '-' or '--'"
+help_cython = "Arguments to pass to Cython"
+help_gcc = "Arguments to pass to gcc"
 
-description_text = 'Auto compile and build .pyx files in place.\n{}'
-description = description_text.format(__cytherinfo__)
+description_text = 'Auto compile and build .pyx or .py files in place.'
+description = description_text
+epilog_text = "{}\n(Use '_' or '__' instead of '-' or '--' when passing args to gcc or Cython)"
+epilog = epilog_text.format(__cytherinfo__)
 formatter = argparse.RawDescriptionHelpFormatter
-usage = 'cyther [options] input_file'
 
-parser = argparse.ArgumentParser(description=description, formatter_class=formatter, usage=usage)
+parser = argparse.ArgumentParser(description=description, epilog=epilog, formatter_class=formatter)
 parser.add_argument('filenames', action='store', nargs='+', help=help_filenames)
 parser.add_argument('-p', '--preset', action='store', default='', help=help_preset)
 parser.add_argument('-t', '--timestamp', action='store_true', default=False, help=help_timestamp)

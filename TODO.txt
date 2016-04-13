@@ -10,18 +10,16 @@ MAINTAIN
 
     Make sure that you constantly search for the assumptions cyther makes
 
-    Make my getDirs() function is up to date with build_ext in distutils
+    Make my getIncludeAndRuntime() function is up to date with build_ext in distutils
 
     Any name cool badges to add? Make sure you got all the recent and useful ones
     Use http://shields.io/ to generate non changing badges
 
+    Make sure that all the message passoffs make sense
+
 EASY FIX
 
-    Make sure that all the message passoffs make sense. Update 'ERROR_PASSOFF' value?
-
-    Rename the getDirs() function to make more sense
-
-    Is it wise to take out the checking procedures with the getDirs() function. Why are they necessary??
+    Is it wise to take out the checking procedures with the getIncludeAndRuntime() function. Why are they necessary??
 
     Reformat the README to include all info and more examples
 
@@ -29,8 +27,6 @@ EASY FIX
     it is non standard, and work anyway? What about Regex?
 
 MEDIUM FIX
-
-    For the love of god, reorganize everything to be encapsulated, then seperate it with blocks of '#'
 
     Where is the best spot to put the README and all the other files?
 
@@ -61,6 +57,9 @@ EASY NEW FEATURES
 
     Specify how to give pass off args and 3rd party modules to include in the epilog section of '-h'
     Do this also with the cython and gcc pass-off arguments
+
+    Write a test script that actually tests the whole deal. Have it run every scenario and then
+    USE the actual extension that it makes
 
 HARD NEW FEATURES
 
@@ -94,6 +93,8 @@ BEFORE DEPLOY:
     Delete the comments that are no longer needed. Any junk or temporary commented code should be extracted
 
 QUESTIONS:
+
+    Would it be possible to automatically send me their __cytherinfo__ variable?
 
     Will sift ever have to return multiple results for the lib directories??
 
