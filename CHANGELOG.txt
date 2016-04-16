@@ -63,3 +63,4 @@
 0.6.3
     Took README.md out of the .gitignore
     Fixed the distribution settings
+    Took out auto-deploy termporarily

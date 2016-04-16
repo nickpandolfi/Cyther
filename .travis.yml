@@ -13,13 +13,3 @@ install:
 
 script:
     - nosetests
-
-deploy:
-    provider: pypi
-    username: "nickpandolfi"
-    password:
-        secure: "Q4heVKxQgVuXXOAI7oIwx8cKxNF5mcXgY9WabhQZLBNpNPPc9R/OQXse3oiOCWmdojZ02Oy8+Iw8/uTkvDMIIwVfcBe4/u8PVB+0+deRz0Ts7BeyizNQwOwWAzHT7Eb3MeAqzJ7FJ8NKoaqbLzmvu9mMNU0JoAP0OvTJZGnVYSvOeEm8q+lSEsO2zcUotWyNwUzM++AaNu6UZVHufh4XB/0Ow1oRUz4XVU3gPz+nTzawJGrypV8FAb2S6TzYRdcAILGXISyeUzglcb31SoaXJUjszQw4hFLGnwUk4IvTi6HRFVbXcrB27PrWZkNG6G4xdSpJQuGmitC4AQapg2w2JYUeQ9YQVm3YrS6gLGNmPtAdVBUEsGb0mHRCGu5kdeoz4vxhPhLn2N/21072KiBEPm5ydw+C9l9MZzVe/cqvvK33mRruHDlV7sxH3ob5DeGfuzvECdy0fKeBcD0XCq0FTr3z1RkSwTcWXKBoMKTxeYYqXRwl5jmDuqE3+udc4qXznQ/KDPTbOQK431yyiwRM3te/b7zbJ9QdKMOpIQvkW0B8ptUUNENn0n6kOyw1nnTA1zvncIcbKezuCgMk968Goap3/4ug5Mkx2fpLTF1d7zVmNjrHPXxcHvZeDAEWg9U3YopA7piDnj3eWhU4o2ZdGlIzX2GSUctM+fCjXMzFVJE="
-    distributions:
-        - "sdist --formats=zip,gztar"
-        - "bdist_wheel"
-        - "bdist_wininst"
