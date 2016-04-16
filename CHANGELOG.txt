@@ -54,3 +54,8 @@
     Did some serious encapsulation and reorganization of entire compilation system
     Fixed the error management system to make sure it is reliable
     All communications from cyther to the user are located in a single place, and done through stdout
+
+0.6.2
+    Changed a few distribution settings
+    Fixed an encoding bug
+    Deleted the test_cyther null command in the travis yaml
