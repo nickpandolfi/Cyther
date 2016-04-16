@@ -12,7 +12,6 @@ install:
     - pip install cython
 
 script:
-    - test_cyther
     - nosetests
 
 deploy:
