@@ -1,6 +1,5 @@
 from math import sqrt
 
-
 cdef int triangular(int n):
     cdef:
         double q
@@ -9,10 +8,16 @@ cdef int triangular(int n):
     r = int(q)
     return r
 
-
 def inverse_triangular(n):
     x = (sqrt(8 * n + 1) - 1) / 2
     n = int(x)
     if x - n > 0:
         return False
     return int(x)
+
+
+'''
+@cyther
+
+a = ''.join([str(x) for x in range(10)])
+'''

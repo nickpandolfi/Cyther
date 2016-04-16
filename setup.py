@@ -5,12 +5,12 @@ except ImportError:
 
 
 NAME = 'Cyther'
-VERSION = '0.5.3'
+VERSION = '0.6.1'
 SHORT_DESCRIPTION = 'The Cross-Platform Cython/Python Compiler'
-LONG_DESCRIPTION = open('README.txt').read()
+LONG_DESCRIPTION = open('README.rst').read()
 PACKAGES = ['cyther']
 SCRIPTS = ['cytherize.py']
-DATA_FILES = [('cyther', ['CHANGELOG.txt', 'README.txt', 'TODO.txt', 'LICENSE.txt'])]
+DATA_FILES = [('cyther', ['CHANGELOG.txt', 'README.rst', 'TODO.txt', 'LICENSE.txt'])]
 PLATFORMS = ['Windows', 'MacOS', 'POSIX', 'Unix']
 AUTHOR = 'Nicholas C. Pandolfi'
 AUTHOR_EMAIL = 'npandolfi@wpi.edu'
@@ -21,7 +21,7 @@ KEYWORDS = ['Cyther', 'Cython', 'Python', 'MinGW32',
             'setup.py', 'gcc', 'Python 3',
             'user-friendly', 'command-line',
             'script', 'auto-compiler']
-CLASSIFIERS = ['Development Status :: 4 - Beta',
+CLASSIFIERS = ['Development Status :: 3 - Alpha',
                'Environment :: Console',
                'Topic :: Software Development :: Compilers',
                'Topic :: Software Development :: Build Tools',

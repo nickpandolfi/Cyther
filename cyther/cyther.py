@@ -1,14 +1,17 @@
-import site
-from distutils import sysconfig
-from distutils import msvccompiler
+# Only those who risk going too far, can truly find out how far one can go
+
+import site, textwrap
+
+import distutils
+import distutils.sysconfig
+import distutils.msvccompiler
 
 import os, sys, subprocess, platform
 import re, collections, argparse
-import time, timeit
+import time, traceback
 
 
 class CytherError(Exception):
-    """A helpful custom error to be called when a general python error just doesn't make sense in context"""
     def __init__(self, *args, **kwargs):
         super(CytherError, self).__init__(*args, **kwargs)
 
@@ -19,16 +22,15 @@ except ImportError:
     raise CytherError("The current version of Python doesn't support the function 'which', normally located in shutil")
 
 
-def dealWithLibA(message):
-    """What to do if the libpythonXY (.a | .so) is missing. Currently, it raises an error, and prints a helpful message"""
+def dealWithMissingStaticLib(message):
     raise CytherError(message)
 
 
 def getIncludeAndRuntime():
     include_dirs, library_dirs = [], []
 
-    py_include = sysconfig.get_python_inc()
-    plat_py_include = sysconfig.get_python_inc(plat_specific=1)
+    py_include = distutils.sysconfig.get_python_inc()
+    plat_py_include = distutils.sysconfig.get_python_inc(plat_specific=1)
 
     include_dirs.append(py_include)
     if plat_py_include != py_include:
@@ -58,7 +60,7 @@ def getIncludeAndRuntime():
 
     is_cygwin = sys.platform[:6] == 'cygwin'
     is_atheos = sys.platform[:6] == 'atheos'
-    is_shared = sysconfig.get_config_var('Py_ENABLE_SHARED')
+    is_shared = distutils.sysconfig.get_config_var('Py_ENABLE_SHARED')
     is_linux = sys.platform.startswith('linux')
     is_gnu = sys.platform.startswith('gnu')
     is_sunos = sys.platform.startswith('sunos')
@@ -71,7 +73,7 @@ def getIncludeAndRuntime():
 
     if (is_linux or is_gnu or is_sunos) and is_shared:
         if sys.executable.startswith(os.path.join(sys.exec_prefix, "bin")):
-            library_dirs.append(sysconfig.get_config_var('LIBDIR'))
+            library_dirs.append(distutils.sysconfig.get_config_var('LIBDIR'))
         else:
             library_dirs.append(os.getcwd())
 
@@ -98,9 +100,11 @@ def getIncludeAndRuntime():
 ########################################################################################################################
 ########################################################################################################################
 
-CYTHER_FAIL = 0
-CYTHER_SUCCESS = 1
-ERROR_PASSOFF = -3
+FINE = 0
+ERROR_PASSOFF = 1
+SKIPPED_COMPILATION = 1337
+WAIT_FOR_FIX = 42
+
 INTERVAL = .25
 
 MAJOR = str(sys.version_info.major)
@@ -108,9 +112,9 @@ MINOR = str(sys.version_info.minor)
 
 VER = MAJOR + MINOR
 
-MSVC_VERSION = int(msvccompiler.get_build_version())
+MSVC_VERSION = int(distutils.msvccompiler.get_build_version())
 PLATFORM = sys.platform
-BASENAME = "python" + sysconfig.get_python_version()
+BASENAME = "python" + distutils.sysconfig.get_python_version()
 
 CYTHONIZABLE_FILE_EXTS = ('.pyx', '.py')
 
@@ -159,67 +163,58 @@ if not INCLUDE_DIRS:
     raise CytherError(MISSING_INCLUDE_DIRS)
 
 if not RUNTIME_DIRS:
-    dealWithLibA(MISSING_RUNTIME_DIRS)
+    dealWithMissingStaticLib(MISSING_RUNTIME_DIRS)
+
 
 pound_extract = re.compile(r"(?:#\s*@\s?[Cc]yther\s+)(?P<content>.+?)(?:\s*)(?:\n|$)")
 tripple_extract = re.compile(r"(?:(?:''')(?:(?:.|\n)+?)@[C|c]yther\s+)(?P<content>(?:.|\n)+?)(?:\s*)(?:''')")
 
 
+setupTemplate = """
+# high level importing to extract whats necessary from your '@cyther' code
+import sys
+sys.path.insert(0, '{0}')
+import {1}
+
+# bringing everything into your local namespace
+extract_these = ', '.join([name for name in dir({1}) if not name.startswith('__')])
+exec('from {1} import ' + extract_these)
+
+# freshening up your namespace
+del {1}
+del sys.path[0]
+del sys
+
+# this is the end of the setup actions
+"""
+
+timerTemplate = """
+import timeit
+
+setup_string = '''{0}'''
+
+code_string = '''{1}'''
+
+repeat = {2}
+number = {3}
+precision = {4}
+
+exec(setup_string)
+
+timer_obj = timeit.Timer(code_string, setup="from __main__ import {5}".format(extract_these))
+
+try:
+    result = min(timer_obj.repeat(repeat, number)) / number
+    rounded = format(result, '.{5}e'.format(precision))
+    print("{5} loops, best of {5}: ({5}) sec per loop".format(number, repeat, rounded))
+except:
+    timer_obj.print_exc()
+
+"""
+
+
 ########################################################################################################################
 ########################################################################################################################
-
-
-def run(filename, *, timer=False, repeat=3, number=10000, precision=2):
-    with open(filename, 'r') as file:
-        string = file.read()
-
-    obj = re.findall(pound_extract, string) + re.findall(tripple_extract, string)
-    if not obj:
-        print("There was no '@cyther' code collected from the file '{}'".format(filename))
-
-    code = ''.join([item + '\n' for item in obj])
-
-    if timer:
-        timer_obj = timeit.Timer(code)
-        try:
-            result = min(timer_obj.repeat(repeat, number)) / number
-            rounded = format(result, '.{}e'.format(precision))
-            print("{} loops, best of {}: ({}) sec per loop".format(number, repeat, rounded))
-        except:
-            timer_obj.print_exc()
-    else:
-        exec(code)
-
-
-def crawl(*to_find, source=DRIVE):
-    """This function will wrap the shutil.which function to return the abspath every time, or a empty string"""
-    found = {}
-    cmd = set(to_find)
-
-    for root, dirs, _ in os.walk(source):
-        for directory in cmd.intersection(set(dirs)):
-            if directory in cmd:
-                string = os.path.abspath(os.path.join(source, root, directory))
-                expression = EXPRESSIONS[directory]
-                dna = False
-
-                if expression:
-                    matches = re.search(expression, string)
-                    if (not matches) or (matches.end() != len(string)):
-                        dna = True
-
-                if not dna:
-                    if directory not in found:
-                        found[directory] = []
-                    found[directory].append(string)
-
-    for item in cmd:
-        if item not in found:
-            raise CytherError("The item '{}' was not found searching drive '{}'\n\n'{}'".format(item, DRIVE, found[item]))
-        elif len(found[item]) > 1:
-            raise CytherError("The item '{}' was found more than once in drive '{}'\n\n'{}'".format(item, DRIVE, found[item]))
-
-    return {item: found[item][0] for item in found}
 
 
 def where(cmd, mode=os.X_OK, path=None):
@@ -277,7 +272,6 @@ def processFiles(args):
                 dirname = os.path.dirname(output_name)
                 if not dirname:
                     dirname = os.getcwd()
-                print('dirname: {}'.format(dirname))
                 if os.path.exists(dirname):
                     file['output_name'] = output_name
                 else:
@@ -290,8 +284,14 @@ def processFiles(args):
     return to_process
 
 
+def isValid(file):
+    modified_time = os.path.getmtime(file['file_path'])
+    valid = modified_time > file['stamp_if_error']
+    return valid
+
+
 def isOutDated(file):
-    """Figures out if Cyther should compile the given file. For use with the -t option"""
+    """Figures out if Cyther should compile the given file. For use with the -s option"""
     if os.path.exists(file['output_name']):
         source_time = os.path.getmtime(file['file_path'])
         output_time = os.path.getmtime(file['output_name'])
@@ -302,9 +302,16 @@ def isOutDated(file):
     return False
 
 
-def makeCommands(preset, file):
-    """Given a high level preset, it will construct the basic args to pass over. 'ninja', 'beast', and 'minimal'"""
+def printCommands(*several_commands):
+    for commands in several_commands:
+        print(' '.join(commands).strip())
 
+
+def makeCommands(preset, file):
+    """
+    Given a high level preset, it will construct the basic args to pass over.
+    'ninja', 'beast', 'minimal', 'swift'
+    """
     if not preset:
         preset = 'ninja'
 
@@ -329,11 +336,6 @@ def makeCommands(preset, file):
     return cython_command, gcc_command
 
 
-def printCommands(commands):
-    """Simply prints all of the commands to stdout for the user to see. Nice for debugging."""
-    print(' '.join(commands).strip())
-
-
 def convertToDashes(commands):
     """Converts Cyther's pass off notation to the regular dash notation (_a becomes -a)"""
     processed = []
@@ -356,6 +358,18 @@ def filterCommands(pass_off_commands, commands):
                     commands.append(item)
 
 
+def finalizeCommands(args, file):
+    cython_commands, gcc_commands = makeCommands(args['preset'], file)
+
+    cython_pass_off = convertToDashes(args['cython_args'])
+    gcc_pass_off = convertToDashes(args['gcc_args'])
+
+    filterCommands(cython_pass_off, cython_commands)
+    filterCommands(gcc_pass_off, gcc_commands)
+
+    return cython_commands, gcc_commands
+
+
 def getDirsToInclude(string):
     """Given a string of module names, it will return the 'include' directories essential to their compilation"""
     dirs = []
@@ -375,42 +389,7 @@ def getDirsToInclude(string):
     return dirs
 
 
-def callCompilers(args, commands):
-    """The function where the actual compilation takes place"""
-    for command in commands:
-        ret = subprocess.call(command)
-        if ret:
-            if ret != 1:
-                string = str(ret)
-            else:
-                string = ''
-            if args['watch']:
-                print(string)
-                return ERROR_PASSOFF
-            else:
-                raise CytherError(string)
-    return CYTHER_SUCCESS
-
-
-def cytherize(args, file, print_command):
-    """Used by core to integrate all the pieces of information, and to make sure everything is good to go"""
-    cython_commands, gcc_commands = makeCommands(args['preset'], file)
-
-    cython_pass_off = convertToDashes(args['cython_args'])
-    gcc_pass_off = convertToDashes(args['gcc_args'])
-
-    filterCommands(cython_pass_off, cython_commands)
-    filterCommands(gcc_pass_off, gcc_commands)
-
-    if print_command:
-        printCommands(cython_commands)
-        printCommands(gcc_commands)
-
-    response = callCompilers(args, (cython_commands, gcc_commands)) # This is where to compile only C code as well
-    return response
-
-
-def convertArgs(args):
+def processArgs(args):
     if isinstance(args, str):
         unprocessed = args.strip().split(' ')
         if unprocessed[0] == 'cytherize' or unprocessed[0] == 'cyther':
@@ -422,54 +401,232 @@ def convertArgs(args):
         pass
     else:
         raise CytherError("Args must be a instance of str or argparse.Namespace, not '{}'".format(str(type(args))))
+
+    if args['X']:
+        args['execute'] = True
+        args['timestamp'] = True
+        args['watch'] = True
+
+    if args['T']:
+        args['timer'] = True
+        args['timestamp'] = True
+        args['watch'] = True
+
+    if args['watch']:
+        args['timestamp'] = True
+
+    args['watch_stats'] = {'counter': 0, 'errors': 0, 'compiles': 0, 'polls': 0}
+    args['print_args'] = True
+
     return args
+
+
+def cueExtractAndRun(args, file):
+    filename = file['file_path']
+    if args['execute']:
+        holla = run(filename)
+    else:
+        holla = run(filename, True, 3, 10000, 2)
+    return holla
+
+
+watch_stats_string = "\n...<iterations:{}, compiles:{}, errors:{}, polls:{}>...\n"
+
+
+def call(commands):
+    try:
+        process = subprocess.Popen(commands, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    except:
+        output = traceback.format_exc()
+        return {'returncode': 1, 'output': output}
+
+    stdout_bytes, stderr_bytes = process.communicate()
+    stdout = stdout_bytes.decode(sys.stdout.encoding)
+    stderr = stderr_bytes.decode(sys.stderr.encoding)
+    code = process.returncode
+
+    output = ''
+    if stdout:
+        output += stdout + '\r\n'
+    output += stderr
+
+    result = {'returncode': code, 'output': output}
+    return result
+
+
+def multiCall(*commands, dependent=True):
+    results = []
+    dependent_failed = False
+
+    for command in commands:
+        if not dependent_failed:
+            result = call(command)
+            if (result['returncode'] == 1) and dependent:
+                dependent_failed = True
+        else:
+            result = None
+        results.append(result)
+
+    obj = {'returncode': 0, 'output': ''}
+    for result in results:
+        if not result:
+            continue
+        elif result['returncode'] == 1:
+            obj['returncode'] = 1
+        obj['output'] += result['output']
+    return obj
+
+
+def initiateCompilation(args, file):
+    commands = finalizeCommands(args, file)
+    if not args['concise'] and args['print_args']:
+        printCommands(*commands)
+        if args['watch']:
+            args['print_args'] = False
+    response = multiCall(*commands)
+    return response
+
+
+def cytherize(args, file):
+    """Used by core to integrate all the pieces of information, and to make sure everything is good to go"""
+    if isOutDated(file):
+        if isValid(file):
+            response = initiateCompilation(args, file)
+        else:
+            response = {'returncode': WAIT_FOR_FIX, 'output': ''}
+    else:
+        if args['timestamp']:
+            response = {'returncode': SKIPPED_COMPILATION, 'output': ''}
+        else:
+            response = initiateCompilation(args, file)
+
+    ####################################################################################################################
+    ####################################################################################################################
+
+    time.sleep(INTERVAL)
+    if response['returncode'] == ERROR_PASSOFF:
+        file['stamp_if_error'] = time.time()
+        if args['watch']:
+            if len(args['filenames']) > 1:
+                output = "Error in file: '{}'; Cyther will wait until it is fixed...\n".format(file['file_path'])
+            else:
+                output = "Cyther will wait for you to fix this error before it tries to compile again...\n"
+        else:
+            output = "Error in source file, see above\n"
+
+    elif response['returncode'] == SKIPPED_COMPILATION:
+        if not args['watch']:
+            output = 'Skipping compilation: source file not updated since last compile\n'
+        else:
+            output = ''
+
+    elif response['returncode'] == WAIT_FOR_FIX:
+        output = ''
+
+    elif response['returncode'] == FINE:
+        if args['watch']:
+            if len(args['filenames']) > 1:
+                output = "Compiled the file '{}'\n".format(file['file_path'])
+            else:
+                output = 'Compiled the file\n'
+        else:
+            if not args['concise']:
+                output = 'Compilation complete\n'
+            else:
+                output = ''
+
+    else:
+        raise CytherError("Unrecognized return value '{}'".format(response['returncode']))
+
+    response['output'] += output
+
+    ####################################################################################################################
+    ####################################################################################################################
+
+    condition = response['returncode'] == SKIPPED_COMPILATION and not args['watch']
+    if (args['execute'] or args['timer']) and response['returncode'] == FINE or condition:
+        ret = cueExtractAndRun(args, file)
+        response['output'] += ret['output']
+
+    ####################################################################################################################
+    ####################################################################################################################
+
+    if args['watch']:
+        if response['returncode'] == FINE or response['returncode'] == ERROR_PASSOFF:
+            if response['returncode'] == FINE:
+                args['watch_stats']['compiles'] += 1
+            else:
+                args['watch_stats']['errors'] += 1
+            args['watch_stats']['counter'] += 1
+            response['output'] += watch_stats_string.format(args['watch_stats']['counter'],
+                                                            args['watch_stats']['compiles'],
+                                                            args['watch_stats']['errors'],
+                                                            args['watch_stats']['polls'])
+        else:
+            args['watch_stats']['polls'] += 1
+
+    ####################################################################################################################
+    ####################################################################################################################
+
+    if args['watch']:
+        if response['returncode'] == 1:
+            print(response['output'] + '\n')
+        else:
+            if response['output']:
+                print(response['output'])
+    else:
+        if response['returncode'] == 1:
+            if args['error']:
+                raise CytherError(response['output'])
+            else:
+                print(response['output'])
+        else:
+            print(response['output'])
 
 
 def core(args):
     """The heart of Cyther, this function controls the main loop"""
-    args = convertArgs(args)
+    args = processArgs(args)
 
     numfiles = len(args['filenames'])
     interval = INTERVAL / numfiles
     files = processFiles(args)
-    if not args['timestamp'] and args['watch']:
-        args['timestamp'] = True
-    counter = 1
-    should_i_print = True
     while True:
         for file in files:
-            if args['timestamp']:
-                modified_time = os.path.getmtime(file['file_path'])
-                no_error = modified_time > file['stamp_if_error']
-                if isOutDated(file) and no_error:
-                    if args['watch']:
-                        if len(args['filenames']) > 1:
-                            print("Compiling the file '{}'".format(file['file_path']))
-                        else:
-                            print('Compiling the file')
-                    print('')
-                    ret = cytherize(args, file, should_i_print)
-                    should_i_print = False
-                    if ret == ERROR_PASSOFF:
-                        file['stamp_if_error'] = time.time()
-                    if args['watch']:
-                        print("\n...<count:{}>...\n".format(counter))
-                        counter += 1
-                else:
-                    if not args['watch']:
-                        if len(args['filenames']) > 1:
-                            print("Skipping the file '{}'".format(file['file_path']))
-                        else:
-                            print('Skipping compilation')
-                    else:
-                        pass
-                    continue
-            else:
-                cytherize(args, file, should_i_print)
+            cytherize(args, file)
         if not args['watch']:
             break
         else:
             time.sleep(interval)
+
+
+def run(filename, timer=False, repeat=3, number=10000, precision=2):
+    with open(filename, 'r') as file:
+        string = file.read()
+
+    obj = re.findall(pound_extract, string) + re.findall(tripple_extract, string)
+    if not obj:
+        output = "There was no '@cyther' code collected from the file '{}'\n".format(filename)
+        return {'returncode': 0, 'output': output}
+
+    code = ''.join([item + '\n' for item in obj])
+
+    module_directory = os.path.dirname(filename)
+    module_name = os.path.splitext(os.path.basename(filename))[0]
+    setup_string = setupTemplate.format(module_directory, module_name, '{}')
+
+    if timer:
+        string = timerTemplate.format(setup_string, code, repeat, number, precision, '{}')
+    else:
+        string = setup_string + code
+
+    script = os.path.join(os.path.dirname(__file__), 'script.py')
+    with open(script, 'w+') as file:
+        file.write(string)
+
+    response = call(['python', script])
+    return response
+
 
 ########################################################################################################################
 ########################################################################################################################
@@ -494,44 +651,61 @@ INFO += "\n\t\tOperating System: {}".format(OPERATING_SYSTEM)
 INFO += "\n\t\t\tOS is Windows: {}".format(IS_WINDOWS)
 INFO += "\n\t\tDefault Output Extension: {}".format(DEFAULT_OUTPUT_EXTENSION)
 INFO += "\n\t\tInstallation Directory: {}".format(sys.exec_prefix)
-
+INFO += '\n'
 INFO += "\n\tCython ({}):".format(CYTHON_EXECUTABLE)
-INFO += "\n\t\tNothing Here Yet"
+INFO += "\n\t{}".format(textwrap.indent(call(['cython', '-V'])['output'], '\t'))
 
 INFO += "\n\tGCC ({}):".format(GCC_EXECUTABLE)
-INFO += "\n\t\tNothing Here Yet"
+INFO += "\n{}".format(textwrap.indent(call(['gcc', '-v'])['output'], '\t\t'))
 
 __cytherinfo__ = INFO
 
 del INFO
 
 help_filenames = 'The Cython source files'
-help_preset = 'The preset options for using cython and gcc (ninja, verbose, beast)'
+help_concise = "Get cyther to NOT print what it is thinking. Only use if you like to live on the edge"
+help_preset = 'The preset options for using cython and gcc (ninja, beast, minimal, swift)'
 help_timestamp = 'If this flag is provided, cyther will not compile files that have a modified' \
                  'time before that of your compiled .pyd or .so files'
 help_output_name = 'Change the name of the output file, default is basename plus .pyd'
 help_include = 'The names of the python modules that have an include library that needs to be passed to gcc'
-help_assumptions = 'Print the list of assumptions cyther makes about your system before running'
 help_local = 'When not flagged, builds in __cythercache__, when flagged, it builds locally in the same directory'
 help_watch = "When given, cyther will watch the directory with the 't' option implied and compile," \
              "when necessary, the files given"
+help_error = "Raise a CytherError exception instead of printing out stderr when -w is not specified"
+help_execute = "Run the @Cyther code in multi-line single quoted strings, and comments"
+help_timer = "Time the @Cyther code in multi-line single quoted strings, and comments"
+help_X = "A 'super flag' that implies the flags '-x', '-s', and '-w'"
+help_T = "A 'super flag' that implies the flags '-t', '-s', and '-w'"
 help_cython = "Arguments to pass to Cython"
 help_gcc = "Arguments to pass to gcc"
 
 description_text = 'Auto compile and build .pyx or .py files in place.'
 description = description_text
-epilog_text = "{}\n(Use '_' or '__' instead of '-' or '--' when passing args to gcc or Cython)"
+epilog_text = "{}\nOther Info:\n\tUse '_' or '__' instead of '-' or '--' when passing args to gcc or Cython"
+epilog_text += "\n\tThe ('-x', '-X') and ('-t', '-T') Boolean flags are mutually exclusive"
 epilog = epilog_text.format(__cytherinfo__)
 formatter = argparse.RawDescriptionHelpFormatter
 
 parser = argparse.ArgumentParser(description=description, epilog=epilog, formatter_class=formatter)
 parser.add_argument('filenames', action='store', nargs='+', help=help_filenames)
+parser.add_argument('-c', '--concise', action='store_true', help=help_concise)
 parser.add_argument('-p', '--preset', action='store', default='', help=help_preset)
-parser.add_argument('-t', '--timestamp', action='store_true', default=False, help=help_timestamp)
+parser.add_argument('-s', '--timestamp', action='store_true', help=help_timestamp)
 parser.add_argument('-o', '--output_name', action='store', help=help_output_name)
 parser.add_argument('-i', '--include', action='store', default='', help=help_include)
-parser.add_argument('-l', '--local', action='store_true', dest='local', default=False, help=help_local)
-parser.add_argument('-w', '--watch', action='store_true', dest='watch', default=False, help=help_watch)
+parser.add_argument('-l', '--local', action='store_true', help=help_local)
+parser.add_argument('-w', '--watch', action='store_true', help=help_watch)
+parser.add_argument('-e', '--error', action='store_true', help=help_error)
+
+execution_system = parser.add_mutually_exclusive_group()
+execution_system.add_argument('-x', '--execute', action='store_true', dest='execute', default=False, help=help_execute)
+execution_system.add_argument('-t', '--timeit', action='store_true', dest='timer', default=False, help=help_timer)
+
+super_flags = parser.add_mutually_exclusive_group()
+super_flags.add_argument('-X', action='store_true', dest='X', default=False, help=help_X)
+super_flags.add_argument('-T', action='store_true', dest='T', default=False, help=help_T)
+
 parser.add_argument('-cython', action='store', nargs='+', dest='cython_args', default=[], help=help_cython)
 parser.add_argument('-gcc', action='store', nargs='+', dest='gcc_args', default=[], help=help_gcc)
 

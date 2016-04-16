@@ -1,17 +1,17 @@
 
-from cyther import *
-from subprocess import call
+import cyther
+import subprocess
 
-'''
-@cyther
+cyther.core('example_file.pyx -x -e')
+cyther.core('example_file.pyx -t -e')
+subprocess.call(['python', 'cytherize.py', 'example_file.pyx', '-s', '-e'])
+subprocess.call(['python', 'cytherize.py', 'example_file.pyx', '-l', '-cython', '_a', '_l', '-e'])
+cyther.core('example_file.pyx -t -c -e')
+cyther.core('example_file.pyx -t -l -e')
+cyther.core('example_file.pyx -x -l -p minimal -gcc _O4 -e')
+cyther.core('example_file.pyx -x -e')
+cyther.core('example_file.pyx -e')
 
-a = ''.join([str(x) for x in range(10)])
-if a != '0123456789':
-    raise CytherError("The @ code doesn't work correctly")
-'''
+cyther.core('-h')
 
-core('example_file.pyx')
-call(['python', 'cytherize.py', 'example_file.pyx', '-t'])
-
-run(__file__)
-run(__file__, timer=True)
+print('All tests have been passed')

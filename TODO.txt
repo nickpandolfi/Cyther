@@ -1,4 +1,5 @@
-MAINTAIN
+
+MAINTAIN (make sure this stuff is always perfected)
 
     Keep __all__ up to date with all the useful functions
 
@@ -15,74 +16,65 @@ MAINTAIN
     Any name cool badges to add? Make sure you got all the recent and useful ones
     Use http://shields.io/ to generate non changing badges
 
-    Make sure that all the message passoffs make sense
+    Make sure the test_cyther.py file is updated to include the latest features (test everything!)
 
-EASY FIX
 
-    Is it wise to take out the checking procedures with the getIncludeAndRuntime() function. Why are they necessary??
-
-    Reformat the README to include all info and more examples
+EASY FIX (easy breazy lemon squeazy)
 
     How to deal with non-standard extensions that people might be using? Don't error, but just have it print that
     it is non standard, and work anyway? What about Regex?
 
-MEDIUM FIX
+    Reorder all the functions in cyther.py to actually make sense
 
-    Where is the best spot to put the README and all the other files?
+    Make a __all__ in __init__, and what other things can we put there
 
-    Get Travis to deploy automatically. But before that, run a script to deploy to the test >> include in build process
+    Split cyther.py into several other modules?
 
-    Make CytherError traceback invisible. Make sure that the error doesn't look like cyther.cyther.CytherError...
 
-HARD FIX
+MEDIUM FIX (ok, its do-able)
 
-    Make a generation script that automatically sets the version and generates a rst and md readme files. Think of
-    other stuff that this script cound do.
+    None
 
-    When the -w (watch) option is used, and the contents of the source file are being imported, the file will not be
-    able to recompile. Will this fix need the if __name__ == '__cyther__' clause in it, to read and pass to exec()
+HARD FIX (shit)
 
     Get the operating system dependant flags that are passed to gcc by distutils and inject them when building the
     preset
 
-    Use a 'subparser' to process the commands to cython and gcc
-
     Make sure that the file order provided doesn't matter when compiling multiple files that may depend on one another
 
-EASY NEW FEATURES
 
-    Add more presets, including one that compiles really fast, for testing purposes
+EASY NEW FEATURES (easy peasy and planned)
 
-    Extend the -l option to take a specific directory to build the files in
+    Get the arguments of run(timer=True) to work properly
 
-    Specify how to give pass off args and 3rd party modules to include in the epilog section of '-h'
-    Do this also with the cython and gcc pass-off arguments
+    Make CytherError traceback invisible. Make sure that the error doesn't look like cyther.cyther.CytherError...
 
-    Write a test script that actually tests the whole deal. Have it run every scenario and then
-    USE the actual extension that it makes
 
-HARD NEW FEATURES
+HARD NEW FEATURES (yes, planned)
 
-    Function to clean a directory of everything 'locally build' related, or move it to a cythercache
-    A function to remove EVERYTHING cyther related
+    Instead of the include option, have the system automatically detect the python {}.get_include() modules
 
-    Have an option to run the code under `if __name__ == '__main__'` statement directly in the terminal
-
-    Always back up the previous compile if there was one. Then if there is an error, don't overwrite it with anything,
-    but instead, keep the backup version. Have the new compilation attempt be built in the __cythercache__ directory
-
-    An option to just build the C, or to just take the C and build only the extension
-
-    Get -w (watch), to exit safely and keep the same command prompt open. Is this possible?
-
-    Don't have args and file, have only one object with everything in it
+    Have a scriptble system of talking to the core and passing in arguments. THIS WOULD BE GREAT!!
 
     Add cl to the options that are available for compilers
 
     Say the search for the directories necessary for the runtime compilation fails, and returns nothing. Then run the
     crawl algorithm over the whole DRIVE to find a lib file that matches the REGEX definition
 
-BEFORE DEPLOY:
+
+LOW PRIORITY (probably will happen)
+
+    An option to just build the C, or to just take the C and build only the extension
+    How could cyther be used with distutils??
+
+    Function to clean a directory of everything 'locally build' related, or move it to a cythercache
+    A function to remove EVERYTHING cyther related
+
+    Always back up the previous compile if there was one. Then if there is an error, don't overwrite it with anything,
+    but instead, keep the backup version. Have the new compilation attempt be built in the __cythercache__ directory
+
+
+BEFORE DEPLOY (for me)
 
     Make sure that the version specified makes sense (major.minor.patch)
 
@@ -92,7 +84,19 @@ BEFORE DEPLOY:
 
     Delete the comments that are no longer needed. Any junk or temporary commented code should be extracted
 
-QUESTIONS:
+    Write a test script that actually tests the whole deal. Have it run every scenario and then
+    USE the actual extension that it makes
+
+
+QUESTIONS (yeah, these happen)
+
+    Where is the best spot to put the README and all the other files?
+
+    Add more presets?? I need to do a brainstorming situation...
+
+    Don't have args and file, have only one object with everything in it. Does this even make sense?
+
+    Is it wise to take out the checking procedures with the getIncludeAndRuntime() function. Why are they necessary??
 
     Would it be possible to automatically send me their __cytherinfo__ variable?
 
@@ -117,23 +121,3 @@ QUESTIONS:
 
     What is the difference between os.name and sys.platform and platform.platform?
     Why do some return operating systems, and some return processor architectures
-
-ON HOLD:
-
-    Recompile the libpythonXY.a static library if it does not exist:
-
-        Possible tool to help: dlltool, reimp, pexports, gendef
-
-            It would be best to use a tool that always exists on each and every platform
-
-        Possible usage: reimp.exe -d %lib_file%\ndlltool.exe -d %def_file% -D %dll_file% -k -l %a_file%
-
-        Take a look at your favorites page for instructions on pexport
-
-    Explicitly state that neither Cython nor any GNU product nor Python is yours, and all rights belong to their
-    respective owners
-
-    If is windows, just call subprocess with where
-    If is unix, just call subprocess with which
-    If unable to do this, THEN try to import and use which
-    If this doesnot exist, raise error?
