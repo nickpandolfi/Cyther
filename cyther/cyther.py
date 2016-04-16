@@ -441,8 +441,10 @@ def call(commands):
         return {'returncode': 1, 'output': output}
 
     stdout_bytes, stderr_bytes = process.communicate()
-    stdout = stdout_bytes.decode(sys.stdout.encoding)
-    stderr = stderr_bytes.decode(sys.stderr.encoding)
+    stdout_encoding = sys.stdout.encoding if sys.stdout.encoding else 'utf-8'
+    stderr_encoding = sys.stderr.encoding if sys.stderr.encoding else 'utf-8'
+    stdout = stdout_bytes.decode(stdout_encoding)
+    stderr = stderr_bytes.decode(stderr_encoding)
     code = process.returncode
 
     output = ''
