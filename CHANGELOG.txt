@@ -66,3 +66,6 @@
     Properly encapsulated the 'script' code
     Finally added proper documentation!
 
+0.6.3
+    Dealt with pypi nonsense
+    Took out auto deployment
