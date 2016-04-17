@@ -5,7 +5,7 @@ except ImportError:
 
 
 NAME = 'Cyther'
-VERSION = '0.6.3'
+VERSION = '0.7.0'
 SHORT_DESCRIPTION = 'The Cross-Platform Cython/Python Compiler'
 LONG_DESCRIPTION = open('README.rst').read()
 PACKAGES = ['cyther']
