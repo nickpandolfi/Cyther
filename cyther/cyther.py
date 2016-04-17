@@ -1,17 +1,21 @@
 # Only those who risk going too far, can truly find out how far one can go
 
-import site, textwrap
-
-import distutils
+import site, distutils
 import distutils.sysconfig
 import distutils.msvccompiler
 
-import os, sys, subprocess, platform
-import re, collections, argparse
-import time, traceback
+import os, sys, platform
+import re, argparse, traceback
+
+import textwrap
+import time
+import subprocess
 
 
 class CytherError(Exception):
+    """
+    A custom error used to denote that an exception was Cyther related
+    """
     def __init__(self, *args, **kwargs):
         super(CytherError, self).__init__(*args, **kwargs)
 
@@ -22,11 +26,43 @@ except ImportError:
     raise CytherError("The current version of Python doesn't support the function 'which', normally located in shutil")
 
 
+########################################################################################################################
+########################################################################################################################
+
+__all__ = ['core', 'CytherError', 'run', 'runAsScript',
+           'call', 'multiCall',
+           'where', 'which']
+
+
 def dealWithMissingStaticLib(message):
+    """
+    Deal with the python missing static lib (.a|.so). Currently all this does is raises a helpful error...
+    Args:
+        message (str): What to pass to a CytherError
+    Returns: CytherError
+    """
     raise CytherError(message)
 
 
+def sift(obj):
+    """
+    Used to find the correct static lib name to pass to gcc
+    Args:
+        obj (list): The list of names of runtime directories to include
+
+    Returns (str): The proper name of the argument passed into the '-l' option
+    """
+    string = [str(item) for name in obj for item in os.listdir(name)]
+    s = set(re.findall('(?<=lib)(.+?)(?=\.so|\.a)', '\n'.join(string)))
+    result = max(list(s), key=len)
+    return result
+
+
 def getIncludeAndRuntime():
+    """
+    A function from distutils' build_ext.py that was updated and changed to ACTUALLY WORK
+    Returns (tuple of list): The include and runtime directories Python needs (os dependant)
+    """
     include_dirs, library_dirs = [], []
 
     py_include = distutils.sysconfig.get_python_inc()
@@ -40,6 +76,7 @@ def getIncludeAndRuntime():
         library_dirs.append(os.path.join(sys.exec_prefix, 'libs'))
         include_dirs.append(os.path.join(sys.exec_prefix, 'PC'))
 
+        MSVC_VERSION = int(distutils.msvccompiler.get_build_version())
         if MSVC_VERSION == 14:
             library_dirs.append(os.path.join(sys.exec_prefix, 'PC', 'VS14', 'win32release'))
         elif MSVC_VERSION == 9:
@@ -109,10 +146,8 @@ INTERVAL = .25
 
 MAJOR = str(sys.version_info.major)
 MINOR = str(sys.version_info.minor)
-
 VER = MAJOR + MINOR
 
-MSVC_VERSION = int(distutils.msvccompiler.get_build_version())
 PLATFORM = sys.platform
 BASENAME = "python" + distutils.sysconfig.get_python_version()
 
@@ -123,14 +158,6 @@ if not DRIVE:
     DRIVE = os.path.normpath('/')
 
 CYTHER_CONFIG_FILE = os.path.join(os.path.expanduser('~'), '.cyther')
-
-
-def sift(obj):
-    string = [str(item) for name in obj for item in os.listdir(name)]
-    s = set(re.findall('(?<=lib)(.+?)(?=\.so|\.a)', '\n'.join(string)))
-    result = max(list(s), key=len)
-    return result
-
 
 INCLUDE_DIRS, RUNTIME_DIRS = getIncludeAndRuntime()
 
@@ -144,8 +171,6 @@ for directory in INCLUDE_DIRS:
 RUNTIME_STRING = ''
 for directory in RUNTIME_DIRS:
     RUNTIME_STRING += '-L' + directory
-
-EXPRESSIONS = collections.defaultdict()
 
 MISSING_INCLUDE_DIRS = """
 Cyther could not find any include directories that the current Python installation was built off of.
@@ -166,11 +191,12 @@ if not RUNTIME_DIRS:
     dealWithMissingStaticLib(MISSING_RUNTIME_DIRS)
 
 
-pound_extract = re.compile(r"(?:#\s*@\s?[Cc]yther\s+)(?P<content>.+?)(?:\s*)(?:\n|$)")
-tripple_extract = re.compile(r"(?:(?:''')(?:(?:.|\n)+?)@[C|c]yther\s+)(?P<content>(?:.|\n)+?)(?:\s*)(?:''')")
+POUND_EXTRACT = re.compile(r"(?:#\s*@\s?[Cc]yther\s+)(?P<content>.+?)(?:\s*)(?:\n|$)")
+TRIPPLE_EXTRACT = re.compile(r"(?:(?:''')(?:(?:.|\n)+?)@[C|c]yther\s+)(?P<content>(?:.|\n)+?)(?:\s*)(?:''')")
 
+WATCH_STATS_TEMPLATE = "\n...<iterations:{}, compiles:{}, errors:{}, polls:{}>...\n"
 
-setupTemplate = """
+SETUP_TEMPLATE = """
 # high level importing to extract whats necessary from your '@cyther' code
 import sys
 sys.path.insert(0, '{0}')
@@ -188,7 +214,7 @@ del sys
 # this is the end of the setup actions
 """
 
-timerTemplate = """
+TIMER_TEMPLATE = """
 import timeit
 
 setup_string = '''{0}'''
@@ -212,13 +238,21 @@ except:
 
 """
 
-
 ########################################################################################################################
 ########################################################################################################################
 
 
-def where(cmd, mode=os.X_OK, path=None):
-    raw_result = which(cmd, mode, path)
+def where(cmd, path=None):
+    """
+    A function to wrap shutil.which for universal usage
+    Args:
+        cmd (str): The command wished to be traced back to its source
+        path: A pathin which to limit the results to
+    Returns:
+        (CytherError): If could not find
+        (str): The abspath of the executable found
+    """
+    raw_result = which(cmd, os.X_OK, path)
     if raw_result:
         return os.path.abspath(raw_result)
     else:
@@ -226,7 +260,14 @@ def where(cmd, mode=os.X_OK, path=None):
 
 
 def getFullPath(filename):
-    """This will get the full path of a path of a filename"""
+    """
+    Gets the full path of a filename
+    Args:
+        filename (str): Name of the file to be absolutized
+    Returns:
+        (CytherError): If the filename doesn't exist
+        (str): The full path of the location of the filename
+    """
     if os.path.exists(filename) and (filename not in os.listdir(os.getcwd())):
         ret = filename
     elif os.path.exists(os.path.join(os.getcwd(), filename)):
@@ -236,8 +277,154 @@ def getFullPath(filename):
     return ret
 
 
+def printCommands(*several_commands):
+    """
+    Simply prints several commands given to it
+    Args:
+        *several_commands (list|tuple): Container of commands
+    Returns: None
+    """
+    for commands in several_commands:
+        print(' '.join(commands).strip())
+
+
+def call(commands):
+    """
+    Super handy function to open another process
+    Args:
+        commands (list|tuple): The commands wished to open a new process with
+    Returns (dict): The status of the call. Keys are 'returncode', and 'output'
+    """
+    try:
+        process = subprocess.Popen(commands, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    except:
+        output = traceback.format_exc()
+        return {'returncode': 1, 'output': output}
+
+    stdout_bytes, stderr_bytes = process.communicate()
+    stdout_encoding = sys.stdout.encoding if sys.stdout.encoding else 'utf-8'
+    stderr_encoding = sys.stderr.encoding if sys.stderr.encoding else 'utf-8'
+    stdout = stdout_bytes.decode(stdout_encoding)
+    stderr = stderr_bytes.decode(stderr_encoding)
+    code = process.returncode
+
+    output = ''
+    if stdout:
+        output += stdout + '\r\n'
+    output += stderr
+
+    result = {'returncode': code, 'output': output}
+    return result
+
+
+def multiCall(*commands, dependent=True):
+    """
+    Calls 'call' multiple times, given sets of commands
+    Args:
+        *commands (list|tuple): The sets of commands to be called with
+        dependent (bool): If one set fails, it forces the rest to fail, and return None
+    Returns (dict): The combined results of the series of calls. Keys are same as 'call'
+    """
+    results = []
+    dependent_failed = False
+
+    for command in commands:
+        if not dependent_failed:
+            result = call(command)
+            if (result['returncode'] == 1) and dependent:
+                dependent_failed = True
+        else:
+            result = None
+        results.append(result)
+
+    obj = {'returncode': 0, 'output': ''}
+    for result in results:
+        if not result:
+            continue
+        elif result['returncode'] == 1:
+            obj['returncode'] = 1
+        obj['output'] += result['output']
+    return obj
+
+
+########################################################################################################################
+########################################################################################################################
+
+
+def isValid(file):
+    """
+    Figures out if the file had previously errored and hasn't been fixed since
+    Args:
+        file (dict): File dict to be inspected
+    Returns (bool): If the file is valid for compilation
+    """
+    modified_time = os.path.getmtime(file['file_path'])
+    valid = modified_time > file['stamp_if_error']
+    return valid
+
+
+def isOutDated(file):
+    """
+    Figures out if Cyther should compile the given file by checking the source code and compiled object
+    Args:
+        file (dict): File dict to be inspected
+    Returns (bool): If the file is outdated, and needs compilation
+    """
+    if os.path.exists(file['output_name']):
+        source_time = os.path.getmtime(file['file_path'])
+        output_time = os.path.getmtime(file['output_name'])
+        if source_time > output_time:
+            return True
+    else:
+        return True
+    return False
+
+
+def processArgs(args):
+    """
+    Converts args, and deals with incongruities that argparse couldn't handle
+    Args:
+        args (unknown): Args to be sorted
+    Returns (dict): Filtered and processed arguments
+    """
+    if isinstance(args, str):
+        unprocessed = args.strip().split(' ')
+        if unprocessed[0] == 'cytherize' or unprocessed[0] == 'cyther':
+            del unprocessed[0]
+        args = parser.parse_args(unprocessed).__dict__
+    elif isinstance(args, argparse.Namespace):
+        args = args.__dict__
+    elif isinstance(args, dict):
+        pass
+    else:
+        raise CytherError("Args must be a instance of str or argparse.Namespace, not '{}'".format(str(type(args))))
+
+    if args['X']:
+        args['execute'] = True
+        args['timestamp'] = True
+        args['watch'] = True
+
+    if args['T']:
+        args['timer'] = True
+        args['timestamp'] = True
+        args['watch'] = True
+
+    if args['watch']:
+        args['timestamp'] = True
+
+    args['watch_stats'] = {'counter': 0, 'errors': 0, 'compiles': 0, 'polls': 0}
+    args['print_args'] = True
+
+    return args
+
+
 def processFiles(args):
-    """Generates and error checks each file's information before the compilation actually starts"""
+    """
+    Generates and error checks each file's information before the compilation actually starts
+    Args:
+        args (dict): The processed args to base 'file' off of
+    Returns files
+    """
     to_process = []
 
     for filename in args['filenames']:
@@ -284,33 +471,14 @@ def processFiles(args):
     return to_process
 
 
-def isValid(file):
-    modified_time = os.path.getmtime(file['file_path'])
-    valid = modified_time > file['stamp_if_error']
-    return valid
-
-
-def isOutDated(file):
-    """Figures out if Cyther should compile the given file. For use with the -s option"""
-    if os.path.exists(file['output_name']):
-        source_time = os.path.getmtime(file['file_path'])
-        output_time = os.path.getmtime(file['output_name'])
-        if source_time > output_time:
-            return True
-    else:
-        return True
-    return False
-
-
-def printCommands(*several_commands):
-    for commands in several_commands:
-        print(' '.join(commands).strip())
-
-
 def makeCommands(preset, file):
     """
     Given a high level preset, it will construct the basic args to pass over.
     'ninja', 'beast', 'minimal', 'swift'
+    Args:
+        preset (str): The high level preset
+        file (dict): The file for which to generate these commands for
+    Returns (tuple of lists): The commands in which to pass off to the underlying compilers
     """
     if not preset:
         preset = 'ninja'
@@ -337,7 +505,12 @@ def makeCommands(preset, file):
 
 
 def convertToDashes(commands):
-    """Converts Cyther's pass off notation to the regular dash notation (_a becomes -a)"""
+    """
+    Converts Cyther's pass off notation to the regular dash notation (_a becomes -a)
+    Args:
+        commands (list|tuple): The unprocessed commands
+    Returns (list): The processed commands
+    """
     processed = []
     for command in commands:
         if command[0] == '_':
@@ -350,7 +523,13 @@ def convertToDashes(commands):
 
 
 def filterCommands(pass_off_commands, commands):
-    """Puts items of pass_off_commands in commands if commands does not already have them"""
+    """
+    Puts items of pass_off_commands in commands if commands does not already have them
+    Args:
+        pass_off_commands (list|tuple): Commands manually fed to be passed off
+        commands (list): The automatically generate commands to be passed off
+    Returns (list): The processed commands
+    """
     if pass_off_commands:
         for item in pass_off_commands:
             if item[0] == '-':
@@ -359,6 +538,13 @@ def filterCommands(pass_off_commands, commands):
 
 
 def finalizeCommands(args, file):
+    """
+    Combines a few functions to generate all the commands needed for a specific file
+    Args:
+        args (dict): The compilation wide arguments
+        file (dict): The specific file dict to construct the commands for
+    Returns (tuple of lists): The finalized cython and gcc commands
+    """
     cython_commands, gcc_commands = makeCommands(args['preset'], file)
 
     cython_pass_off = convertToDashes(args['cython_args'])
@@ -371,7 +557,12 @@ def finalizeCommands(args, file):
 
 
 def getDirsToInclude(string):
-    """Given a string of module names, it will return the 'include' directories essential to their compilation"""
+    """
+    Given a string of module names, it will return the 'include' directories essential to their compilation
+    Args:
+        string (str): A continuous string of modules split by '-'
+    Returns (list): Extra include directories to pass into gcc
+    """
     dirs = []
     a = string.strip()
     obj = a.split('-')
@@ -389,39 +580,14 @@ def getDirsToInclude(string):
     return dirs
 
 
-def processArgs(args):
-    if isinstance(args, str):
-        unprocessed = args.strip().split(' ')
-        if unprocessed[0] == 'cytherize' or unprocessed[0] == 'cyther':
-            del unprocessed[0]
-        args = parser.parse_args(unprocessed).__dict__
-    elif isinstance(args, argparse.Namespace):
-        args = args.__dict__
-    elif isinstance(args, dict):
-        pass
-    else:
-        raise CytherError("Args must be a instance of str or argparse.Namespace, not '{}'".format(str(type(args))))
-
-    if args['X']:
-        args['execute'] = True
-        args['timestamp'] = True
-        args['watch'] = True
-
-    if args['T']:
-        args['timer'] = True
-        args['timestamp'] = True
-        args['watch'] = True
-
-    if args['watch']:
-        args['timestamp'] = True
-
-    args['watch_stats'] = {'counter': 0, 'errors': 0, 'compiles': 0, 'polls': 0}
-    args['print_args'] = True
-
-    return args
-
-
 def cueExtractAndRun(args, file):
+    """
+    Cues the @cyther code execution procedure
+    Args:
+        args (dict): Compile wide arguments to use
+        file (dict): The file to extract the code from
+    Returns (dict): The response generated from 'call'
+    """
     filename = file['file_path']
     if args['execute']:
         holla = run(filename)
@@ -430,56 +596,14 @@ def cueExtractAndRun(args, file):
     return holla
 
 
-watch_stats_string = "\n...<iterations:{}, compiles:{}, errors:{}, polls:{}>...\n"
-
-
-def call(commands):
-    try:
-        process = subprocess.Popen(commands, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    except:
-        output = traceback.format_exc()
-        return {'returncode': 1, 'output': output}
-
-    stdout_bytes, stderr_bytes = process.communicate()
-    stdout_encoding = sys.stdout.encoding if sys.stdout.encoding else 'utf-8'
-    stderr_encoding = sys.stderr.encoding if sys.stderr.encoding else 'utf-8'
-    stdout = stdout_bytes.decode(stdout_encoding)
-    stderr = stderr_bytes.decode(stderr_encoding)
-    code = process.returncode
-
-    output = ''
-    if stdout:
-        output += stdout + '\r\n'
-    output += stderr
-
-    result = {'returncode': code, 'output': output}
-    return result
-
-
-def multiCall(*commands, dependent=True):
-    results = []
-    dependent_failed = False
-
-    for command in commands:
-        if not dependent_failed:
-            result = call(command)
-            if (result['returncode'] == 1) and dependent:
-                dependent_failed = True
-        else:
-            result = None
-        results.append(result)
-
-    obj = {'returncode': 0, 'output': ''}
-    for result in results:
-        if not result:
-            continue
-        elif result['returncode'] == 1:
-            obj['returncode'] = 1
-        obj['output'] += result['output']
-    return obj
-
-
 def initiateCompilation(args, file):
+    """
+    Starts the entire compilation procedure
+    Args:
+        args (dict): Compile wide arguments to use
+        file (dict): The file to compile
+    Returns (dict): The formal response generated from 'multiCall'
+    """
     commands = finalizeCommands(args, file)
     if not args['concise'] and args['print_args']:
         printCommands(*commands)
@@ -490,7 +614,13 @@ def initiateCompilation(args, file):
 
 
 def cytherize(args, file):
-    """Used by core to integrate all the pieces of information, and to make sure everything is good to go"""
+    """
+    Used by core to integrate all the pieces of information, and to interface with the user. Compiles and cleans up.
+    Args:
+        args (dict): Compile wide arguments to use
+        file (dict): The file to compile
+    Returns: None
+    """
     if isOutDated(file):
         if isValid(file):
             response = initiateCompilation(args, file)
@@ -502,7 +632,6 @@ def cytherize(args, file):
         else:
             response = initiateCompilation(args, file)
 
-    ####################################################################################################################
     ####################################################################################################################
 
     time.sleep(INTERVAL)
@@ -543,14 +672,12 @@ def cytherize(args, file):
     response['output'] += output
 
     ####################################################################################################################
-    ####################################################################################################################
 
     condition = response['returncode'] == SKIPPED_COMPILATION and not args['watch']
     if (args['execute'] or args['timer']) and response['returncode'] == FINE or condition:
         ret = cueExtractAndRun(args, file)
         response['output'] += ret['output']
 
-    ####################################################################################################################
     ####################################################################################################################
 
     if args['watch']:
@@ -560,14 +687,13 @@ def cytherize(args, file):
             else:
                 args['watch_stats']['errors'] += 1
             args['watch_stats']['counter'] += 1
-            response['output'] += watch_stats_string.format(args['watch_stats']['counter'],
-                                                            args['watch_stats']['compiles'],
-                                                            args['watch_stats']['errors'],
-                                                            args['watch_stats']['polls'])
+            response['output'] += WATCH_STATS_TEMPLATE.format(args['watch_stats']['counter'],
+                                                              args['watch_stats']['compiles'],
+                                                              args['watch_stats']['errors'],
+                                                              args['watch_stats']['polls'])
         else:
             args['watch_stats']['polls'] += 1
 
-    ####################################################################################################################
     ####################################################################################################################
 
     if args['watch']:
@@ -586,8 +712,42 @@ def cytherize(args, file):
             print(response['output'])
 
 
+def run(filename, timer=False, repeat=3, number=10000, precision=2):
+    with open(filename, 'r') as file:
+        string = file.read()
+
+    obj = re.findall(POUND_EXTRACT, string) + re.findall(TRIPPLE_EXTRACT, string)
+    if not obj:
+        output = "There was no '@cyther' code collected from the file '{}'\n".format(filename)
+        return {'returncode': 0, 'output': output}
+
+    code = ''.join([item + '\n' for item in obj])
+
+    module_directory = os.path.dirname(filename)
+    module_name = os.path.splitext(os.path.basename(filename))[0]
+    setup_string = SETUP_TEMPLATE.format(module_directory, module_name, '{}')
+
+    if timer:
+        string = TIMER_TEMPLATE.format(setup_string, code, repeat, number, precision, '{}')
+    else:
+        string = setup_string + code
+
+    script = os.path.join(os.path.dirname(__file__), 'script.py')
+    with open(script, 'w+') as file:
+        file.write(string)
+
+    response = call(['python', script])
+    return response
+
+
 def core(args):
-    """The heart of Cyther, this function controls the main loop"""
+    """
+    The heart of Cyther, this function controls the main loop, and can be used to perform any Cyther action
+    This is what the user will always call if using Cyther from the module level
+    Args:
+        args (str|dict|argparse.Namespace): Polymorphesized arguments to pass to Cyther
+    Returns: None
+    """
     args = processArgs(args)
 
     numfiles = len(args['filenames'])
@@ -600,34 +760,6 @@ def core(args):
             break
         else:
             time.sleep(interval)
-
-
-def run(filename, timer=False, repeat=3, number=10000, precision=2):
-    with open(filename, 'r') as file:
-        string = file.read()
-
-    obj = re.findall(pound_extract, string) + re.findall(tripple_extract, string)
-    if not obj:
-        output = "There was no '@cyther' code collected from the file '{}'\n".format(filename)
-        return {'returncode': 0, 'output': output}
-
-    code = ''.join([item + '\n' for item in obj])
-
-    module_directory = os.path.dirname(filename)
-    module_name = os.path.splitext(os.path.basename(filename))[0]
-    setup_string = setupTemplate.format(module_directory, module_name, '{}')
-
-    if timer:
-        string = timerTemplate.format(setup_string, code, repeat, number, precision, '{}')
-    else:
-        string = setup_string + code
-
-    script = os.path.join(os.path.dirname(__file__), 'script.py')
-    with open(script, 'w+') as file:
-        file.write(string)
-
-    response = call(['python', script])
-    return response
 
 
 ########################################################################################################################
@@ -713,6 +845,10 @@ parser.add_argument('-gcc', action='store', nargs='+', dest='gcc_args', default=
 
 
 def runAsScript():
+    """
+    Function to run Cyther as a script
+    Returns: None
+    """
     args = parser.parse_args()
     core(args)
 

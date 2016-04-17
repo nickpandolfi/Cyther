@@ -24,12 +24,6 @@ EASY FIX (easy breazy lemon squeazy)
     How to deal with non-standard extensions that people might be using? Don't error, but just have it print that
     it is non standard, and work anyway? What about Regex?
 
-    Reorder all the functions in cyther.py to actually make sense
-
-    Make a __all__ in __init__, and what other things can we put there
-
-    Split cyther.py into several other modules?
-
 
 MEDIUM FIX (ok, its do-able)
 
@@ -45,12 +39,14 @@ HARD FIX (shit)
 
 EASY NEW FEATURES (easy peasy and planned)
 
-    Get the arguments of run(timer=True) to work properly
+    Get the arguments of run(timer=True) to work properly, or be automatic, like IPython
 
-    Make CytherError traceback invisible. Make sure that the error doesn't look like cyther.cyther.CytherError...
+    Get crawl to find libpython, and also rename crawl to 'what'
 
 
 HARD NEW FEATURES (yes, planned)
+
+    Erase Cyther's usage of distutils entirely
 
     Instead of the include option, have the system automatically detect the python {}.get_include() modules
 
@@ -89,6 +85,8 @@ BEFORE DEPLOY (for me)
 
 
 QUESTIONS (yeah, these happen)
+
+    Split cyther.py into several other modules?
 
     Where is the best spot to put the README and all the other files?
 

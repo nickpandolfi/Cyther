@@ -56,11 +56,13 @@
     All communications from cyther to the user are located in a single place, and done through stdout
 
 0.6.2
-    Changed a few distribution settings
     Fixed an encoding bug
     Deleted the test_cyther null command in the travis yaml
-
-0.6.3
     Took README.md out of the .gitignore
     Fixed the distribution settings
-    Took out auto-deploy termporarily
+    Implemented some PEP8 rules
+    Added the __all__ attribute to cyther.py
+    Reordered all functions to make more sense
+    Properly encapsulated the 'script' code
+    Finally added proper documentation!
+
