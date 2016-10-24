@@ -9,7 +9,7 @@ __cythercache__/
 /cyther/script.py
 /example_file.c
 /example_file.html
-example_file.lis
+/example_file.lis
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

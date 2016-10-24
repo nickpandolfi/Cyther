@@ -1,5 +1,5 @@
 
-MAINTAIN (make sure this stuff is always perfected)
+MAINTAIN
 
     Keep __all__ up to date with all the useful functions
 
@@ -19,32 +19,33 @@ MAINTAIN (make sure this stuff is always perfected)
     Make sure the test_cyther.py file is updated to include the latest features (test everything!)
 
 
-EASY FIX (easy breazy lemon squeazy)
+EASY FIX
 
     How to deal with non-standard extensions that people might be using? Don't error, but just have it print that
     it is non standard, and work anyway? What about Regex?
 
 
-MEDIUM FIX (ok, its do-able)
+MEDIUM FIX
 
-    None
+    Fix issue posted on cyther/issues
+        Investigate cold installations and usage of other operating systems
 
-HARD FIX (shit)
+HARD FIX
 
     Get the operating system dependant flags that are passed to gcc by distutils and inject them when building the
-    preset
+    preset (see question you posed)
 
     Make sure that the file order provided doesn't matter when compiling multiple files that may depend on one another
 
 
-EASY NEW FEATURES (easy peasy and planned)
+EASY NEW FEATURES
 
     Get the arguments of run(timer=True) to work properly, or be automatic, like IPython
 
     Get crawl to find libpython, and also rename crawl to 'what'
 
 
-HARD NEW FEATURES (yes, planned)
+HARD NEW FEATURES
 
     Erase Cyther's usage of distutils entirely
 
@@ -58,7 +59,7 @@ HARD NEW FEATURES (yes, planned)
     crawl algorithm over the whole DRIVE to find a lib file that matches the REGEX definition
 
 
-LOW PRIORITY (probably will happen)
+LOW PRIORITY
 
     An option to just build the C, or to just take the C and build only the extension
     How could cyther be used with distutils??
@@ -69,6 +70,7 @@ LOW PRIORITY (probably will happen)
     Always back up the previous compile if there was one. Then if there is an error, don't overwrite it with anything,
     but instead, keep the backup version. Have the new compilation attempt be built in the __cythercache__ directory
 
+########################################################################################################################
 
 BEFORE DEPLOY (for me)
 
@@ -84,7 +86,7 @@ BEFORE DEPLOY (for me)
     USE the actual extension that it makes
 
 
-QUESTIONS (yeah, these happen)
+QUESTIONS (for me to ask myself)
 
     Split cyther.py into several other modules?
 

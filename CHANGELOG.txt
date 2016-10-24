@@ -69,3 +69,9 @@
 0.7.0
     Dealt with pypi nonsense
     Took out auto deployment
+
+0.7.1
+    Updated the README to include the current cytherize -h text
+    Added linereader to the packages included
+
+0.8.0
