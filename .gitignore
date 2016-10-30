@@ -10,6 +10,7 @@ __cythercache__/
 /example_file.c
 /example_file.html
 /example_file.lis
+/linereader
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

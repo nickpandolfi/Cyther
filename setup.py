@@ -5,7 +5,7 @@ except ImportError:
 
 
 NAME = 'Cyther'
-VERSION = '0.7.1'
+VERSION = '0.8.0.test.a'
 SHORT_DESCRIPTION = 'The Cross-Platform Cython/Python Compiler'
 LONG_DESCRIPTION = open('README.rst').read()
 PACKAGES = ['cyther']
@@ -21,7 +21,7 @@ KEYWORDS = ['Cyther', 'Cython', 'Python', 'MinGW32',
             'setup.py', 'gcc', 'Python 3',
             'user-friendly', 'command-line',
             'script', 'auto-compiler']
-CLASSIFIERS = ['Development Status :: 3 - Alpha',
+CLASSIFIERS = ['Development Status :: 4 - Beta',
                'Environment :: Console',
                'Topic :: Software Development :: Compilers',
                'Topic :: Software Development :: Build Tools',

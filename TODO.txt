@@ -21,8 +21,17 @@ MAINTAIN
 
 EASY FIX
 
+    Whats up with CYTHER_CONFIG_FILE? Should we use it?
+
+    Make sure a new window doesnt get spawned on the subprocess calls (on some systems it does, some it doesnt)
+
     How to deal with non-standard extensions that people might be using? Don't error, but just have it print that
     it is non standard, and work anyway? What about Regex?
+
+    Update tags
+        take out codacy
+
+    Fix the help text in the readme to not have 'Nothing here yet'
 
 
 MEDIUM FIX
@@ -39,6 +48,10 @@ HARD FIX
 
 
 EASY NEW FEATURES
+
+    Make a --test option in cyther command interface. (Makes testing much easier and quicker)
+
+    Have 'help' text print out all the directories it is using
 
     Get the arguments of run(timer=True) to work properly, or be automatic, like IPython
 
@@ -114,8 +127,6 @@ QUESTIONS (for me to ask myself)
     Is it necessary to make sure that os.pardir will never be a problem??
 
     How about using tempfile for the building files??
-
-    How about packaging cython with cyther? Is this even useful?
 
     What about packaging the libraries with cyther?? Are they cross platform? How to even get these libs?
 

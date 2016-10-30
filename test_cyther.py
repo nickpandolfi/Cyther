@@ -14,4 +14,4 @@ cyther.core('example_file.pyx -e')
 
 cyther.core('-h')
 
-print('All tests have been passed')
+print('<test_cyther.py> All tests have been passed')
