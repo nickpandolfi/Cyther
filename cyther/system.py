@@ -144,7 +144,7 @@ DEFAULT_OUTPUT_EXTENSION = '.pyd' if IS_WINDOWS else '.so'
 PYTHON_EXECUTABLE = where('python')
 CYTHON_EXECUTABLE = where('cython')
 GCC_EXECUTABLE = where('gcc')
-CYTHERIZE_SCRIPT = where('cytherize')
+CYTHERIZE_SCRIPT = where('cytherize.py')
 
 INFO = str()
 INFO += "\nSystem:"

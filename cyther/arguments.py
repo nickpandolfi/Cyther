@@ -22,13 +22,12 @@ help_cython = "Arguments to pass to Cython"
 help_gcc = "Arguments to pass to gcc"
 
 description_text = 'Auto compile and build .pyx or .py files in place.'
-description = description_text
 epilog_text = "{}\nOther Info:\n\tUse '_' or '__' instead of '-' or '--' when passing args to gcc or Cython"
 epilog_text += "\n\tThe ('-x', '-X') and ('-t', '-T') Boolean flags are mutually exclusive"
 epilog = epilog_text.format(INFO)
 formatter = argparse.RawDescriptionHelpFormatter
 
-parser = argparse.ArgumentParser(description=description, epilog=epilog, formatter_class=formatter)
+parser = argparse.ArgumentParser(description=description_text, epilog=epilog, formatter_class=formatter)
 parser.add_argument('filenames', action='store', nargs='+', help=help_filenames)
 parser.add_argument('-c', '--concise', action='store_true', help=help_concise)
 parser.add_argument('-p', '--preset', action='store', default='', help=help_preset)
