@@ -108,7 +108,7 @@ def makeCommands(preset, file):
     """
     commands = [['cython', '-a', '-p', '-o', file['c_name'], file['file_path']],
                 ['gcc', '-c', file['include'], '-o', file['object_file_name'], file['c_name']],
-                ['gcc', '-shared', RUNTIME_STRING, '-o', file['output_name'], file['object_file_name'], L_OPTION]]
+                ['gcc', '-fPIC', '-shared', RUNTIME_STRING, '-o', file['output_name'], file['object_file_name'], L_OPTION]]
 
     return commands
 

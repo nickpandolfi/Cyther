@@ -81,5 +81,6 @@
     Split cyther.py into multiple modules to make everything easier to understand
     Updated setup.cfg to include the correct README
     Implemented entry_points on setup tools to make an executable script
+    TODO
     Implemented a 'makefile' system. This is not the primary method of compilation.
         Instead of directly calling commands, it will make a 'makefile', for later modification if desired
