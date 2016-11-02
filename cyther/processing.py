@@ -1,9 +1,9 @@
 import argparse
 
 from .tools import getFullPath
-from .definitions import *
 from .system import *
 from .arguments import parser
+from .definitions import NOT_NEEDED_MESSAGE
 
 
 def furtherArgsProcessing(args):
