@@ -144,7 +144,6 @@ DEFAULT_OUTPUT_EXTENSION = '.pyd' if IS_WINDOWS else '.so'
 PYTHON_EXECUTABLE = where('python')
 CYTHON_EXECUTABLE = where('cython')
 GCC_EXECUTABLE = where('gcc')
-CYTHERIZE_SCRIPT = where('cytherize.py')
 
 INFO = str()
 INFO += "\nSystem:"
@@ -159,7 +158,7 @@ INFO += '\n'
 INFO += "\n\tCython ({}):".format(CYTHON_EXECUTABLE)
 INFO += "\n\t{}".format(textwrap.indent(call(['cython', '-V'])['output'], '\t'))
 
-INFO += "\n\tCyther ({}):".format(CYTHERIZE_SCRIPT)
+INFO += "\n\tCyther:"
 INFO += "\n\t\tIncludable Header Search Command: {}".format(INCLUDE_STRING)
 INFO += "\n\t\tRuntime Library Search Command: {}".format(RUNTIME_STRING)
 INFO += "\n\t\tRuntime Library Name: {}".format(L_OPTION)

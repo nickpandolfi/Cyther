@@ -6,7 +6,7 @@ from .system import *
 from .arguments import parser
 
 
-def processArgs(args):
+def furtherArgsProcessing(args):
     """
     Converts args, and deals with incongruities that argparse couldn't handle
     Args:
@@ -74,7 +74,7 @@ def processFiles(args):
             file['c_name'] = os.path.join(cache_name, file['file_base_name']) + '.c'
         else:
             file['c_name'] = file['no_extension'] + '.c'
-
+        file['object_file_name'] = os.path.splitext(file['c_name'])[0] + '.o'
         output_name = args['output_name']
         if args['watch']:
             file['output_name'] = file['no_extension'] + DEFAULT_OUTPUT_EXTENSION
@@ -106,80 +106,11 @@ def makeCommands(preset, file):
         file (dict): The file for which to generate these commands for
     Returns (tuple of lists): The commands in which to pass off to the underlying compilers
     """
-    if not preset:
-        preset = 'ninja'
+    commands = [['cython', '-a', '-p', '-o', file['c_name'], file['file_path']],
+                ['gcc', '-c', file['include'], '-o', file['object_file_name'], file['c_name']],
+                ['gcc', '-shared', RUNTIME_STRING, '-o', file['output_name'], file['object_file_name'], L_OPTION]]
 
-    if preset == 'ninja':
-        cython_command = ['cython', '-a', '-p', '-o', file['c_name'], file['file_path']]
-        gcc_command = ['gcc', '-fPIC', '-shared', '-w', '-O3', file['include'], RUNTIME_STRING, '-o',
-                       file['output_name'], file['c_name'], L_OPTION]
-    elif preset == 'beast':
-        cython_command = ['cython', '-a', '-l', '-p', '-o', file['c_name'], file['file_path']]
-        gcc_command = ['gcc', '-fPIC', '-shared', '-Wall', '-O3', file['include'], RUNTIME_STRING, '-o',
-                       file['output_name'], file['c_name'], L_OPTION]
-    elif preset == 'minimal':
-        cython_command = ['cython', '-o', file['c_name'], file['file_path']]
-        gcc_command = ['gcc', '-fPIC', '-shared', file['include'], RUNTIME_STRING, '-o', file['output_name'],
-                       file['c_name'], L_OPTION]
-    elif preset == 'swift':
-        cython_command = ['cython', '-o', file['c_name'], file['file_path']]
-        gcc_command = ['gcc', '-fPIC', '-shared', '-Os', file['include'], RUNTIME_STRING, '-o', file['output_name'],
-                       file['c_name'], L_OPTION]
-    else:
-        raise CytherError("The preset '{}' is not supported".format(preset))
-    return cython_command, gcc_command
-
-
-def convertToDashes(commands):
-    """
-    Converts Cyther's pass off notation to the regular dash notation (_a becomes -a)
-    Args:
-        commands (list|tuple): The unprocessed commands
-    Returns (list): The processed commands
-    """
-    processed = []
-    for command in commands:
-        if command[0] == '_':
-            if command[1] == '_':
-                command = '--' + command[2:]
-            else:
-                command = '-' + command[1:]
-        processed.append(command)
-    return processed
-
-
-def filterCommands(pass_off_commands, commands):
-    """
-    Puts items of pass_off_commands in commands if commands does not already have them
-    Args:
-        pass_off_commands (list|tuple): Commands manually fed to be passed off
-        commands (list): The automatically generate commands to be passed off
-    Returns (list): The processed commands
-    """
-    if pass_off_commands:
-        for item in pass_off_commands:
-            if item[0] == '-':
-                if item not in commands:
-                    commands.append(item)
-
-
-def finalizeCommands(args, file):
-    """
-    Combines a few functions to generate all the commands needed for a specific file
-    Args:
-        args (dict): The compilation wide arguments
-        file (dict): The specific file dict to construct the commands for
-    Returns (tuple of lists): The finalized cython and gcc commands
-    """
-    cython_commands, gcc_commands = makeCommands(args['preset'], file)
-
-    cython_pass_off = convertToDashes(args['cython_args'])
-    gcc_pass_off = convertToDashes(args['gcc_args'])
-
-    filterCommands(cython_pass_off, cython_commands)
-    filterCommands(gcc_pass_off, gcc_commands)
-
-    return cython_commands, gcc_commands
+    return commands
 
 
 def getDirsToInclude(string):

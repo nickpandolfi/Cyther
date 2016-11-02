@@ -5,17 +5,19 @@ except ImportError:
 
 
 NAME = 'Cyther'
-VERSION = '0.8.0.test.a'
+VERSION = '0.8.0.dev.a'
 SHORT_DESCRIPTION = 'The Cross-Platform Cython/Python Compiler'
 LONG_DESCRIPTION = open('README.rst').read()
-PACKAGES = ['cyther']
-SCRIPTS = ['cytherize.py']
-DATA_FILES = [('cyther', ['CHANGELOG.txt', 'README.rst', 'TODO.txt', 'LICENSE.txt'])]
-PLATFORMS = ['Windows', 'MacOS', 'POSIX', 'Unix']
 AUTHOR = 'Nicholas C. Pandolfi'
 AUTHOR_EMAIL = 'npandolfi@wpi.edu'
 URL = 'https://github.com/nickpandolfi/Cyther'
 LICENSE = 'MIT'
+
+PACKAGES = ['cyther']
+ENTRY_POINTS = {'console_scripts': ['cytherize = cyther.__main__:main']}
+DATA_FILES = [('cyther', ['CHANGELOG.txt', 'README.rst', 'TODO.txt', 'LICENSE.txt'])]
+
+PLATFORMS = ['Windows', 'MacOS', 'POSIX', 'Unix']
 KEYWORDS = ['Cyther', 'Cython', 'Python', 'MinGW32',
             'vcvarsall.bat', 'vcvarsall not found',
             'setup.py', 'gcc', 'Python 3',
@@ -41,7 +43,7 @@ setup(name=NAME,
       description=SHORT_DESCRIPTION,
       long_description=LONG_DESCRIPTION,
       packages=PACKAGES,
-      scripts=SCRIPTS,
+      entry_points=ENTRY_POINTS,
       data_files=DATA_FILES,
       platforms=PLATFORMS,
       author=AUTHOR,

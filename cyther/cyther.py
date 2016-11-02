@@ -1,11 +1,11 @@
 # Only those who risk going too far, can truly find out how far one can go
 
 import time
+import re
 
 from .tools import multiCall, printCommands
 from .validation import *
 from .processing import *
-from .arguments import parser
 
 
 def cueExtractAndRun(args, file):
@@ -32,7 +32,8 @@ def initiateCompilation(args, file):
         file (dict): The file to compile
     Returns (dict): The formal response generated from 'multiCall'
     """
-    commands = finalizeCommands(args, file)
+    ####commands = finalizeCommands(args, file)
+    commands = makeCommands(0, file)
     if not args['concise'] and args['print_args']:
         printCommands(*commands)
         if args['watch']:
@@ -176,7 +177,7 @@ def core(args):
         args (str|dict|argparse.Namespace): Polymorphesized arguments to pass to Cyther
     Returns: None
     """
-    args = processArgs(args)
+    args = furtherArgsProcessing(args)
 
     numfiles = len(args['filenames'])
     interval = INTERVAL / numfiles
@@ -190,14 +191,5 @@ def core(args):
             time.sleep(interval)
 
 
-def runAsScript():
-    """
-    Function to run Cyther as a script
-    Returns: None
-    """
-    args = parser.parse_args()
-    core(args)
-
-
 if __name__ == '__main__':
-    raise CytherError('This module is not meant to be run as a script. See cytherize.py for this functionality')
+    raise CytherError('This module is not meant to be run as a script. Try \'cytherize\' for this functionality')
