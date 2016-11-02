@@ -107,8 +107,8 @@ def makeCommands(preset, file):
     Returns (tuple of lists): The commands in which to pass off to the underlying compilers
     """
     commands = [['cython', '-a', '-p', '-o', file['c_name'], file['file_path']],
-                ['gcc', '-c', file['include'], '-o', file['object_file_name'], file['c_name']],
-                ['gcc', '-fPIC', '-shared', RUNTIME_STRING, '-o', file['output_name'], file['object_file_name'], L_OPTION]]
+                ['gcc', '-fPIC', '-c', file['include'], '-o', file['object_file_name'], file['c_name']],
+                ['gcc', '-shared', RUNTIME_STRING, '-o', file['output_name'], file['object_file_name'], L_OPTION]]
 
     return commands
 
