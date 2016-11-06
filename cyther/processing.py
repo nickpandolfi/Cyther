@@ -107,8 +107,8 @@ def makeCommands(preset, file):
     Returns (tuple of lists): The commands in which to pass off to the underlying compilers
     """
     commands = [['cython', '-a', '-p', '-o', file['c_name'], file['file_path']],
-                ['gcc', '-fPIC', '-c', file['include'], '-o', file['object_file_name'], file['c_name']],
-                ['gcc', '-shared', RUNTIME_STRING, '-o', file['output_name'], file['object_file_name'], L_OPTION]]
+    ['gcc', '-DNDEBUG', '-g', '-fwrapv', '-O3', '-Wall', '-pthread', '-fPIC', '-c', file['include'], '-o', file['object_file_name'], file['c_name']],
+    ['gcc', '-pthread', '-shared', RUNTIME_STRING, '-o', file['output_name'], file['object_file_name'], L_OPTION]]
 
     return commands
 
@@ -116,6 +116,7 @@ def makeCommands(preset, file):
 def getDirsToInclude(string):
     """
     Given a string of module names, it will return the 'include' directories essential to their compilation
+    as long as the module has the conventional 'get_include' function.
     Args:
         string (str): A continuous string of modules split by '-'
     Returns (list): Extra include directories to pass into gcc
@@ -131,7 +132,7 @@ def getDirsToInclude(string):
             except ImportError:
                 raise CytherError("The module '{}' does not exist".format(module))
             try:
-                dirs.append('-I {}'.format(eval(module).get_include()))
+                dirs.append('-I{}'.format(eval(module).get_include()))
             except AttributeError:
                 print(NOT_NEEDED_MESSAGE.format(module))
     return dirs
