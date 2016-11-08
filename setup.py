@@ -5,17 +5,17 @@ except ImportError:
 
 
 NAME = 'Cyther'
-VERSION = '0.8.0.dev.a'
+VERSION = '0.8.dev3'
 SHORT_DESCRIPTION = 'The Cross-Platform Cython/Python Compiler'
-LONG_DESCRIPTION = open('README.rst').read()
+LONG_DESCRIPTION = open('cyther/data/README.rst').read()
 AUTHOR = 'Nicholas C. Pandolfi'
 AUTHOR_EMAIL = 'npandolfi@wpi.edu'
 URL = 'https://github.com/nickpandolfi/Cyther'
 LICENSE = 'MIT'
 
 PACKAGES = ['cyther']
+PACKAGE_DATA = {'cyther': ['data/*']}
 ENTRY_POINTS = {'console_scripts': ['cytherize = cyther.__main__:main']}
-DATA_FILES = [('cyther', ['CHANGELOG.txt', 'README.rst', 'TODO.txt', 'LICENSE.txt'])]
 
 PLATFORMS = ['Windows', 'MacOS', 'POSIX', 'Unix']
 KEYWORDS = ['Cyther', 'Cython', 'Python', 'MinGW32',
@@ -43,8 +43,8 @@ setup(name=NAME,
       description=SHORT_DESCRIPTION,
       long_description=LONG_DESCRIPTION,
       packages=PACKAGES,
+      package_data=PACKAGE_DATA,
       entry_points=ENTRY_POINTS,
-      data_files=DATA_FILES,
       platforms=PLATFORMS,
       author=AUTHOR,
       author_email=AUTHOR_EMAIL,

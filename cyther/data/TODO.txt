@@ -1,0 +1,114 @@
+
+MAINTAIN
+
+    Keep __all__ up to date with all the useful functions
+
+    Comment and properly docstring everything
+
+    Keep the -h follow all the other common -h practices
+
+    Make sure that the -h is up to date, including all the version info of all the external features (gcc/Cython)
+
+    Make sure that you constantly search for the assumptions cyther makes
+
+    Make my getIncludeAndRuntime() function is up to date with build_ext in distutils
+
+    Any name cool badges to add? Make sure you got all the recent and useful ones
+    Use http://shields.io/ to generate non changing badges
+
+    Make sure the test_cyther.py file is updated to include the latest features (test everything!)
+
+
+TO-DO (before next version)
+
+    The --test option
+        Add this to the help text
+        Say that if there is an error, to email me the output of this function
+    What is the use of the vcruntime.dll on windows installations? Does it need to be included?
+    Download many different ubuntu and linux or mac operating systems on virtual box to directly test
+    Travis keeps telling me this: 'python: can't open file 'cytherize': [Errno 2] No such file or directory'
+    Make sure a new window doesnt get spawned on the subprocess calls (on some systems it does, some it doesnt)
+    Implement the makefile system
+        But for now make sure it created a file with just commands
+    Make sure that 'cytherize' can be called from the command line correctly
+    Where is the best spot to put the README and all the other files?
+    Fix the help text in the readme to not have 'Nothing here yet'
+        Is there a better way to get the version of gcc?
+    Change the descripting of the readme so that it doesn't say that it is directly a compiler, but a processor instead
+
+EASY FIX
+
+    Whats up with CYTHER_CONFIG_FILE? Should we use it?
+
+MEDIUM FIX
+
+    Fix issue posted on cyther/issues
+        Investigate cold installations and usage of other operating systems
+
+HARD FIX
+
+    Get the operating system dependant flags that are passed to gcc by distutils and inject them when building the
+    preset (see question you posed)
+
+EASY NEW FEATURES
+
+    Get the arguments of run(timer=True) to work properly, or be automatic, like IPython
+
+    Get crawl to find libpython, and also rename crawl to 'what'
+
+
+HARD NEW FEATURES
+
+    Erase Cyther's usage of distutils entirely
+
+    Instead of the include option, have the system automatically detect the python {}.get_include() modules
+
+    Say the search for the directories necessary for the runtime compilation fails, and returns nothing. Then run the
+    crawl algorithm over the whole DRIVE to find a lib file that matches the REGEX definition
+
+
+LOW PRIORITY
+
+    Function to clean a directory of everything 'locally build' related, or move it to a cythercache
+        A function to remove EVERYTHING cyther related
+
+    Always back up the previous compile if there was one. Then if there is an error, don't overwrite it with anything,
+    but instead, keep the backup version. Have the new compilation attempt be built in the __cythercache__ directory
+
+########################################################################################################################
+
+BEFORE DEPLOY (for me)
+
+    Make sure that the version specified makes sense (major.minor.patch)
+
+    Make sure that the README reflects the new interface changes
+
+    Make sure that the CHANGELOG is up to date and includes the current version change
+
+    Delete the comments that are no longer needed. Any junk or temporary commented code should be extracted
+
+    Write a test script that actually tests the whole deal. Have it run every scenario and then
+    USE the actual extension that it makes
+
+
+QUESTIONS (for me to ask myself)
+
+    How to deal with non-standard extensions that people might be using? Don't error, but just have it print that
+    it is non standard, and work anyway? What about Regex?
+
+    Don't have args and file, have only one object with everything in it. Does this even make sense?
+
+    Is it wise to take out the checking procedures with the getIncludeAndRuntime() function. Why are they necessary??
+
+    Would it be possible to automatically send me their __cytherinfo__ variable?
+
+    Will sift ever have to return multiple results for the lib directories??
+
+    What about lines like this platform.platform().strip().lower().startswith('windows')??
+    What do the platform names even look like? Is their structure reliable? Does it need to be?
+
+    Is it necessary to make sure that os.pardir will never be a problem??
+
+    What about packaging the libraries with cyther?? Is cross compiling possible / a good idea?
+
+    What is the difference between os.name and sys.platform and platform.platform?
