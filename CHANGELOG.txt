@@ -80,9 +80,11 @@
     Fixed some PEP8 issues
     Split cyther.py into multiple modules to make everything easier to understand
     Updated setup.cfg to include the correct README
-    Implemented entry_points on setup tools to make an executable script
-    Temporarily disables the -p presets system
+    Implemented entry_points on setup tools to make an executable script instead of doing it manually
+    Temporarily disabled the -p presets system
     Cyther now works in three stages temporarily: cython, compile, link
+    The help text now prints the directories for 'include' and 'runtime' used by cyther
+    Updated test_cyther to correctly call cytherize
     TODO (not yet done)
     Implemented a 'makefile' system. This is not the primary method of compilation.
         Instead of directly calling commands, it will make a 'makefile', for later modification if desired
