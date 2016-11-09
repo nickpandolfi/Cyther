@@ -86,7 +86,7 @@
     The help text now prints the directories for 'include' and 'runtime' used by cyther
     Updated test_cyther to correctly call cytherize
     Reorganized the structure of the package
+    Reworked the 'package_data'
     TODO (not yet done)
-    Reworked the 'package_data' so that the 'data' folder is installed correctly
     Implemented a 'makefile' system. This is not the primary method of compilation.
         Instead of directly calling commands, it will make a 'makefile', for later modification if desired
