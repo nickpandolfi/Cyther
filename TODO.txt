@@ -21,20 +21,21 @@ MAINTAIN
 
 TO-DO (before next version)
 
-    The --test option
-        Add this to the help text
-        Say that if there is an error, to email me the output of this function
-    What is the use of the vcruntime.dll on windows installations? Does it need to be included?
     Download many different ubuntu and linux or mac operating systems on virtual box to directly test
-    Travis keeps telling me this: 'python: can't open file 'cytherize': [Errno 2] No such file or directory'
+    FFS figure out how to get admin priviliges so that the install_test can be run directly...
+
+    The --test option. Make it and add it to the help text
+    What is the use of the vcruntime.dll on windows installations? Does it need to be included?
     Make sure a new window doesnt get spawned on the subprocess calls (on some systems it does, some it doesnt)
     Implement the makefile system
         But for now make sure it created a file with just commands
-    Make sure that 'cytherize' can be called from the command line correctly
-    Where is the best spot to put the README and all the other files?
+    Is there a better way to get the version of gcc / basic information?
+
     Fix the help text in the readme to not have 'Nothing here yet'
-        Is there a better way to get the version of gcc?
     Change the descripting of the readme so that it doesn't say that it is directly a compiler, but a processor instead
+    Say that if there is an error, to email me the output of the '--test' option
+
+    Get travis to run a very specific testing file!
 
 EASY FIX
 
