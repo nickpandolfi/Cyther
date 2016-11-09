@@ -75,14 +75,15 @@
     Added linereader to the packages included
 
 0.8.0
-    Added additional help texts to aid in testing
+    A bunch of bug fixes and internal problem solving:
+
     Cut out unnecssary junk in the help text (gcc configurations)
     Fixed some PEP8 issues
     Split cyther.py into multiple modules to make everything easier to understand
     Updated setup.cfg to include the correct README
     Implemented entry_points on setup tools to make an executable script instead of doing it manually
     Temporarily disabled the -p presets system
-    Cyther now works in three stages temporarily: cython, compile, link
+    Cyther now works in three stages: cython, compile, link
     The help text now prints the directories for 'include' and 'runtime' used by cyther
     Updated test_cyther to correctly call cytherize
     Reorganized the structure of the package

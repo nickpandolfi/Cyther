@@ -15,6 +15,7 @@ LICENSE = 'MIT'
 
 PACKAGES = ['cyther']
 PACKAGE_DATA = {'cyther': ['../*.txt', '../README.rst']}
+
 ENTRY_POINTS = {'console_scripts': ['cytherize = cyther.__main__:main']}
 
 PLATFORMS = ['Windows', 'MacOS', 'POSIX', 'Unix']
