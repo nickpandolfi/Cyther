@@ -18,11 +18,20 @@ MAINTAIN
 
     Make sure the test_cyther.py file is updated to include the latest features (test everything!)
 
+STATUS
+
+    pip on xubuntu's venv is installing packages into the global python dist
+        Make it install locally instead
+
 
 TO-DO (before next version)
 
-    Download many different ubuntu and linux or mac operating systems on virtual box to directly test
+    How to tell travis what the script is
+    Follow as many conventions as possible in the bookmark 'PYPI tutorial'
     FFS figure out how to get admin priviliges so that the install_test can be run directly...
+        use --user??
+        If this works, make a seperate from_pypi file to do the opposite
+        Or change the to_pypi to just pypi, and have both functionalities in there
 
     The --test option. Make it and add it to the help text
     What is the use of the vcruntime.dll on windows installations? Does it need to be included?
