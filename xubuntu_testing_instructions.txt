@@ -1,15 +1,16 @@
 
-1) Install xubuntu
+1) Install xubuntu on virtual box
 2) Open terminal @ home ('cd')
 3) 'sudo apt install python3-venv'
+	Type in password
 4) 'mkdir testing'
 5) 'cd testing'
 6) 'sudo pyvenv cyther_test'
-7) 'sudo chown -R npandolfi:npandolfi testing/cyther_test'
+7) 'sudo chown -R npandolfi:npandolfi cyther_test'
 8) 'cd cyther_test/bin'
 9) 'source activate'
-10) 'pip install --user cython'
-11) 'pip install --user -i https://testpypi.python.org/pypi cyther'
+10) 'pip install cython'
+11) 'pip install -i https://testpypi.python.org/pypi cyther'
 
 Note: Line #7 has to be done when virtualenv is installed with sudo.
       If virtualenv is somehow NOT installed with sudo, then this is unnecessary.
