@@ -5,7 +5,7 @@ except ImportError:
 
 
 NAME = 'Cyther'
-VERSION = '0.8.dev5'
+VERSION = '0.8.dev6'
 SHORT_DESCRIPTION = 'The Cross-Platform Cython/Python Compiler'
 LONG_DESCRIPTION = open('README.rst').read()
 AUTHOR = 'Nicholas C. Pandolfi'

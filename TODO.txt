@@ -18,56 +18,47 @@ MAINTAIN
 
     Make sure the test_cyther.py file is updated to include the latest features (test everything!)
 
-STATUS
-
-    pip on xubuntu's venv is installing packages into the global python dist
-        Make it install locally instead
-
 
 TO-DO (before next version)
 
-    How to tell travis what the script is
-    Follow as many conventions as possible in the bookmark 'PYPI tutorial'
-    FFS figure out how to get admin priviliges so that the install_test can be run directly...
-        use --user??
-        If this works, make a seperate from_pypi file to do the opposite
-        Or change the to_pypi to just pypi, and have both functionalities in there
+    HELP TEXT:
+        Have cyther's help text print its version!
+            Whats the best way to do this?
+        Is there a better way to get the version of gcc / basic information?
+        The '--test' option. Make it and add it to the help text
 
-    The --test option. Make it and add it to the help text
-    What is the use of the vcruntime.dll on windows installations? Does it need to be included?
-    Make sure a new window doesnt get spawned on the subprocess calls (on some systems it does, some it doesnt)
-    Implement the makefile system
-        But for now make sure it created a file with just commands
-    Is there a better way to get the version of gcc / basic information?
+    DEPLOYMENT:
+        How to tell travis what the script is
+        Follow as many conventions as possible in the bookmark 'PYPI tutorial'
+            Make a requirements list in setup.py (setuptools + cython)
 
-    Fix the help text in the readme to not have 'Nothing here yet'
-    Change the descripting of the readme so that it doesn't say that it is directly a compiler, but a processor instead
-    Say that if there is an error, to email me the output of the '--test' option
+    TECHNICAL:
+        What is the use of the vcruntime.dll on windows installations? Does it need to be included?
+        Make sure a new window doesnt get spawned on the subprocess calls (on some systems it does, some it doesnt)
+        Implement the makefile system
+            But for now make sure it created a file with just commands
+        Get it working on Xubuntu ---> should cascade fix many other errors
 
-    Get travis to run a very specific testing file!
+    README:
+        Fix the help text in the readme to not have 'Nothing here yet'
+        Change the descripting of the readme so that it doesn't say that it is directly a compiler, but a processor instead
+        Say that if there is an error, to email me the output of the '--test' option
 
-EASY FIX
+FIX
 
     Whats up with CYTHER_CONFIG_FILE? Should we use it?
-
-MEDIUM FIX
 
     Fix issue posted on cyther/issues
         Investigate cold installations and usage of other operating systems
 
-HARD FIX
-
     Get the operating system dependant flags that are passed to gcc by distutils and inject them when building the
     preset (see question you posed)
 
-EASY NEW FEATURES
+NEW FEATURES
 
     Get the arguments of run(timer=True) to work properly, or be automatic, like IPython
 
     Get crawl to find libpython, and also rename crawl to 'what'
-
-
-HARD NEW FEATURES
 
     Erase Cyther's usage of distutils entirely
 

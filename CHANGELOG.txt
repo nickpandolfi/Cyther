@@ -88,6 +88,7 @@
     Updated test_cyther to correctly call cytherize
     Reorganized the structure of the package
     Reworked the 'package_data'
+    Cyther is now being locally tested on xubuntu
     TODO (not yet done)
     Implemented a 'makefile' system. This is not the primary method of compilation.
         Instead of directly calling commands, it will make a 'makefile', for later modification if desired

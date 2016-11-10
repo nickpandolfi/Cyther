@@ -2,12 +2,13 @@
 __cythercache__/
 .idea/
 /DO_NOT_DISTRIBUTE.txt
-/to_pypi.py
+/pypi.py
 /import_cyther.py
 /cyther/script.py
 /example_file.c
 /example_file.html
 /example_file.lis
+/xubuntu_testing_instructions.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
