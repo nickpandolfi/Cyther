@@ -4,7 +4,7 @@ __cythercache__/
 /DO_NOT_DISTRIBUTE.txt
 /pypi.py
 /import_cyther.py
-/cyther/script.py
+/script.py
 /example_file.c
 /example_file.html
 /example_file.lis

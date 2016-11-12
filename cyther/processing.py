@@ -15,7 +15,7 @@ def furtherArgsProcessing(args):
     """
     if isinstance(args, str):
         unprocessed = args.strip().split(' ')
-        if unprocessed[0] == 'cytherize' or unprocessed[0] == 'cyther':
+        if unprocessed[0] == 'cyther':
             del unprocessed[0]
         args = parser.parse_args(unprocessed).__dict__
     elif isinstance(args, argparse.Namespace):
@@ -24,16 +24,6 @@ def furtherArgsProcessing(args):
         pass
     else:
         raise CytherError("Args must be a instance of str or argparse.Namespace, not '{}'".format(str(type(args))))
-
-    if args['X']:
-        args['execute'] = True
-        args['timestamp'] = True
-        args['watch'] = True
-
-    if args['T']:
-        args['timer'] = True
-        args['timestamp'] = True
-        args['watch'] = True
 
     if args['watch']:
         args['timestamp'] = True

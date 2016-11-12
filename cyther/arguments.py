@@ -1,4 +1,5 @@
 import argparse
+from .actions import info, configure, test, setup, make, clean, purge
 
 help_info = "Prints the information regarding cyther's installation and environment. Returns helpful info on" \
             "the compilers used and all the current build settings, then exits"
@@ -19,16 +20,33 @@ description_text = "Auto compile and build .pyx, .py, or .c files in-place"
 formatter = argparse.RawDescriptionHelpFormatter  # Any others to use? Why did I choose this one?
 parser = argparse.ArgumentParser(description=description_text, formatter_class=formatter)
 
+
+
+
+
+
+
+
+
+
 commands = parser.add_subparsers()
+
+# $$$$$$$$$$ COMMANDS FOR INFO $$$$$$$$$$
 info_parser = commands.add_parser('info', help=help_info)
+info_parser.set_defaults(func=info)
+# Empty as of now
+
+# $$$$$$$$$$ COMMANDS FOR CONFIGURE $$$$$$$$$$
 configure_parser = commands.add_parser('configure', help=help_configure)
+# Empty as of now
+
+# $$$$$$$$$$ COMMANDS FOR TEST $$$$$$$$$$
 test_parser = commands.add_parser('test', help=help_test)
-setup_parser = commands.add_parser('setup', help=help_setup)
-make_parser = commands.add_parser('make', help=help_make)
-clean_parser = commands.add_parser('clean', help=help_clean)
-purge_parser = commands.add_parser('purge', help=help_purge)
+# Empty as of now
 
 # $$$$$$$$$$ COMMANDS FOR SETUP $$$$$$$$$$
+setup_parser = commands.add_parser('setup', help=help_setup)
+
 help_filenames = "The Cython source file(s)"
 setup_parser.add_argument('filenames',
                           action='store',
@@ -41,10 +59,10 @@ setup_parser.add_argument('--preset',
                           default='',
                           help=help_preset)
 
-help_output_name = 'Change the name of the output file, default is basename plus .pyd'
-setup_parser.add_argument('--output_name',
+help_output = 'Change the name of the output file, default is basename plus .pyd'
+setup_parser.add_argument('--output',
                           action='store',
-                          help=help_output_name)
+                          help=help_output)
 
 help_include = 'The names of the python modules that have an include library that needs to be passed to gcc'
 setup_parser.add_argument('--include',
@@ -69,6 +87,7 @@ setup_parser.add_argument('--cython',
                           help=help_cython)
 
 # $$$$$$$$$$ COMMANDS FOR MAKE $$$$$$$$$$
+make_parser = commands.add_parser('make', help=help_make)
 
 help_concise = "Get cyther to NOT print what it is thinking. Only use if you like to live on the edge"
 make_parser.add_argument('--concise',
@@ -103,6 +122,14 @@ execution_system.add_argument('--timeit',
                               dest='timer',
                               help=help_timer)
 
+# $$$$$$$$$$ COMMANDS FOR CLEAN $$$$$$$$$$
+clean_parser = commands.add_parser('clean', help=help_clean)
+# Empty as of now
+
+# $$$$$$$$$$ COMMANDS FOR PURGE $$$$$$$$$$
+purge_parser = commands.add_parser('purge', help=help_purge)
+# Empty as of now
+
 
 """
 Unsure:
@@ -110,10 +137,9 @@ Unsure:
                      'not been modified since last compile'
     make_parser.add_argument('--timestamp', action='store_true', help=help_timestamp)
 
-
 """
 
 if __name__ == '__main__':
-    ergs = ['setup', '-h']
+    ergs = ['info']
     parsed_ergs = parser.parse_args(ergs)
     print(parsed_ergs)
