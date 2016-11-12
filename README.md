@@ -11,6 +11,7 @@
 
 ![travis](https://secure.travis-ci.org/nickpandolfi/Cyther.png)
 ![codacy](https://api.codacy.com/project/badge/grade/a26189501a8e4086ac0eda51de5fd752)
+![github](https://img.shields.io/github/stars/badges/shields.svg?style=social&label=Star)
 
 #### We all know the beauties of Cython:
 
@@ -29,6 +30,9 @@
 >2) gcc: undefined reference to...
 >
 >3) Other errors basically referring to `compiler not found`
+
+Python's distutils library is weakly defined when it comes to it's `build_ext` functionality. On windows specifically,
+there are many errors
 
 Cython may be almost as easy to write as Python, but sometimes nowhere near the level of easiness that it
 takes to run Python. *This is where Cyther comes into play*. Cyther is an attempt at a cross platform compiler

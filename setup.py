@@ -3,9 +3,9 @@ try:
 except ImportError:
     from distutils.core import setup
 
-
 NAME = 'Cyther'
-VERSION = '0.8.dev6'
+VERSION = '0.8.dev9'
+INSTALL_REQUIRES = ['cython']
 SHORT_DESCRIPTION = 'The Cross-Platform Cython/Python Compiler'
 LONG_DESCRIPTION = open('README.rst').read()
 AUTHOR = 'Nicholas C. Pandolfi'
@@ -16,7 +16,7 @@ LICENSE = 'MIT'
 PACKAGES = ['cyther']
 PACKAGE_DATA = {'cyther': ['../*.txt', '../README.rst']}
 
-ENTRY_POINTS = {'console_scripts': ['cytherize = cyther.__main__:main']}
+ENTRY_POINTS = {'console_scripts': ['cyther = cyther.__main__:main']}
 
 PLATFORMS = ['Windows', 'MacOS', 'POSIX', 'Unix']
 KEYWORDS = ['Cyther', 'Cython', 'Python', 'MinGW32',
@@ -41,6 +41,7 @@ CLASSIFIERS = ['Development Status :: 4 - Beta',
 
 setup(name=NAME,
       version=VERSION,
+      install_requires=INSTALL_REQUIRES,
       description=SHORT_DESCRIPTION,
       long_description=LONG_DESCRIPTION,
       packages=PACKAGES,

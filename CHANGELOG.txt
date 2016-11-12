@@ -89,6 +89,11 @@
     Reorganized the structure of the package
     Reworked the 'package_data'
     Cyther is now being locally tested on xubuntu
+    Stopped deploying the rst readme
+    Included cython in the install_requirements
+    Deleted the 'super-flags'. Probably not a very good practice...
+    Changed the signature of argparser. Now vastly superior to the previous model.
+        Reformatted the arguments.py file to be easier to read
     TODO (not yet done)
     Implemented a 'makefile' system. This is not the primary method of compilation.
         Instead of directly calling commands, it will make a 'makefile', for later modification if desired
