@@ -1,14 +1,11 @@
 import sys
-from .cyther import core
 from .arguments import parser
 
 
-def main(initialArgs=None):
-    if initialArgs is None:
-        initialArgs = sys.argv[1:]
-    args = parser.parse_args(initialArgs)
-
-    core(args)
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+    parser.parse_args(args)
 
 
 if __name__ == '__main__':

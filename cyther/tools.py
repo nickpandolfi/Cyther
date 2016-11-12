@@ -17,6 +17,20 @@ except ImportError:
     raise CytherError("The current version of Python doesn't support the function 'which', normally located in shutil")
 
 
+def commandsFromFile(filename):
+    with open(filename, 'r') as file:
+        lines = file.readlines()
+    #to be updated with more functionality to mimic GNU's 'makefile' system
+    return lines
+
+
+def commandsToFile(filename, commands):
+    with open(filename, 'w+') as file:
+        chars = file.write(commands.join('\n'))
+    #to be updated with more functionality to mimic GNU's 'makefile' system
+    return chars
+
+
 def where(cmd, path=None):
     """
     A function to wrap shutil.which for universal usage

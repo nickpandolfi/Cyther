@@ -1,6 +1,7 @@
 # I'm just a small-town (girl) initialization file
 
 from .cyther import *
+from .actions import *
 
 __author__ = 'Nicholas C. Pandolfi'
 
