@@ -1,4 +1,4 @@
 import cyther
 
-ret = cyther.core('info')
-print(ret)
+
+cyther.configure(yolo=True, icons='poop')

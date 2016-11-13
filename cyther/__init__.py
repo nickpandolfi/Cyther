@@ -3,33 +3,16 @@
 from .cyther import *
 from .actions import *
 
-__author__ = 'Nicholas C. Pandolfi'
+__author__ = "Nicholas C. Pandolfi"
 
-__all__ = ['core', 'CytherError', 'run', 'runAsScript',
-           'call', 'multiCall',
-           'where', 'which']
+__copyright__ = "Copyright (c) 2016 Nicholas C. Pandolfi"
 
-__license__ = '''
-Copyright (c) 2016 Nicholas C. Pandolfi ALL RIGHTS RESERVED (MIT)
+__credits__ = "Stack Exchange"
 
-Permission is hereby granted, free of charge, to any person
-obtaining a copy of this software and associated documentation
-files (the "Software"), to deal in the Software without
-restriction, including without limitation the rights to use,
-copy, modify, merge, publish, distribute, sublicense, and/or
-sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
+__all__ = ['core', 'CytherError', 'run', 'runAsScript', 'call', 'multiCall', 'where', 'which']
 
-The above copyright notice and this permission notice shall
-be included in all copies or substantial portions of the Software.
+__license__ = "MIT"
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
-'''
+__email__ = "npandolfi@wpi.edu"
 
+__status__ = "Development"
