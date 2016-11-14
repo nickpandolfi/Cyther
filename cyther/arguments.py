@@ -1,5 +1,7 @@
+
 import argparse
-from .actions import info, configure, test, setup, make, clean, purge
+from .commands import info, configure, test, setup, make, clean, purge
+
 
 help_info = "Prints the information regarding cyther's installation and environment. Returns helpful info on" \
             "the compilers used and all the current build settings, then exits"
@@ -26,9 +28,6 @@ parser = argparse.ArgumentParser(description=description_text, formatter_class=f
 
 
 
-
-
-
 commands = parser.add_subparsers()
 
 # $$$$$$$$$$ COMMANDS FOR INFO $$$$$$$$$$
@@ -41,6 +40,7 @@ info_parser.set_defaults(func=info)
 
 # $$$$$$$$$$ COMMANDS FOR CONFIGURE $$$$$$$$$$
 configure_parser = commands.add_parser('configure', help=help_configure)
+configure_parser.set_defaults(func=configure)
 # Empty as of now
 
 
@@ -48,6 +48,7 @@ configure_parser = commands.add_parser('configure', help=help_configure)
 
 # $$$$$$$$$$ COMMANDS FOR TEST $$$$$$$$$$
 test_parser = commands.add_parser('test', help=help_test)
+test_parser.set_defaults(func=test)
 # Empty as of now
 
 
@@ -55,6 +56,7 @@ test_parser = commands.add_parser('test', help=help_test)
 
 # $$$$$$$$$$ COMMANDS FOR SETUP $$$$$$$$$$
 setup_parser = commands.add_parser('setup', help=help_setup)
+setup_parser.set_defaults(func=setup)
 help_filenames = "The Cython source file(s)"
 setup_parser.add_argument('filenames', action='store', nargs='+', help=help_filenames)
 help_preset = 'The preset options for using cython and gcc (ninja, beast, minimal, swift)'
@@ -73,6 +75,7 @@ setup_parser.add_argument('--cython', action='store', nargs='+', dest='cython_ar
 
 # $$$$$$$$$$ COMMANDS FOR MAKE $$$$$$$$$$
 make_parser = commands.add_parser('make', help=help_make)
+make_parser.set_defaults(func=make)
 help_concise = "Get cyther to NOT print what it is thinking. Only use if you like to live on the edge"
 make_parser.add_argument('--concise', action='store_true', help=help_concise)
 help_local = 'When not flagged, builds in __cythercache__, when flagged, it builds locally in the same directory'
@@ -93,6 +96,7 @@ execution_system.add_argument('--timeit', action='store_true', dest='timer', hel
 
 # $$$$$$$$$$ COMMANDS FOR CLEAN $$$$$$$$$$
 clean_parser = commands.add_parser('clean', help=help_clean)
+clean_parser.set_defaults(func=clean)
 # Empty as of now
 
 
@@ -100,6 +104,7 @@ clean_parser = commands.add_parser('clean', help=help_clean)
 
 # $$$$$$$$$$ COMMANDS FOR PURGE $$$$$$$$$$
 purge_parser = commands.add_parser('purge', help=help_purge)
+purge_parser.set_defaults(func=purge)
 # Empty as of now
 
 
@@ -110,8 +115,3 @@ Unsure:
     make_parser.add_argument('--timestamp', action='store_true', help=help_timestamp)
 
 """
-
-if __name__ == '__main__':
-    ergs = ['info']
-    parsed_ergs = parser.parse_args(ergs)
-    print(parsed_ergs)

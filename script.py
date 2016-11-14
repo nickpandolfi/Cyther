@@ -1,4 +1,4 @@
-import cyther
+from cyther import *
 
 
-cyther.configure(yolo=True, icons='poop')
+purge()

@@ -1,7 +1,9 @@
 import subprocess
+import os
 
 """
 TO USE BDIST_WHEEL YOU MUST HAVE THE MODULE 'WHEEL' INSTALLED
+MUST INSTALL PANDOC: Go to 'http://pandoc.org/' and download the installer > This is not a python module!!!
 Use python --user pypi.py to upload?????
 """
 
@@ -19,9 +21,15 @@ if push_or_pull == 'push':
 
     result = 'pypitest' if response == 'test' else 'pypi'
 
+    subprocess.call(['pandoc', 'README.md', '-f', 'markdown',
+                     '-t', 'rst', '-o', 'README.txt'])
+
     subprocess.call(['python', 'setup.py', 'sdist', '--formats=zip,gztar', 'bdist_wheel', 'bdist_wininst',
                      'check', 'upload', '-r', result])
+
+    os.remove('README.txt')
 
 else:
     subprocess.call(['pip', 'uninstall', 'cyther'])
     subprocess.call(['pip', 'install', '-i', 'https://testpypi.python.org/pypi', 'cyther'])
+

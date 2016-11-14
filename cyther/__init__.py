@@ -1,15 +1,13 @@
 # I'm just a small-town (girl) initialization file
 
-from .cyther import *
-from .actions import *
+from .cyther import core, CytherError, run, call, multiCall, where
+from .commands import info, configure, test, setup, make, clean, purge
 
 __author__ = "Nicholas C. Pandolfi"
 
 __copyright__ = "Copyright (c) 2016 Nicholas C. Pandolfi"
 
 __credits__ = "Stack Exchange"
-
-__all__ = ['core', 'CytherError', 'run', 'runAsScript', 'call', 'multiCall', 'where', 'which']
 
 __license__ = "MIT"
 

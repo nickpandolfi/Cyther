@@ -4,6 +4,7 @@ import re
 import sys
 import traceback
 import subprocess
+import argparse
 
 
 class CytherError(Exception):
@@ -15,6 +16,15 @@ try:
     from shutil import which
 except ImportError:
     raise CytherError("The current version of Python doesn't support the function 'which', normally located in shutil")
+
+
+def polymorph(func):
+    def wrapped(*args, **kwargs):
+        if kwargs:
+            args = argparse.Namespace()
+            args.__dict__.update(kwargs)
+        return func(args)
+    return wrapped
 
 
 def commandsFromFile(filename):

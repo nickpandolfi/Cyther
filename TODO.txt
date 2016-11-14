@@ -24,26 +24,21 @@ TO-DO (before next version)
     HELP TEXT:
         Have cyther's help text print its version!
             Whats the best way to do this?
-        Is there a better way to get the version of gcc / basic information?
-        The '--test' option. Make it and add it to the help text
 
     DEPLOYMENT:
+        Figure out how to do a github release!
+        Is it possible to webhook pypi into github??
         Keep an eye on Code Climate, Travis, and CodeShip!!
-        Put in downloads per day tag!
-        How to tell travis what the script is
         Follow as many conventions as possible in the bookmark 'PYPI tutorial'
-            Make a requirements list in setup.py (setuptools + cython)
 
     DOCS:
-        Find the best format for the docstrings that is the most universal
-            Sphinx?? What format does it use
-        Make all documentation more readable and helpful
+        Find the best format for the docstrings that is the most universal (What does sphinx use?)
+            Make all documentation more readable and helpful
         Put a basic overview docstring at the beginning of each file (what is each file for?)
 
     TECHNICAL:
         Make cytherize and getIncludeAndRuntime shorter
             Change the name of cytherize to something more meaningful
-        Why does travis keep telling me "No such file or directory: 'cytherize'"
         What is the use of the vcruntime.dll on windows installations? Does it need to be included?
         Make sure a new window doesnt get spawned on the subprocess calls (on some systems it does, some it doesnt)
         Implement the makefile system
@@ -71,20 +66,10 @@ FIX
 
 NEW FEATURES
 
-    What about Magnum CI and Circle CI and other methods for continuous integration
-
     Have the CYTHER_CONFIG_FILE hold the paths to the compiler executables!
         Then, it may be ok to not have gcc in the path, and thus a seperate and private gcc can be used
 
     So for this ^ we need a massive function to search through the drive as far as possible and implement regex patterns
-
-    Flag names for condiferation:
-        cyther --configure :: Triggers the compiler search AGAIN
-        cyther --setup :: Sets up the base 'makefile'. Errors if the makefile exists, asks to overwrite.
-        cyther --make :: Just like GNU's 'make' command. Takes a optional argument of the name of the file to run.
-        cyther --test :: Runs the testing script. Returns tons of information.
-        cyther --help :: Prints the help text
-        cyther --purge :: Cleans the current directory of anything 'cyther' related. Deletes the cache.
 
     BUT HOW TO THE INDIVIDUAL CYTHER OPTIONS FIT INTO THE MAKEFILE SYSTEM?
 
@@ -131,6 +116,8 @@ BEFORE DEPLOY (for me)
 
 
 QUESTIONS (for me to ask myself)
+
+    Is there a better way to get the version of gcc / basic information?
 
     How to deal with non-standard extensions that people might be using? Don't error, but just have it print that
     it is non standard, and work anyway? What about Regex?

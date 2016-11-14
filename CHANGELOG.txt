@@ -95,6 +95,7 @@
     Changed the signature of argparser. Now vastly superior to the previous model.
         Reformatted the arguments.py file to be easier to read
     Implemented an 'actions' file for the arguments to call directly!
+    Updated README badges to include links to build utilities and display more useful stuff
     TODO (not yet done)
     Implemented a 'makefile' system. This is not the primary method of compilation.
         Instead of directly calling commands, it will make a 'makefile', for later modification if desired
