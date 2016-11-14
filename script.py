@@ -1,4 +1,0 @@
-from cyther import *
-
-
-purge()
