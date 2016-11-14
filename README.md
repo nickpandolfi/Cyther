@@ -166,7 +166,6 @@ to a minimum. Future plans can be found in the `TODO.txt` I have included with t
 Python's standard distutils library is weakly defined when it comes to it's `build_ext` functionality *(big claim? Look at the code for yourself)*. On windows specifically, there are many errors that never seem to be addressed regarding finding and using Microsoft Visual C++ redistributables. StackOverflow is littered with these kinds of errors, piling duplicate question on duplicate question. In many instances, as I believe I had mentioned before, there are many underlying causes to these errors, and the individual errors tell you absolutely nothing about the problem. Getting to the bottom of it was what inspired me to write Cyther.
 
 Cyther is my humble attempt* at bridging this gap, and still offering a piece of software that a beginner to Python can use. I intend for Cyther to be used by people who simply want to compile a set of files for their own use. Cyther explicitly avoids distutils' esoteric compilation system. *(I know, I really live on the edge huh?)*
-<sub><sup> *Please have mercy on my soul. Thanks in advance. </sup></sub>
 
 #### Contact + Reporting Info
 
@@ -181,4 +180,4 @@ If you have any questions or concerns, or even any suggestions, don't hesitate t
 
 *Happy compiling! - Nick*
 
-<sub><sup> Choking hazard. Small parts. Not for children under 3 years. </sup></sub>
+###### *Choking hazard. Small parts. Not for children under 3 years of age.*
