@@ -4,7 +4,7 @@ except ImportError:
     from distutils.core import setup
 
 NAME = 'Cyther'
-VERSION = '0.8.dev15'
+VERSION = '0.8.dev16'
 INSTALL_REQUIRES = ['cython']
 SHORT_DESCRIPTION = 'The Cross-Platform Cython/Python Compiler'
 LONG_DESCRIPTION = open('README.txt').read()
