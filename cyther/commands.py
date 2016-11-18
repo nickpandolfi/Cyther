@@ -52,16 +52,20 @@ def purge(args):
             print("Listing local '__cythercache__':")
             cache_dir = os.path.join(os.getcwd(), "__cythercache__")
             to_delete = []
-            for filename in os.listdir(cache_dir):
-                print('\t' + filename)
-                filepath = os.path.join(cache_dir, filename)
-                to_delete.append(filepath)
+            contents = os.listdir(cache_dir)
+            if contents:
+                for filename in contents:
+                    print('\t' + filename)
+                    filepath = os.path.join(cache_dir, filename)
+                    to_delete.append(filepath)
+            else:
+                print("\tNothing was found in the cache")
 
             check_response = getResponse("Delete all these files? (^) [y/n]: ", ('y', 'n'))
             if check_response == 'y':
                 for filepath in to_delete:
                     os.remove(filepath)
-                os.remove(cache_dir)
+                os.rmdir(cache_dir)
             else:
                 print("Skipping the deletion... all files are fine!")
         else:
