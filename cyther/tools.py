@@ -18,6 +18,19 @@ except ImportError:
     raise CytherError("The current version of Python doesn't support the function 'which', normally located in shutil")
 
 
+def getResponse(message, acceptableResponses):
+    if isinstance(acceptableResponses, str):
+        acceptableResponses = (acceptableResponses,)
+    else:
+        if not isinstance(acceptableResponses, tuple):
+            raise ValueError("Argument 'acceptableResponses' cannot be of type: '{}'".format(type(acceptableResponses)))
+
+    response = input(message)
+    while response not in acceptableResponses:
+        response = input(message)
+    return response
+
+
 def polymorph(func):
     def wrapped(*args, **kwargs):
         if kwargs:

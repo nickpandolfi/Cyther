@@ -1,6 +1,6 @@
 from .test_cyther import test_cyther
 from .system import INFO
-from .tools import polymorph
+from .tools import polymorph, getResponse
 import os
 
 """
@@ -9,7 +9,6 @@ by the parser, and parser always passes a 'args' variable in.
 """
 
 
-@polymorph
 def info(args):
     print(INFO)
     exit()
@@ -25,13 +24,16 @@ def test(args):
     test_cyther()
 
 
-@polymorph
 def setup(args):
     pass
 
 
-@polymorph
 def make(args):
+    pass
+
+
+@polymorph
+def build(args):
     pass
 
 
@@ -43,3 +45,26 @@ def clean(args):
 @polymorph
 def purge(args):
     print('Current Directory: {}'.format(os.getcwd()))
+    directories = os.listdir(os.getcwd())
+    if '__cythercache__' in directories:
+        response = getResponse("Would you like to delete the cache and everything in it? [y/n]: ", ('y', 'n'))
+        if response == 'y':
+            print("Listing local '__cythercache__':")
+            cache_dir = os.path.join(os.getcwd(), "__cythercache__")
+            to_delete = []
+            for filename in os.listdir(cache_dir):
+                print('\t' + filename)
+                filepath = os.path.join(cache_dir, filename)
+                to_delete.append(filepath)
+
+            check_response = getResponse("Delete all these files? (^) [y/n]: ", ('y', 'n'))
+            if check_response == 'y':
+                for filepath in to_delete:
+                    os.remove(filepath)
+                os.remove(cache_dir)
+            else:
+                print("Skipping the deletion... all files are fine!")
+        else:
+            print("Skipping deletion of the cache")
+    else:
+        print("Couldn't find a cache file ('__cythercache__') in this directory")
