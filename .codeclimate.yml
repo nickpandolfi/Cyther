@@ -1,0 +1,21 @@
+engines:
+  pep8:
+    enabled: true
+
+  radon:
+    enabled: true
+
+  duplication:
+    enabled: true
+    config:
+      languages:
+        python:
+          python_version: 3
+
+  markdownlint:
+    enabled: true
+
+ratings:
+  paths:
+  - "cyther/**"
+  - "**.py"

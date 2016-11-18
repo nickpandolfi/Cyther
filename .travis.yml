@@ -13,3 +13,7 @@ install:
 script:
     - cyther test
     - nosetests
+
+addons:
+    code_climate:
+        repo_token: ae8d1b63b7724a600b288f65a174ebb635d5f86472f6786181be82075a02b9c3
