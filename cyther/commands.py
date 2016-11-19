@@ -1,12 +1,23 @@
 from .test_cyther import test_cyther
 from .system import INFO
-from .tools import polymorph, getResponse
+from .tools import getResponse
+
 import os
+import argparse
 
 """
 Each function must have the parameter 'args', even if they do not use it. This is because they can be called
 by the parser, and parser always passes a 'args' variable in.
 """
+
+
+def polymorph(func):
+    def wrapped(*args, **kwargs):
+        if kwargs:
+            args = argparse.Namespace()
+            args.__dict__.update(kwargs)
+        return func(args)
+    return wrapped
 
 
 def info(args):

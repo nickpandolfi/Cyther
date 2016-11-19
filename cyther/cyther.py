@@ -47,7 +47,8 @@ def initiateCompilation(args, file):
 
 def cytherize(args, file):
     """
-    Used by core to integrate all the pieces of information, and to interface with the user. Compiles and cleans up.
+    Used by core to integrate all the pieces of information, and to interface
+    with the user. Compiles and cleans up.
     Args:
         args (dict): Compile wide arguments to use
         file (dict): The file to compile
@@ -64,22 +65,25 @@ def cytherize(args, file):
         else:
             response = initiateCompilation(args, file)
 
-    ####################################################################################################################
+    ##########################################################################
 
     time.sleep(INTERVAL)
     if response['returncode'] == ERROR_PASSOFF:
         file['stamp_if_error'] = time.time()
         if args['watch']:
             if len(args['filenames']) > 1:
-                output = "Error in file: '{}'; Cyther will wait until it is fixed...\n".format(file['file_path'])
+                output = "Error in file: '{}'; Cyther will wait until it is" \
+                         "fixed...\n".format(file['file_path'])
             else:
-                output = "Cyther will wait for you to fix this error before it tries to compile again...\n"
+                output = "Cyther will wait for you to fix this error before" \
+                         "it tries to compile again...\n"
         else:
             output = "Error in source file, see above\n"
 
     elif response['returncode'] == SKIPPED_COMPILATION:
         if not args['watch']:
-            output = 'Skipping compilation: source file not updated since last compile\n'
+            output = 'Skipping compilation: source file not updated since' \
+                     'last compile\n'
         else:
             output = ''
 
@@ -174,10 +178,12 @@ def run(filename, timer=False, repeat=3, number=10000, precision=2):
 
 def core(args):
     """
-    The heart of Cyther, this function controls the main loop, and can be used to perform any Cyther action
-    This is what the user will always call if using Cyther from the module level
+    The heart of Cyther, this function controls the main loop, and can be
+    used to perform any Cyther action. You can call if using Cyther
+    from the module level
     Args:
-        args (str|dict|argparse.Namespace): Polymorphesized arguments to pass to Cyther
+        args (str|dict|argparse.Namespace): Polymorphesized
+                                            arguments to pass to Cyther
     Returns: None
     """
     args = furtherArgsProcessing(args)
