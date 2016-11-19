@@ -7,7 +7,7 @@ help_info = "Prints the information regarding cyther's installation and environm
             "the compilers used and all the current build settings, then exits"
 help_configure = "A very important command to run once in a while. This will trigger cyther's search for the" \
                  "compilers it will use on your system"
-help_test = "Binary flag to run the included 'test_cyther.py' script"
+help_test = "Binary flag to run the included 'test.py' script"
 help_setup = "Constructs the standard 'cytherize' file necessary to use cyther. Takes an optional 'preset' argument" \
              "to control the style of commands generated and injected into the 'cytherize' file"
 help_make = "Similar to GNU's 'make' command. Runs a file called 'cytherize' in your local directory.\n" \

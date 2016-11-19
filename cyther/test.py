@@ -12,7 +12,7 @@ def test_cyther():
     #Do a core, command line, and function run
     #subprocess.call(['cyther', 'build', 'example_file.pyx'])
 
-    print('<@test_cyther.py> All tests have been passed')
+    print('<@test.py> All tests have been passed')
 
 if __name__ == '__main__':
     test_cyther()

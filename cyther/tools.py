@@ -15,42 +15,9 @@ except ImportError:
     raise CytherError("The current version of Python doesn't support the function 'which', normally located in shutil")
 
 
-def getResponse(message, acceptableResponses):
-    if isinstance(acceptableResponses, str):
-        acceptableResponses = (acceptableResponses,)
-    else:
-        if not isinstance(acceptableResponses, tuple):
-            raise ValueError("Argument 'acceptableResponses' cannot be of type: '{}'".format(type(acceptableResponses)))
-
-    response = input(message)
-    while response not in acceptableResponses:
-        response = input(message)
-    return response
-
-
-def commandsFromFile(filename):
-    with open(filename, 'r') as file:
-        lines = file.readlines()
-    #to be updated with more functionality to mimic GNU's 'makefile' system
-    return lines
-
-
-def commandsToFile(filename, commands):
-    with open(filename, 'w+') as file:
-        chars = file.write(commands.join('\n'))
-    #to be updated with more functionality to mimic GNU's 'makefile' system
-    return chars
-
-
 def where(cmd, path=None):
     """
     A function to wrap shutil.which for universal usage
-    Args:
-        cmd (str): The command wished to be traced back to its source
-        path: A pathin which to limit the results to
-    Returns:
-        (CytherError): If could not find
-        (str): The abspath of the executable found
     """
     raw_result = which(cmd, os.X_OK, path)
     if raw_result:
@@ -62,10 +29,6 @@ def where(cmd, path=None):
 def sift(obj):
     """
     Used to find the correct static lib name to pass to gcc
-    Args:
-        obj (list): The list of names of runtime directories to include
-
-    Returns (str): The proper name of the argument passed into the '-l' option
     """
     string = [str(item) for name in obj for item in os.listdir(name)]
     s = set(re.findall('(?<=lib)(.+?)(?=\.so|\.a)', '\n'.join(string)))
