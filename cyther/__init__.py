@@ -1,7 +1,15 @@
 # I'm just a small-town (girl) initialization file
 
-from .cyther import core, CytherError, run, call, multiCall, where
+from .cyther import core, CytherError, run
 from .commands import info, configure, test, setup, make, clean, purge
+
+
+try:
+    from shutil import which
+except ImportError:
+    raise CytherError("The current version of Python doesn't support the"
+                      "function 'which', normally located in shutil")
+
 
 __author__ = "Nicholas C. Pandolfi"
 
