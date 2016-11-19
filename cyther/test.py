@@ -12,7 +12,17 @@ def test_cyther():
     #Do a core, command line, and function run
     #subprocess.call(['cyther', 'build', 'example_file.pyx'])
 
-    print('<@test.py> All tests have been passed')
+    print('<@test.py> All compilation tests have been passed')
+
+
+def test_utilities():
+    """
+    This function is here to test cyther's utilities for operation, and not
+    the actual compiling phases. It introduces crazy circumstances into the
+    lower level operation of it
+    """
+    return
+
 
 if __name__ == '__main__':
     test_cyther()

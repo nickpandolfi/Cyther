@@ -6,8 +6,9 @@ import os
 import argparse
 
 """
-Each function must have the parameter 'args', even if they do not use it. This is because they can be called
-by the parser, and parser always passes a 'args' variable in.
+Each function must have the parameter 'args', even if they do not use it.
+This is because they can be called by the parser, and parser always passes a
+'args' variable in.
 """
 
 
@@ -58,7 +59,8 @@ def purge(args):
     print('Current Directory: {}'.format(os.getcwd()))
     directories = os.listdir(os.getcwd())
     if '__cythercache__' in directories:
-        response = getResponse("Would you like to delete the cache and everything in it? [y/n]: ", ('y', 'n'))
+        response = getResponse("Would you like to delete the cache and"
+                               "everything in it? [y/n]: ", ('y', 'n'))
         if response == 'y':
             print("Listing local '__cythercache__':")
             cache_dir = os.path.join(os.getcwd(), "__cythercache__")
@@ -72,7 +74,8 @@ def purge(args):
             else:
                 print("\tNothing was found in the cache")
 
-            check_response = getResponse("Delete all these files? (^) [y/n]: ", ('y', 'n'))
+            check_response = getResponse("Delete all these files? (^)"
+                                         "[y/n]: ", ('y', 'n'))
             if check_response == 'y':
                 for filepath in to_delete:
                     os.remove(filepath)
@@ -82,4 +85,5 @@ def purge(args):
         else:
             print("Skipping deletion of the cache")
     else:
-        print("Couldn't find a cache file ('__cythercache__') in this directory")
+        print("Couldn't find a cache file ('__cythercache__')"
+              "in this directory")

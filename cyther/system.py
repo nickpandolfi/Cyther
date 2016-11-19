@@ -7,24 +7,24 @@ import textwrap
 import distutils.sysconfig
 import distutils.msvccompiler
 
-from .tools import CytherError, where, call, sift
+from .tools import CytherError
+from .searcher import where, sift
+from .launcher import call
 from .definitions import MISSING_INCLUDE_DIRS, MISSING_RUNTIME_DIRS
 
 
 def dealWithMissingStaticLib(message):
     """
-    Deal with the python missing static lib (.a|.so). Currently all this does is raises a helpful error...
-    Args:
-        message (str): What to pass to a CytherError
-    Returns: CytherError
+    Deal with the python missing static lib (.a|.so). Currently all this does
+    is raises a helpful error...
     """
     raise CytherError(message)
 
 
 def getIncludeAndRuntime():
     """
-    A function from distutils' build_ext.py that was updated and changed to ACTUALLY WORK
-    Returns (tuple of list): The include and runtime directories Python needs (os dependant)
+    A function from distutils' build_ext.py that was updated and changed
+    to ACTUALLY WORK
     """
     include_dirs, library_dirs = [], []
 
@@ -41,7 +41,8 @@ def getIncludeAndRuntime():
 
         MSVC_VERSION = int(distutils.msvccompiler.get_build_version())
         if MSVC_VERSION == 14:
-            library_dirs.append(os.path.join(sys.exec_prefix, 'PC', 'VS14', 'win32release'))
+            library_dirs.append(os.path.join(sys.exec_prefix, 'PC', 'VS14',
+                                             'win32release'))
         elif MSVC_VERSION == 9:
             suffix = '' if PLATFORM == 'win32' else PLATFORM[4:]
             new_lib = os.path.join(sys.exec_prefix, 'PCbuild')
@@ -49,7 +50,8 @@ def getIncludeAndRuntime():
                 new_lib = os.path.join(new_lib, suffix)
             library_dirs.append(new_lib)
         elif MSVC_VERSION == 8:
-            library_dirs.append(os.path.join(sys.exec_prefix, 'PC', 'VS8.0', 'win32release'))
+            library_dirs.append(os.path.join(sys.exec_prefix, 'PC', 'VS8.0',
+                                             'win32release'))
         elif MSVC_VERSION == 7:
             library_dirs.append(os.path.join(sys.exec_prefix, 'PC', 'VS7.1'))
         else:
@@ -67,7 +69,8 @@ def getIncludeAndRuntime():
 
     if is_cygwin or is_atheos:
         if sys.executable.startswith(os.path.join(sys.exec_prefix, "bin")):
-            library_dirs.append(os.path.join(sys.prefix, "lib", BASENAME, "config"))
+            library_dirs.append(os.path.join(sys.prefix, "lib", BASENAME,
+                                             "config"))
         else:
             library_dirs.append(os.getcwd())
 
@@ -145,6 +148,9 @@ PYTHON_EXECUTABLE = where('python')
 CYTHON_EXECUTABLE = where('cython')
 GCC_EXECUTABLE = where('gcc')
 
+GCC_INFO = call(['gcc', '-v'], raise_exception=True)
+CYTHON_OUTPUT = call(['cython', '-V'], raise_exception=True)
+
 INFO = str()
 INFO += "\nSystem:"
 
@@ -156,7 +162,7 @@ INFO += "\n\t\tDefault Output Extension: {}".format(DEFAULT_OUTPUT_EXTENSION)
 INFO += "\n\t\tInstallation Directory: {}".format(sys.exec_prefix)
 INFO += '\n'
 INFO += "\n\tCython ({}):".format(CYTHON_EXECUTABLE)
-INFO += "\n\t{}".format(textwrap.indent(call(['cython', '-V'])['output'], '\t'))
+INFO += "\n\t{}".format(textwrap.indent(CYTHON_OUTPUT, '\t'))
 
 INFO += "\n\tCyther:"
 INFO += "\n\t\tIncludable Header Search Command: {}".format(INCLUDE_STRING)
@@ -164,5 +170,6 @@ INFO += "\n\t\tRuntime Library Search Command: {}".format(RUNTIME_STRING)
 INFO += "\n\t\tRuntime Library Name: {}".format(L_OPTION)
 INFO += "\n"
 INFO += "\n\tGCC ({}):".format(GCC_EXECUTABLE)
-INFO += "\n{}".format(textwrap.indent(call(['gcc', '-v'])['output'].splitlines()[-1], '\t\t'))
+
+INFO += "\n{}".format(textwrap.indent(GCC_INFO.splitlines()[-1], '\t\t'))
 INFO += "\n"
