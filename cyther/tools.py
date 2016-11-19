@@ -1,9 +1,6 @@
 
 import os
 import re
-import sys
-import traceback
-import subprocess
 import argparse
 
 
@@ -29,15 +26,6 @@ def getResponse(message, acceptableResponses):
     while response not in acceptableResponses:
         response = input(message)
     return response
-
-
-def polymorph(func):
-    def wrapped(*args, **kwargs):
-        if kwargs:
-            args = argparse.Namespace()
-            args.__dict__.update(kwargs)
-        return func(args)
-    return wrapped
 
 
 def commandsFromFile(filename):
@@ -106,72 +94,3 @@ def getFullPath(filename):
         raise CytherError("The file '{}' does not exist".format(filename))
     return ret
 
-
-def printCommands(*several_commands):
-    """
-    Simply prints several commands given to it
-    Args:
-        *several_commands (list|tuple): Container of commands
-    Returns: None
-    """
-    for commands in several_commands:
-        print(' '.join(commands).strip())
-
-
-def call(commands):
-    """
-    Super handy function to open another process
-    Args:
-        commands (list|tuple): The commands wished to open a new process with
-    Returns (dict): The status of the call. Keys are 'returncode', and 'output'
-    """
-    try:
-        process = subprocess.Popen(commands, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    except:
-        output = traceback.format_exc()
-        return {'returncode': 1, 'output': output}
-
-    stdout_bytes, stderr_bytes = process.communicate()
-    stdout_encoding = sys.stdout.encoding if sys.stdout.encoding else 'utf-8'
-    stderr_encoding = sys.stderr.encoding if sys.stderr.encoding else 'utf-8'
-    stdout = stdout_bytes.decode(stdout_encoding)
-    stderr = stderr_bytes.decode(stderr_encoding)
-    code = process.returncode
-
-    output = ''
-    if stdout:
-        output += stdout + '\r\n'
-    output += stderr
-
-    result = {'returncode': code, 'output': output}
-    return result
-
-
-def multiCall(*commands, dependent=True):
-    """
-    Calls 'call' multiple times, given sets of commands
-    Args:
-        *commands (list|tuple): The sets of commands to be called with
-        dependent (bool): If one set fails, it forces the rest to fail, and return None
-    Returns (dict): The combined results of the series of calls. Keys are same as 'call'
-    """
-    results = []
-    dependent_failed = False
-
-    for command in commands:
-        if not dependent_failed:
-            result = call(command)
-            if (result['returncode'] == 1) and dependent:
-                dependent_failed = True
-        else:
-            result = None
-        results.append(result)
-
-    obj = {'returncode': 0, 'output': ''}
-    for result in results:
-        if not result:
-            continue
-        elif result['returncode'] == 1:
-            obj['returncode'] = 1
-        obj['output'] += result['output']
-    return obj

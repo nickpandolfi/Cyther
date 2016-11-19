@@ -23,12 +23,11 @@ TO-DO (before next version)
 
     HELP TEXT:
         Have cyther's help text print its version!
-            Whats the best way to do this?
 
     DEPLOYMENT:
         Figure out how to do a github release!
         Is it possible to webhook pypi into github??
-        Keep an eye on Code Climate, Travis, and CodeShip!!
+        Keep an eye on Code Climate, Travis
         Follow as many conventions as possible in the bookmark 'PYPI tutorial'
 
     DOCS:
@@ -65,6 +64,9 @@ FIX
         Can this be sorted out by regex style pattern recog??
 
 NEW FEATURES
+
+    I like the format of this: '------- >> begin captured stdout << --------'
+        Incorporate into 'watch'
 
     Have the CYTHER_CONFIG_FILE hold the paths to the compiler executables!
         Then, it may be ok to not have gcc in the path, and thus a seperate and private gcc can be used
