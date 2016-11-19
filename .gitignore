@@ -8,8 +8,8 @@ __cythercache__/
 /example_file.c
 /example_file.html
 /example_file.lis
-/README.txt
 /xubuntu_testing_instructions.txt
+/packages_diagram.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

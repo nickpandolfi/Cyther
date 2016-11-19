@@ -9,9 +9,6 @@ from .definitions import NOT_NEEDED_MESSAGE
 def furtherArgsProcessing(args):
     """
     Converts args, and deals with incongruities that argparse couldn't handle
-    Args:
-        args (unknown): Args to be sorted
-    Returns (dict): Filtered and processed arguments
     """
     if isinstance(args, str):
         unprocessed = args.strip().split(' ')
@@ -37,9 +34,6 @@ def furtherArgsProcessing(args):
 def processFiles(args):
     """
     Generates and error checks each file's information before the compilation actually starts
-    Args:
-        args (dict): The processed args to base 'file' off of
-    Returns files
     """
     to_process = []
 
@@ -91,10 +85,6 @@ def makeCommands(preset, file):
     """
     Given a high level preset, it will construct the basic args to pass over.
     'ninja', 'beast', 'minimal', 'swift'
-    Args:
-        preset (str): The high level preset
-        file (dict): The file for which to generate these commands for
-    Returns (tuple of lists): The commands in which to pass off to the underlying compilers
     """
     commands = [['cython', '-a', '-p', '-o',
                  file['c_name'], file['file_path']],
@@ -110,11 +100,9 @@ def makeCommands(preset, file):
 
 def getDirsToInclude(string):
     """
-    Given a string of module names, it will return the 'include' directories essential to their compilation
-    as long as the module has the conventional 'get_include' function.
-    Args:
-        string (str): A continuous string of modules split by '-'
-    Returns (list): Extra include directories to pass into gcc
+    Given a string of module names, it will return the 'include' directories
+    essential to their compilation as long as the module has the conventional
+    'get_include' function.
     """
     dirs = []
     a = string.strip()
@@ -125,7 +113,8 @@ def getDirsToInclude(string):
             try:
                 exec('import {}'.format(module))
             except ImportError:
-                raise CytherError("The module '{}' does not exist".format(module))
+                raise CytherError("The module '{}' does not"
+                                  "exist".format(module))
             try:
                 dirs.append('-I{}'.format(eval(module).get_include()))
             except AttributeError:

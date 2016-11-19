@@ -23,7 +23,6 @@ def polymorph(func):
 
 def info(args):
     print(INFO)
-    exit()
 
 
 @polymorph

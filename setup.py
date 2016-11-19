@@ -1,31 +1,36 @@
+
 try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
 
 NAME = 'Cyther'
-VERSION = '0.8.dev16'
-INSTALL_REQUIRES = ['cython']
-SHORT_DESCRIPTION = 'The Cross-Platform Cython/Python Compiler'
-LONG_DESCRIPTION = open('README.txt').read()
 AUTHOR = 'Nicholas C. Pandolfi'
 AUTHOR_EMAIL = 'npandolfi@wpi.edu'
 URL = 'https://github.com/nickpandolfi/Cyther'
 LICENSE = 'MIT'
 
+
+
+SHORT_DESCRIPTION = "Cyther: The Cross-Platform Cython/Python/C Auto-Compiler"
+VERSION = '0.8.dev18'
+INSTALL_REQUIRES = ['cython']
+LONG_DESCRIPTION = open('README.txt').read()
+
+
+
 PACKAGES = ['cyther']
-
-PACKAGE_DATA = {'cyther': ['../*.txt', '../README.txt']}
-
+PACKAGE_DATA = {'cyther': ['../*.txt', '../data/*']}
 ENTRY_POINTS = {'console_scripts': ['cyther = cyther.__main__:main']}
+
+
 
 PLATFORMS = ['Windows', 'MacOS', 'POSIX', 'Unix']
 
-KEYWORDS = ['Cyther', 'Cython', 'Python', 'MinGW32',
-            'vcvarsall.bat', 'vcvarsall not found',
-            'setup.py', 'gcc', 'Python 3',
-            'user-friendly', 'command-line',
-            'script', 'auto-compiler', 'compiler', 'integration']
+KEYWORDS = ['Cyther', 'Cython', 'Python', 'MinGW32', 'vcvarsall.bat',
+            'vcvarsall not found', 'setup.py', 'gcc', 'Python 3',
+            'user-friendly', 'command-line', 'script', 'auto-compiler',
+            'compiler', 'integration', 'api']
 
 CLASSIFIERS = ['Development Status :: 3 - Alpha',
                'Environment :: Console',
