@@ -93,7 +93,6 @@ NEW FEATURES
     Make the example_file.pyx a prototype for the SuperObject system. Implementing live testing of it?
 
 
-
 LOW PRIORITY
 
     Erase Cyther's usage of distutils entirely
@@ -138,3 +137,11 @@ QUESTIONS (for me to ask myself)
     What about packaging the libraries with cyther?? Is cross compiling possible / a good idea?
 
     What is the difference between os.name and sys.platform and platform.platform?
+
+
+1) Must read the commands in from command line
+2) Must parse them and create directed graphs
+3) Dependency resolver
+4) Generate the set of commands
+
+
