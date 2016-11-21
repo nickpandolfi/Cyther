@@ -13,7 +13,7 @@ LICENSE = 'MIT'
 
 
 SHORT_DESCRIPTION = "Cyther: The Cross-Platform Cython/Python/C Auto-Compiler"
-VERSION = '0.8.dev18'
+VERSION = '0.8.dev20'
 INSTALL_REQUIRES = ['cython']
 LONG_DESCRIPTION = open('README.txt').read()
 
