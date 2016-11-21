@@ -20,7 +20,7 @@ LONG_DESCRIPTION = open('README.txt').read()
 
 
 PACKAGES = ['cyther']
-PACKAGE_DATA = {'cyther': ['../*.txt', '../data']}
+#PACKAGE_DATA = {'cyther': ['../*.txt', '../data']}
 ENTRY_POINTS = {'console_scripts': ['cyther = cyther.__main__:main']}
 
 
@@ -53,7 +53,6 @@ setup(name=NAME,
       description=SHORT_DESCRIPTION,
       long_description=LONG_DESCRIPTION,
       packages=PACKAGES,
-      package_data=PACKAGE_DATA,
       entry_points=ENTRY_POINTS,
       platforms=PLATFORMS,
       author=AUTHOR,

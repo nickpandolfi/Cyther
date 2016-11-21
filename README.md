@@ -5,6 +5,7 @@ Cyther is currently under temporary renovation and this README does not apply ju
 
 [![Repository](https://badge.fury.io/py/cyther.svg)](https://pypi.python.org/pypi/Cyther)
 [![Github](https://img.shields.io/github/stars/nickpandolfi/cyther.svg?style=social&label=Star)](https://github.com/nickpandolfi/Cyther)
+[![Downloads](https://img.shields.io/github/downloads/nickpandolfi/Cyther/total.svg)](https://github.com/nickpandolfi/Cyther/releases)
 
 [![Travis](https://secure.travis-ci.org/nickpandolfi/Cyther.png)](https://travis-ci.org/nickpandolfi/Cyther)
 ![Status](https://img.shields.io/badge/Status-Alpha-orange.svg?style=flat)
@@ -15,8 +16,6 @@ Cyther is currently under temporary renovation and this README does not apply ju
 ![Implementation](https://img.shields.io/pypi/implementation/cyther.svg?maxAge=2592000)
 ![License](https://img.shields.io/pypi/l/cyther.svg?maxAge=2592000)
 ![Format](https://img.shields.io/pypi/format/cyther.svg?maxAge=2592000)
-
-[![Downloads](https://img.shields.io/github/downloads/nickpandolfi/Cyther/total.svg)](https://github.com/nickpandolfi/Cyther/releases)
 
 
 

@@ -1,0 +1,2 @@
+include README.txt LICENSE.txt CHANGELOG.txt TODO.txt
+include .travis.yml .codeclimate.yml packages_diagram.png
