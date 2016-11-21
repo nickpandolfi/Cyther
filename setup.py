@@ -4,7 +4,7 @@ try:
 except ImportError:
     from distutils.core import setup
 
-NAME = 'Cyther'
+NAME = 'cyther'
 AUTHOR = 'Nicholas C. Pandolfi'
 AUTHOR_EMAIL = 'npandolfi@wpi.edu'
 URL = 'https://github.com/nickpandolfi/Cyther'
@@ -13,7 +13,7 @@ LICENSE = 'MIT'
 
 
 SHORT_DESCRIPTION = "Cyther: The Cross-Platform Cython/Python/C Auto-Compiler"
-VERSION = '0.8.dev20'
+VERSION = '0.8.dev23'
 INSTALL_REQUIRES = ['cython']
 LONG_DESCRIPTION = open('README.txt').read()
 

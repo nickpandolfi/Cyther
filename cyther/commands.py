@@ -3,7 +3,27 @@ import argparse
 from .tools import getFullPath
 from .system import *
 from .arguments import parser
-from .definitions import NOT_NEEDED_MESSAGE
+
+
+class InstructionManager:
+    """
+    An intelligent container for multiple instructions
+    This contains methods for dependency resolution order
+    """
+
+    # TODO Is Instruction a better name than FileInfo?
+    def parseInstruction(instruction):
+        """
+        Parses `example.pyx>example.c` into information and stores it in FileInfo
+        """
+        pass
+
+    def parseInstruction(instructions):
+        """
+        for each instruction in the list of instructions, parse it
+        return a collection of FileInfo objects
+        """
+        pass
 
 
 def furtherArgsProcessing(args):
@@ -106,7 +126,7 @@ Put them into cytherize
 """
 
 
-class CompilingCommands:
+class CommandManager:
     def __init__(self, commands=None):
         self.__commands = commands
 
@@ -153,26 +173,3 @@ def makeCommands(file):
     return commands
 
 
-# TODO Make this automatic if 'numpy' is seen in the source code?
-def getDirsToInclude(string):
-    """
-    Given a string of module names, it will return the 'include' directories
-    essential to their compilation as long as the module has the conventional
-    'get_include' function.
-    """
-    dirs = []
-    a = string.strip()
-    obj = a.split('-')
-
-    if len(obj) == 1 and obj[0]:
-        for module in obj:
-            try:
-                exec('import {}'.format(module))
-            except ImportError:
-                raise CytherError("The module '{}' does not"
-                                  "exist".format(module))
-            try:
-                dirs.append('-I{}'.format(eval(module).get_include()))
-            except AttributeError:
-                print(NOT_NEEDED_MESSAGE.format(module))
-    return dirs

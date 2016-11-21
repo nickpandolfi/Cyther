@@ -1,5 +1,6 @@
 
 import os
+from .definitions import NOT_NEEDED_MESSAGE
 
 
 class CytherError(Exception):
@@ -40,4 +41,29 @@ def getFullPath(filename):
     else:
         raise CytherError("The file '{}' does not exist".format(filename))
     return ret
+
+
+# TODO Make this automatic if 'numpy' is seen in the source code?
+def getDirsToInclude(string):
+    """
+    Given a string of module names, it will return the 'include' directories
+    essential to their compilation as long as the module has the conventional
+    'get_include' function.
+    """
+    dirs = []
+    a = string.strip()
+    obj = a.split('-')
+
+    if len(obj) == 1 and obj[0]:
+        for module in obj:
+            try:
+                exec('import {}'.format(module))
+            except ImportError:
+                raise CytherError("The module '{}' does not"
+                                  "exist".format(module))
+            try:
+                dirs.append('-I{}'.format(eval(module).get_include()))
+            except AttributeError:
+                print(NOT_NEEDED_MESSAGE.format(module))
+    return dirs
 
