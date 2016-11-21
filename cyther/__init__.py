@@ -1,7 +1,7 @@
 # I'm just a small-town (girl) initialization file
 
 from .cyther import core, CytherError, run
-from .commands import info, configure, test, setup, make, clean, purge
+from .core import info, configure, test, setup, make, clean, purge
 
 
 try:

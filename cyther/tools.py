@@ -8,6 +8,22 @@ class CytherError(Exception):
         super(CytherError, self).__init__(*args, **kwargs)
 
 
+RESPONSES_ERROR = "Argument 'acceptableResponses' cannot be of type: '{}'"
+
+
+def getResponse(message, acceptableResponses):
+    if isinstance(acceptableResponses, str):
+        acceptableResponses = (acceptableResponses,)
+    else:
+        if not isinstance(acceptableResponses, tuple):
+            raise ValueError(RESPONSES_ERROR.format(type(acceptableResponses)))
+
+    response = input(message)
+    while response not in acceptableResponses:
+        response = input(message)
+    return response
+
+
 def getFullPath(filename):
     """
     Gets the full path of a filename

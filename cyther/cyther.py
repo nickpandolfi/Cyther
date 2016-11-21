@@ -6,7 +6,7 @@ import re
 from .searcher import POUND_EXTRACT, TRIPPLE_EXTRACT
 from .launcher import multiCall, printCommands
 from .validation import isValid, isOutDated
-from .processing import furtherArgsProcessing, processFiles, makeCommands
+from .commands import furtherArgsProcessing, processFiles, makeCommands
 from .definitions import WAIT_FOR_FIX, SKIPPED_COMPILATION, INTERVAL,\
                          ERROR_PASSOFF, FINE, WATCH_STATS_TEMPLATE,\
                          SETUP_TEMPLATE, TIMER_TEMPLATE

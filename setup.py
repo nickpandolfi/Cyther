@@ -20,7 +20,7 @@ LONG_DESCRIPTION = open('README.txt').read()
 
 
 PACKAGES = ['cyther']
-PACKAGE_DATA = {'cyther': ['../*.txt', '../data/*']}
+PACKAGE_DATA = {'cyther': ['../*.txt', '../data']}
 ENTRY_POINTS = {'console_scripts': ['cyther = cyther.__main__:main']}
 
 

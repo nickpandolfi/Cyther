@@ -1,6 +1,6 @@
 
 import argparse
-from .commands import info, configure, test, setup, make, clean, purge
+from .core import info, configure, test, setup, make, clean, purge
 
 
 help_info = "Prints the information regarding cyther's installation and " \

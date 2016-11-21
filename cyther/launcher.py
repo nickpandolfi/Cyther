@@ -3,7 +3,17 @@ import traceback
 import sys
 
 
+"""
+This file contains definitions for launching sets of commands into a subprocess
+and handling its output correctly and efficiently
+"""
+
+
 class Result:
+    """
+    A class to hold the results of a command call. Holds stderr and stdout
+    Contains useful functions to process them
+    """
     def __init__(self, returncode=0, stdout='', stderr=''):
         self.returncode = returncode
         self.stdout = stdout
@@ -30,6 +40,9 @@ class Result:
 
 
 def getEncodings():
+    """
+    Just a simple function to return the system encoding (defaults to utf-8)
+    """
     stdout_encoding = sys.stdout.encoding if sys.stdout.encoding else 'utf-8'
     stderr_encoding = sys.stderr.encoding if sys.stderr.encoding else 'utf-8'
     return stdout_encoding, stderr_encoding
@@ -43,6 +56,9 @@ def printCommands(*several_commands):
 
 # TODO An option to raise a Exception as well? Is that useful?
 def call(commands, *, print_result=False, raise_exception=False):
+    """
+    Will call a set of commands and wrangle the output how you choose
+    """
     if raise_exception:
         print_result = False
     try:
@@ -79,10 +95,6 @@ def call(commands, *, print_result=False, raise_exception=False):
 def multiCall(*commands, print_result=False, dependent=True, bundle=False):
     """
     Calls the function 'call' multiple times, given sets of commands
-    Args:
-        *commands (list|tuple): The sets of commands to call in order
-        dependent (bool): If one set fails, it forces the rest to fail
-    Returns (dict): The combined results of the series of calls. Keys are same as 'call'
     """
     results = []
     dependent_failed = False
