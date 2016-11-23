@@ -92,6 +92,18 @@ NEW FEATURES
 
     Make the example_file.pyx a prototype for the SuperObject system. Implementing live testing of it?
 
+    DLLTOOL regex algorithm launched in a separate thread
+
+    Use assert in testing file
+
+    Installation instructions into README
+
+    Why isnt `cyther test` working? ----> Replicate issue on xubuntu
+
+    Unhook cyther from other unnecessary services
+
+    Does the repo token for travis even do anything?
+
 
 LOW PRIORITY
 
@@ -117,6 +129,12 @@ BEFORE DEPLOY (for me)
 
 
 QUESTIONS (for me to ask myself)
+
+    Any other commands to `entry_points` other than `console-script`?
+
+    http://www.linux.org/threads/gnu-binutils.6544/
+
+    Can ar recompile static libraries?
 
     Is there a better way to get the version of gcc / basic information?
 

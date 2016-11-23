@@ -3,6 +3,21 @@ import argparse
 from .tools import getFullPath
 from .system import *
 from .arguments import parser
+from .objects import SimpleCommand
+
+
+class Instruction:
+    def __init__(self, file_type):
+        self.file_type = file_type
+        """
+        Adding the individual fields:
+
+        include
+        c_name
+        file_path
+        object_file_name
+        output_name
+        """
 
 
 class InstructionManager:
@@ -40,12 +55,15 @@ def furtherArgsProcessing(args):
     elif isinstance(args, dict):
         pass
     else:
-        raise CytherError("Args must be a instance of str or argparse.Namespace, not '{}'".format(str(type(args))))
+        raise CytherError(
+            "Args must be a instance of str or argparse.Namespace, not '{}'".format(
+                str(type(args))))
 
     if args['watch']:
         args['timestamp'] = True
 
-    args['watch_stats'] = {'counter': 0, 'errors': 0, 'compiles': 0, 'polls': 0}
+    args['watch_stats'] = {'counter': 0, 'errors': 0, 'compiles': 0,
+                           'polls': 0}
     args['print_args'] = True
 
     return args
@@ -61,27 +79,34 @@ def processFiles(args):
         file = dict()
 
         if args['include']:
-            file['include'] = INCLUDE_STRING + ''.join(['-I' + item for item in args['include']])
+            file['include'] = INCLUDE_STRING + ''.join(
+                ['-I' + item for item in args['include']])
         else:
             file['include'] = INCLUDE_STRING
 
         file['file_path'] = getFullPath(filename)
-        file['file_base_name'] = os.path.splitext(os.path.basename(file['file_path']))[0]
-        file['no_extension'], file['extension'] = os.path.splitext(file['file_path'])
+        file['file_base_name'] = \
+        os.path.splitext(os.path.basename(file['file_path']))[0]
+        file['no_extension'], file['extension'] = os.path.splitext(
+            file['file_path'])
         if file['extension'] not in CYTHONIZABLE_FILE_EXTS:
-            raise CytherError("The file '{}' is not a designated cython file".format(file['file_path']))
+            raise CytherError(
+                "The file '{}' is not a designated cython file".format(
+                    file['file_path']))
         base_path = os.path.dirname(file['file_path'])
         local_build = args['local']
         if not local_build:
             cache_name = os.path.join(base_path, '__cythercache__')
             os.makedirs(cache_name, exist_ok=True)
-            file['c_name'] = os.path.join(cache_name, file['file_base_name']) + '.c'
+            file['c_name'] = os.path.join(cache_name,
+                                          file['file_base_name']) + '.c'
         else:
             file['c_name'] = file['no_extension'] + '.c'
         file['object_file_name'] = os.path.splitext(file['c_name'])[0] + '.o'
         output_name = args['output_name']
         if args['watch']:
-            file['output_name'] = file['no_extension'] + DEFAULT_OUTPUT_EXTENSION
+            file['output_name'] = file[
+                                      'no_extension'] + DEFAULT_OUTPUT_EXTENSION
         elif output_name:
             if os.path.exists(output_name) and os.path.isfile(output_name):
                 file['output_name'] = output_name
@@ -92,38 +117,104 @@ def processFiles(args):
                 if os.path.exists(dirname):
                     file['output_name'] = output_name
                 else:
-                    raise CytherError('The directory specified to write the output file in does not exist')
+                    raise CytherError(
+                        'The directory specified to write the output file in does not exist')
         else:
-            file['output_name'] = file['no_extension'] + DEFAULT_OUTPUT_EXTENSION
+            file['output_name'] = file[
+                                      'no_extension'] + DEFAULT_OUTPUT_EXTENSION
 
         file['stamp_if_error'] = 0
         to_process.append(file)
     return to_process
 
 
-class FileInfo:
-    def __init__(self, file_type):
-        self.file_type = file_type
-        """
-        include
-        c_name
-        file_path
-        object_file_name
-        output_name
-        """
-
-
 """
 Each file gets read and information gets determined
-
 Depencencies are determined
-
 Dependencies are matched and a heirarchy is created
-
 In order from lowest to highest, those commands get created
-
 Put them into cytherize
 """
+
+"""
+a > b
+b > c
+a > c
+c > d
+
+d>c>(b|a)
+"""
+
+
+"""
+Finds all things with no dependencies
+    If there is none:
+        raise circular dep error
+    else:
+        1) Add to the next entry in the batch
+        make it appear as if they disappeared
+        and all things depending on them now didn't
+
+"""
+
+
+def generateCommandBatches(tasks, exceptions):
+    """
+    tasks = [
+    {'a': 'b', 'c'}
+    {'b': 'c', 'd'}
+    ]
+    exeptions = ['c', 'd'] # Also known as the givens!!!
+    """
+    for exception in exceptions:
+        if exception in tasks:
+            pass # TODO Not supposed to be an exception!!
+        for task in tasks:
+            if exception in tasks[task]:
+                tasks[task].remove(exception)
+
+    batches = []
+    while tasks:
+        batch = set()
+        for task, deps in tasks.items():
+            if not deps:
+                batch.add(task)
+
+        if not batch:
+            msg = "Circular dependencies found!\n" + format_dependencies(tasks)
+            raise CytherError(msg)
+
+        for task in batch:
+            del tasks[task]
+
+        for task, deps in tasks.items():
+            #deps.difference_update(ready)
+            for item in batch:
+                if item in deps:
+                    tasks[task].remove(item)
+
+        batches.append(batch)
+
+
+# Format a dependency graph for printing
+def format_dependencies(tasks):
+    msg = []
+    for name, deps in tasks.items():
+        for parent in deps:
+            msg.append("{} -> {}".format(name, parent))
+    return "\n".join(msg)
+
+
+class Command(SimpleCommand, list):
+    def __init__(self):
+        super(Command, self).__init__()
+
+    def generateCommands(self):
+        """
+        1) Sort the commands
+        2) Return the commands in the form of a list
+        """
+        pass
 
 
 class CommandManager:
@@ -133,26 +224,39 @@ class CommandManager:
     def toFile(self, filename=None):
         if not filename:
             filename = 'cytherize'
+
+        commands = self.generateCommands()
+        string = str()
+        for command in commands:
+            string += (' '.join(command) + '\n')
+
+        # TODO What is the best file permission?
         with open(filename, 'w+') as file:
-            chars = file.write(self.__commands.join('\n'))
+            chars = file.write(string)
+
         return chars
 
-    def fromFile(self, filename=None):
+    @staticmethod
+    def fromFile(filename=None):
         if not filename:
             filename = 'cytherize'
+
         with open(filename, 'r') as file:
             lines = file.readlines()
-        if self.__commands is not None:
-            raise ValueError("The commands '{}' already exist, you cannot"
-                             "overwrite them".format(self.__commands))
-        self.__commands = eval(lines)
 
-    def sortCommands(self):
-        """ Intended to put the -l commands at the end """
-        pass
+        output = []
+        for line in lines:
+            output.append(line.split())
 
-    def getCommands(self):
-        self.sortCommands()
+        return output
+
+    def generateCommands(self):
+        commands = []
+        """
+        #DEPENDENCY_RESOLUTION
+        """
+        for command in self.__commands:
+            commands.append(command)
         return self.__commands
 
 
@@ -171,5 +275,3 @@ def makeCommands(file):
                  file['object_file_name'], L_OPTION]]
 
     return commands
-
-
