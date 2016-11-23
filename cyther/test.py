@@ -1,6 +1,7 @@
 
 import cyther
 import subprocess
+from .commands import generateCommandBatches
 
 
 def test_cyther():
@@ -16,11 +17,21 @@ def test_cyther():
 
 
 def test_utilities():
-    """
-    This function is here to test cyther's utilities for operation, and not
-    the actual compiling phases. It introduces crazy circumstances into the
-    lower level operation of it
-    """
+    t = {
+        'a': ['b'],
+        'b': ['c'],
+        'c': ['d', 'e', 'f', 'g'],
+        'd': ['e', 'g', 'j'],
+        'e': ['f'],
+        'f': ['i', 'j'],
+        'g': ['j'],
+        'h': ['i'],
+        'i': ['j'],
+        'j': ['q'],
+    }
+    g = ['q']
+    batches = generateCommandBatches(t, g)
+    assert batches == [{'j'}, {'i', 'g'}, {'f', 'h'}, {'e'}, {'d'}, {'c'}, {'b'}, {'a'}]
     return
 
 

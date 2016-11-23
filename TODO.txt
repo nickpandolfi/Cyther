@@ -36,6 +36,7 @@ TO-DO (before next version)
         Put a basic overview docstring at the beginning of each file (what is each file for?)
 
     TECHNICAL:
+        >>> Make CytherError only apply if the error was the user's fault!! <<<
         Make cytherize and getIncludeAndRuntime shorter
             Change the name of cytherize to something more meaningful
         What is the use of the vcruntime.dll on windows installations? Does it need to be included?
