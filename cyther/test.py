@@ -1,7 +1,7 @@
 
 import cyther
 import subprocess
-from .commands import generateCommandBatches
+from .tools import generateBatches
 
 
 def test_cyther():
@@ -30,7 +30,7 @@ def test_utilities():
         'j': ['q'],
     }
     g = ['q']
-    batches = generateCommandBatches(t, g)
+    batches = generateBatches(t, g)
     assert batches == [{'j'}, {'i', 'g'}, {'f', 'h'}, {'e'}, {'d'}, {'c'}, {'b'}, {'a'}]
     return
 

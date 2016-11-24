@@ -7,8 +7,11 @@ from .objects import SimpleCommand
 
 
 class Instruction:
-    def __init__(self, file_type):
-        self.file_type = file_type
+    def __init__(self, init=None):
+        if isinstance(init, str):
+            pass
+        else:
+            raise Exception()
         """
         Adding the individual fields:
 
@@ -145,8 +148,15 @@ class Command(SimpleCommand, list):
         """
         1) Sort the commands
         2) Return the commands in the form of a list
+        3) This does what makeCommands does right now
         """
         pass
+
+
+"""
+manager = CommandManager()
+command1 = Command('example.pyx', 'dep.pyx')
+"""
 
 
 class CommandManager:
@@ -190,13 +200,10 @@ class CommandManager:
 
 
     def generateCommands(self):
+        sorted_task_names = []
+        # dependency sorting
         commands = []
-        """
-        #DEPENDENCY_RESOLUTION
-        """
-        for command in self.__unprocessed:
-            commands.append(command)
-        return self.__unprocessed
+        return commands
 
 
 def makeCommands(file):

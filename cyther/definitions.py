@@ -6,6 +6,8 @@ WAIT_FOR_FIX = 42
 
 INTERVAL = .25
 
+RESPONSES_ERROR = "Argument 'acceptableResponses' cannot be of type: '{}'"
+
 WATCH_STATS_TEMPLATE = "\n...<iterations:{}, compiles:{}," \
                        "errors:{}, polls:{}>...\n"
 
