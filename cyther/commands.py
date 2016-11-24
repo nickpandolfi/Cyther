@@ -1,6 +1,6 @@
 import argparse
 
-from .tools import getFullPath
+from .files import getFullPath
 from .system import *
 from .arguments import parser
 from .objects import SimpleCommand

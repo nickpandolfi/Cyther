@@ -1,5 +1,6 @@
 import os
 
+# TODO Change all 'filename's to 'filepath's
 
 def isOutDated(file_path, output_name):
     """
@@ -46,6 +47,38 @@ def getFullPath(filename, *, error=True):
 
 def getParentDirectory(filename):
     return os.path.basename(os.path.dirname(filename))
+
+
+def injectCache(filename):
+    if getParentDirectory(filename) == '__cythercache__':
+        raise FileExistsError("Can't put a cache in another cache")
+    new_filename = os.path.join(os.path.dirname(filename),
+                                '__cythercache__',
+                                os.path.basename(filename))
+    return new_filename
+
+
+def joinExt(name, ext):
+    if ext[0] == '.':
+        ret = name + ext
+    else:
+        ret = name + '.' + ext
+    return ret
+
+
+def changeFileName(filename, new_name):
+    dirname = os.path.dirname(filename)
+    old_basename = os.path.basename(filename)
+    new_basename = joinExt(new_name, os.path.splitext(old_basename)[1])
+    return os.path.join(dirname, new_basename)
+
+
+def changeFileDir(filename, dirname):
+    return os.path.join(dirname, os.path.basename(filename))
+
+
+def changeFileExt(filename, ext):
+    return joinExt(os.path.splitext(filename)[0], ext)
 
 
 class FileInfo:
