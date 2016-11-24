@@ -67,3 +67,60 @@ def getDirsToInclude(string):
                 print(NOT_NEEDED_MESSAGE.format(module))
     return dirs
 
+
+def removeGivensFromTasks(tasks, givens):
+    for given in givens:
+        if given in tasks:
+            raise Exception("Task '{}' is not supposed to be an"
+                            " exception".format(given))
+        for task in tasks:
+            if given in tasks[task]:
+                tasks[task].remove(given)
+
+
+def batchErrorProcessing(tasks):
+    should_be_givens = []
+    total_deps = {dep for deps in tasks.values() for dep in deps}
+    for dep in total_deps:
+        if dep not in tasks:
+            should_be_givens.append(dep)
+
+    if should_be_givens:
+        string = ', '.join(should_be_givens)
+        message = "The dependencies '{}' should be givens if not" \
+                  " specified as tasks".format(string)
+    else:
+        message = "Circular dependency found:\n\t"
+        msg = []
+        for task, dependencies in tasks.items():
+            for parent in dependencies:
+                line = "{} -> {}".format(task, parent)
+                msg.append(line)
+        message += "\n\t".join(msg)
+
+    raise ValueError(message)
+
+
+def generateBatches(tasks, givens):
+    removeGivensFromTasks(tasks, givens)
+
+    batches = []
+    while tasks:
+        batch = set()
+        for task, dependencies in tasks.items():
+            if not dependencies:
+                batch.add(task)
+
+        if not batch:
+            batchErrorProcessing(tasks)
+
+        for task in batch:
+            del tasks[task]
+
+        for task, dependencies in tasks.items():
+            for item in batch:
+                if item in dependencies:
+                    tasks[task].remove(item)
+
+        batches.append(batch)
+    return batches

@@ -135,59 +135,11 @@ Put them into cytherize
 """
 
 
-def generateCommandBatches(tasks, givens):
-    for given in givens:
-        if given in tasks:
-            raise Exception("Task '{}' is not supposed to be an"
-                            " exception".format(given))
-        for task in tasks:
-            if given in tasks[task]:
-                tasks[task].remove(given)
-
-    batches = []
-    while tasks:
-        batch = set()
-        for task, dependencies in tasks.items():
-            if not dependencies:
-                batch.add(task)
-
-        if not batch:
-            should_be_givens = []
-            total_deps = {dep for deps in tasks.values() for dep in deps}
-            for dep in total_deps:
-                if dep not in tasks:
-                    should_be_givens.append(dep)
-
-            if should_be_givens:
-                string = ', '.join(should_be_givens)
-                message = "The dependencies '{}' should be givens if not" \
-                          " specified as tasks".format(string)
-            else:
-                message = "Circular dependency found:\n\t"
-                msg = []
-                for task, dependencies in tasks.items():
-                    for parent in dependencies:
-                        line = "{} -> {}".format(task, parent)
-                        msg.append(line)
-                message += "\n\t".join(msg)
-
-            raise Exception(message)
-
-        for task in batch:
-            del tasks[task]
-
-        for task, dependencies in tasks.items():
-            for item in batch:
-                if item in dependencies:
-                    tasks[task].remove(item)
-
-        batches.append(batch)
-    return batches
-
-
 class Command(SimpleCommand, list):
-    def __init__(self):
+    def __init__(self, task_name, dependencies):
         super(Command, self).__init__()
+        self.__task_name = task_name
+        self.__dependencies = dependencies
 
     def generateCommands(self):
         """
@@ -198,8 +150,8 @@ class Command(SimpleCommand, list):
 
 
 class CommandManager:
-    def __init__(self, commands=None):
-        self.__commands = commands
+    def __init__(self):
+        self.__unprocessed = []
 
     def toFile(self, filename=None):
         if not filename:
@@ -230,14 +182,21 @@ class CommandManager:
 
         return output
 
+    def addCommand(self, command):
+        # TODO Should we unpack it here?
+        # task_name to command
+        # task_name to dependencies
+        self.__unprocessed.append(command)
+
+
     def generateCommands(self):
         commands = []
         """
         #DEPENDENCY_RESOLUTION
         """
-        for command in self.__commands:
+        for command in self.__unprocessed:
             commands.append(command)
-        return self.__commands
+        return self.__unprocessed
 
 
 def makeCommands(file):
