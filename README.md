@@ -17,8 +17,6 @@ Cyther is currently under temporary renovation and this README does not apply ju
 ![License](https://img.shields.io/pypi/l/cyther.svg?maxAge=2592000)
 ![Format](https://img.shields.io/pypi/format/cyther.svg?maxAge=2592000)
 
-
-
 ## What is Cyther?
 
 Cyther is a tool used to elegantly compile C and Cython *(and Python for that matter)*. Cyther is what I'd like to call an 'auto-compiler', because it makes the compilation process significantly easier and less cryptic than Python's standard `distutils.build_ext` does. Very similar to GNU's `make` utility, Cyther offers a three step system to compilation:
@@ -32,8 +30,6 @@ Cyther will construct a single file that holds the commands that it will pass-of
 ###3. Compilation
 Cyther will then proceed to execute that exact set of commands. This phase also takes several very intelligent arguments to dynamically run and time the code as if the compiled code were 'interpretable'. This process is also extremely fast with very minimal overhead.
 
-
-
 ## A few reasons why you may want to use Cyther
 
 1. Cyther's method for finding the 'include' and 'runtime' libraries is very sophisticated. Combining regex with a `which` like utility, Cyther will systematically search for the correct directories to use.
@@ -44,16 +40,11 @@ Cyther will then proceed to execute that exact set of commands. This phase also 
 6. You will never, *ever*, see the infamous `vcvarsall.bat not found` error. Not only is it cryptic, but it has many different underlying causes, meaning the user is very lucky if they've solved it.
 7. Cyther can be used from the Python level, as it has a full API and can be imported.
 
-
-
 ### What Cyther is NOT
-
 
 * Cyther is not a replacement for distutils' or setuptools' `build_ext` systems
 * Cyther is not meant to be used in a setup.py script for developers to use it to install source files on a user's machine
 * Cyther should not be used for important / critical pieces of software, ***yet***
-
-
 
 ## How to use
 
@@ -69,53 +60,42 @@ same can be done with:
 
 And as expected, one can call `$ cyther -h` for all the argument help they need. See below.
 
-
-
 ### Raw examples (to be better explained later)
 
-$ cyther build example.pyx
-    Constructs an importable dll (pyd|so) of name `example.pyd`
+`$ cyther build example.pyx`
+    Constructs an importable dll (pyd|so) of name `example.pyd` or `example.so`, depending on your machine
 
-
-$ cyther build example.pyx>{c}
+`$ cyther build example.pyx>{c}`
     Compiles `example.pyx` into the c file of the same name: `example.c`
 
-
-$ cyther build example.pyx>example.c
+`$ cyther build example.pyx>example.c`
     This does the same thing as the previous command, just more clear
 
-
-$ cyther build example.pyx>{@output_name}
+`$ cyther build example.pyx>{@output_name}`
     Creates a dll and calls it `output_name.pyd`
 
-
-$ cyther build (example.o)big_program.py>{pyd} example.pyx>{o}
+`$ cyther build (example.o)big_program.py>{pyd} example.pyx>{o}`
     Compile `example.pyx` into an object file of name `example.o`
     Use this object file and link to big_program.o once you get there
     Then make dll by linking
 
+`$ cyther build (?example.o)big_program.py>{pyd}`
+If you were given the example.o file you would use this command
 
-$ cyther build (?example.o)big_program.py>{pyd}
-    If you were given the example.o file you would use this command
-
-
-$ cyther build example.pyx>example.o{^locally}
-$ cyther build example.pyx>{o}{^locally}
-$ cyther build example.pyx>{o,^locally}
+`$ cyther build example.pyx>example.o{^locally}`
+`$ cyther build example.pyx>{o}{^locally}`
+`$ cyther build example.pyx>{o,^locally}`
     These three commands do exactly the same thing
     The last one makes the most sense
 
-
 Notes:
 
-Dependant files can be in any position relative to the user
+Dependent files can be in any position relative to the user:
 
-The structure of the {} operator:
-    {type,@name,^where,/directory}
-        where: local, cache, obfuscate
-        /directory could use both forward-slashes or backslashes
-
-
+>The structure of the {} operator:
+>    {type,@name,^where,/directory}
+>        where: local, cache, obfuscate
+>        /directory could use both forward-slashes or backslashes
 
 You can also write something like this to execute tests directly after the build procedure
 
@@ -143,7 +123,10 @@ You can also write something like this to execute tests directly after the build
 	print(a)
 	'''
 
-The `@Cyther` line tells Cyther that it should extract the code after it in the single quoted multi-line string and execute it if the build passed. One can also tell Cyther to time the `@Cyther` code, returning an IPython-esque timing message. Here are a few examples of how to use these features.
+The `@Cyther` line tells Cyther that it should extract the code after it in
+the single quoted multi-line string and execute it if the build passed. One
+can also tell Cyther to time the `@Cyther` code, returning an IPython-esque
+timing message. Here are a few examples of how to use these features.
 
 The wonderful `-x` option, and its output to `stdout`
 
@@ -155,29 +138,25 @@ The `-t` option is also super helpful
 	$ cytherize example_file.pyx -t
 	10000 loops, best of 3: (2.94e-06) sec per loop
 
-
-
 ## The help text of Cyther
 
     $ cyther --help
 
-
-
 ### Assumptions Cyther makes about your system
 
-Cyther, like everything else, isn't perfect. Currently for it to function properly, it needs to make a few assumptions of your development environment. All these quirks are listed
-below. I strongly recommend that you look them over before using Cyther. In the
-near future I hope to make Cyther as polished as possible, and bring the list of assumptions listed below
-to a minimum. Future plans can be found in the `TODO.txt` I have included with the project.
-
+Cyther, like everything else, isn't perfect. Currently for it to function
+properly, it needs to make a few assumptions of your development environment.
+All these quirks are listed below. I strongly recommend that you look them
+over before using Cyther. In the near future I hope to make Cyther as polished
+as possible, and bring the list of assumptions listed below to a minimum.
+Future plans can be found in the to-do file I have included with the project.
 
 1. gcc is installed, and accessible from the terminal
 2. Your Python version supports `shutil.which`
 3. Your environment path variable is able to be found by `shutil.which`
-4. `distutils` is able to find the Python runtime static library (usually `libpythonXY.a` or `libpythonXY.so`)
+4. `distutils` is able to find the Python runtime static library
+(usually `libpythonXY.a` or `libpythonXY.so`)
 5. Windows will support gcc compiled C code
-
-
 
 ### The environment used to develop Cyther
 
@@ -187,23 +166,35 @@ to a minimum. Future plans can be found in the `TODO.txt` I have included with t
 4. Ubuntu platforms tested using a local Xubuntu machine
 5. GCC version 4.9.3
 
-
 ### Miscellaneous
 
 #### Backstory
 
-Python's standard distutils library is weakly defined when it comes to it's `build_ext` functionality *(big claim? Look at the code for yourself)*. On windows specifically, there are many errors that never seem to be addressed regarding finding and using Microsoft Visual C++ redistributables. StackOverflow is littered with these kinds of errors, piling duplicate question on duplicate question. In many instances, as I believe I had mentioned before, there are many underlying causes to these errors, and the individual errors tell you absolutely nothing about the problem. Getting to the bottom of it was what inspired me to write Cyther.
+Python's standard distutils library is weakly defined when it comes to it's
+`build_ext` functionality *(big claim? Look at the code for yourself)*.
+On windows specifically, there are many errors that never seem to be addressed
+regarding finding and using Microsoft Visual C++ redistributables.
+StackOverflow is littered with these kinds of errors, piling duplicate
+question on duplicate question. In many instances, as I believe I had
+mentioned before, there are many underlying causes to these errors, and the
+individual errors tell you absolutely nothing about the problem. Getting to
+the bottom of it was what inspired me to write Cyther.
 
-Cyther is my humble attempt* at bridging this gap, and still offering a piece of software that a beginner to Python can use. I intend for Cyther to be used by people who simply want to compile a set of files for their own use. Cyther explicitly avoids distutils' esoteric compilation system. *(I know, I really live on the edge huh?)*
+Cyther is my humble attempt* at bridging this gap, and still offering a piece
+of software that a beginner to Python can use. I intend for Cyther to be used
+by people who simply want to compile a set of files for their own use. Cyther
+explicitly avoids distutils' esoteric compilation system.
+*(I know, I really live on the edge huh?)*
 
 #### Contact + Reporting Info
 
-If you notice any bugs or peculiarities, please report them to our bug tracker, it will
-help us out a lot!
+If you notice any bugs or peculiarities, please report them to our bug
+tracker, it will help us out a lot!
 
     https://github.com/nickpandolfi/Cyther/issues
 
-If you have any questions or concerns, or even any suggestions, don't hesitate to email me at:
+If you have any questions or concerns, or even any suggestions,
+don't hesitate to email me at:
 
     npandolfi@wpi.edu
 
