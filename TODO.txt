@@ -36,6 +36,7 @@ TO-DO (before next version)
         Put a basic overview docstring at the beginning of each file (what is each file for?)
 
     TECHNICAL:
+        ON XUBUNTU: LOOK HOW CYTHON DOES IT AND SEE WHAT FLAGS YOU ARE MISSING!
         >>> Make CytherError only apply if the error was the user's fault!! <<<
         Make cytherize and getIncludeAndRuntime shorter
             Change the name of cytherize to something more meaningful
