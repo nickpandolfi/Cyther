@@ -1,4 +1,4 @@
-
+from .files import FileInfo
 
 INSTRUCTION_HAS_WHITESPACE = "Cannot parse an instruction with whitespace"
 INCOMPLETE_SET = "There must be one set of '{},{}' to finish " \
@@ -15,6 +15,10 @@ MULTIPLE_CONFLICTING_BUILD_OPTIONS = "There can only be one of each " \
                                      "building option per instruction"
 EMPTY_PARAMETER = "Cannot have an empty parameter"
 EMPTY_KEYWORD_PARAMETER = "Cannot have an empty keyword parameter"
+MULTIPLE_FLOW_OPERATORS = "An instruction can only have one '>' in the " \
+                          "task name"
+FLOW_OPERATOR_ON_ENDS = "Greater than character (flow operator) must " \
+                        "seperate filenames"
 
 
 def get_contents_between(string, opener, closer):
@@ -86,6 +90,20 @@ def check_building_options(string):
     return ret
 
 
+def check_flow_operator(string):
+    greater_than_count = string.count('>')
+    if greater_than_count > 1:
+        raise ValueError(MULTIPLE_FLOW_OPERATORS)
+    elif (string[0] == '>') or (string[-1] == '>'):
+        raise ValueError(FLOW_OPERATOR_ON_ENDS)
+    else:
+        if greater_than_count == 1:
+            ret = True
+        else:
+            ret = False
+    return ret
+
+
 ###############################################################################
 
 
@@ -128,7 +146,6 @@ def parseBuildingOptions(string):
                 raise ValueError(MULTIPLE_CONFLICTING_BUILD_OPTIONS)
             building_directory = option[1:]
 
-
     string = string[:string.index('{')]
     return output_directory, output_format, building_directory, string
 
@@ -139,23 +156,36 @@ def parseString(string):
     output_directory = None
     output_format = None
     building_directory = None
+    output_name = None
 
     check_whitespace(string)
 
     there_are_dependencies = check_dependencies(string)
     if there_are_dependencies:
-        buildable_dependencies,\
-            given_dependencies,\
+        buildable_dependencies, \
+            given_dependencies, \
             string = parseDependencies(string)
 
     there_are_options = check_building_options(string)
     if there_are_options:
-        output_directory,\
-            output_format,\
+        output_directory, \
+            output_format, \
             building_directory, string = parseBuildingOptions(string)
 
+    if string[0] == '>':
+        string = string[1:]
+    if string[-1] == '>':
+        string = string[:-1]
+
+    is_a_flow_operator = check_flow_operator(string)
+    if is_a_flow_operator:
+        greater_than_location = string.index('>')
+        output_name = string[greater_than_location + 1:]
+        string = string[:greater_than_location]
+
     ret = {
-        'task_name': string,
+        'input_name': string,
+        'output_name': output_name,
         'buildable_dependencies': buildable_dependencies,
         'given_dependencies': given_dependencies,
         'output_format': output_format,
@@ -163,3 +193,58 @@ def parseString(string):
         'output_directory': output_directory
     }
     return ret
+
+
+class Instruction:
+    def __init__(self, init=None):
+        self.output_name = None
+        self.output_name = None
+        self.__progression = None
+        # Is self.progression and starting point File objects?
+
+        self.build_directory = None
+
+        self.buildable_dependencies = []
+        self.given_dependencies = []
+
+        if init and isinstance(init, str):
+            parseString(init)
+
+    def processAndSetDefaults(self):
+        return
+
+    @staticmethod
+    def fileify(string):
+        return FileInfo(string)
+
+    def setBuildableDependencies(self, dependencies):
+        self.buildable_dependencies = dependencies
+
+    def setGivenDependencies(self, dependencies):
+        self.given_dependencies = dependencies
+
+    def setBuildDirectory(self, directory):
+        self.build_directory = directory
+
+    def setInput(self, input_name):
+        if isinstance(input_name, str):
+            self.output_name = self.fileify(input_name)
+        else:
+            self.output_name = input_name
+
+    def setOutput(self, output_name):
+        if isinstance(output_name, str):
+            self.output_name = self.fileify(output_name)
+        else:
+            self.output_name = output_name
+
+
+
+class InstructionManager:
+    def parseInstruction(self, instruction):
+        # This will parse a given string and automatically add an instruction!
+        pass
+
+    def parseInstructions(self, instructions):
+        for instruction in instructions:
+            self.parseInstruction(instruction)

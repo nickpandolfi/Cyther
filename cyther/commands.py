@@ -15,45 +15,6 @@ Starting Point (task_name is the filename!)
 """
 
 
-class Instruction:
-    def __init__(self, init=None):
-        self.starting_point = None
-        self.progression = None
-
-        self.build_directory = None
-
-        self.buildable_dependencies = None
-        self.given_dependencies = None
-
-        if init and isinstance(init, str):
-            self.parseString(init)
-
-    def setDefaults(self):  # Also error checks
-        return
-
-
-
-class InstructionManager:
-    """
-    An intelligent container for multiple instructions
-    This contains methods for dependency resolution order
-    """
-
-    # TODO Is Instruction a better name than FileInfo?
-    def parseInstruction(instruction):
-        """
-        Parses `example.pyx>example.c` into information and stores it in FileInfo
-        """
-        pass
-
-    def parseInstruction(instructions):
-        """
-        for each instruction in the list of instructions, parse it
-        return a collection of FileInfo objects
-        """
-        pass
-
-
 def furtherArgsProcessing(args):
     """
     Converts args, and deals with incongruities that argparse couldn't handle
