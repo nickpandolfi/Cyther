@@ -1,5 +1,4 @@
 
-import os
 from .definitions import NOT_NEEDED_MESSAGE, RESPONSES_ERROR
 
 

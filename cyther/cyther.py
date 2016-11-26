@@ -1,4 +1,3 @@
-# Only those who risk going too far, can truly find out how far one can go
 
 import time
 import re

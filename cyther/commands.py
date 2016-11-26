@@ -6,21 +6,31 @@ from .arguments import parser
 from .objects import SimpleCommand
 
 
+"""
+(example_file.o)[yolo.pyx]{^local} example_file.pyx{o}
+
+Starting Point (task_name is the filename!)
+    [Intermediate steps]
+    Endpoint
+"""
+
+
 class Instruction:
     def __init__(self, init=None):
-        if isinstance(init, str):
-            pass
-        else:
-            raise Exception()
-        """
-        Adding the individual fields:
+        self.starting_point = None
+        self.progression = None
 
-        include
-        c_name
-        file_path
-        object_file_name
-        output_name
-        """
+        self.build_directory = None
+
+        self.buildable_dependencies = None
+        self.given_dependencies = None
+
+        if init and isinstance(init, str):
+            self.parseString(init)
+
+    def setDefaults(self):  # Also error checks
+        return
+
 
 
 class InstructionManager:
