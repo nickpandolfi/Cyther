@@ -1,12 +1,19 @@
-import os
 
+"""
+This module holds the utilities necessary to process full path names and hold
+their parsed information, so other tools can easily extract this information
+(i.e. extension), and hold the information in a containers better designed
+for it
+"""
+
+import os
 
 # TODO Change all 'filename's to 'filepath's
 
 
 def getFullPath(filename, *, error=True):
     """
-    Gets the full path of a filename
+    Gets the full path of a filename relative to the drive it is on
     """
     cwd = os.getcwd()
     if os.path.exists(filename) and (filename not in os.listdir(cwd)):
@@ -23,10 +30,18 @@ def getFullPath(filename, *, error=True):
 
 
 def getParentDir(filename):
+    """
+    This will return just the name of the parent directory of
+    the given file path
+    """
     return os.path.basename(os.path.dirname(filename))
 
 
 def injectCache(filename):
+    """
+    This will inject a '__cythercache__' into a file path before the filename
+    and after the parent directory, essentially putting it in the cache
+    """
     if getParentDir(filename) == '__cythercache__':
         raise FileExistsError("Can't put a cache in another cache")
     new_filename = os.path.join(os.path.dirname(filename),
@@ -36,6 +51,9 @@ def injectCache(filename):
 
 
 def joinExt(name, ext):
+    """
+    Similar to os.path.join, except it joins a file name and an extension
+    """
     if ext[0] == '.':
         ret = name + ext
     else:
@@ -44,6 +62,9 @@ def joinExt(name, ext):
 
 
 def changeFileName(filename, new_name):
+    """
+    Changes the name of the file with the extension from the given path name
+    """
     dirname = os.path.dirname(filename)
     old_basename = os.path.basename(filename)
     new_basename = joinExt(new_name, os.path.splitext(old_basename)[1])
@@ -51,14 +72,23 @@ def changeFileName(filename, new_name):
 
 
 def changeFileDir(filename, dirname):
+    """
+    Changes the parent directory of the given path name
+    """
     return os.path.join(dirname, os.path.basename(filename))
 
 
 def changeFileExt(filename, ext):
+    """
+    Changes the extension of the file to ext
+    """
     return joinExt(os.path.splitext(filename)[0], ext)
 
 
-class FileInfo:
+class File:
+    """
+    Holds all of the information and methods necessary to process full paths
+    """
     def __init__(self, path):
         """If the path doesn't yet exist, it must be a FULL path!!"""
         full_path = getFullPath(path, error=False)
@@ -74,6 +104,10 @@ class FileInfo:
         return self.__file_path
 
     def convertTo(self, *, directory=None, name=None, extension=None):
+        """
+        Returns a different object with the specified changes applied to
+        it. This object is not changed in the process.
+        """
         path = self.getPath()
         if directory:
             path = changeFileDir(path, directory)
@@ -81,16 +115,17 @@ class FileInfo:
             path = changeFileName(path, name)
         if extension:
             path = changeFileExt(path, extension)
-        return FileInfo(path)
+        return File(path)
 
-    def isOutDated(self, output_name):
+    def isOutDated(self, output_file):
         """
-            Figures out if Cyther should compile the given file by checking the source
-            code and compiled object
-            """
-        if os.path.exists(output_name):
+        Figures out if Cyther should compile the given FileInfo object by
+        checking the both of the modified times
+        """
+        path = output_file.getPath()
+        if os.path.exists(path):
             source_time = os.path.getmtime(self.getPath())
-            output_time = os.path.getmtime(output_name)
+            output_time = os.path.getmtime(path)
             if source_time > output_time:
                 return True
         else:
@@ -100,24 +135,38 @@ class FileInfo:
     def isUpdated(self, previous_modified_time):
         # TODO Why didn't I use abspath or normpath?
         """
-        Figures out if the file had previously errored and hasn't been fixed since
+        Figures out if the file had previously errored and hasn't
+        been fixed since given a numerical time
         """
         modified_time = os.path.getmtime(self.getPath())
         valid = modified_time > previous_modified_time
         return valid
 
     def getName(self):
+        """
+        Gets the name of the file as the parent directory sees it
+        (ex. 'example.py')
+        """
         return self.__file_name
 
     def getType(self):
+        """
+        Returns the type of the file (its extension) with the '.'
+        """
         return self.__file_type
 
     def getLocation(self):
+        """
+        Returns the parent directory of the file
+        """
         return self.__file_location
 
     def getPath(self):
+        """
+        Returns the full file path to the file, including the drive
+        """
         return self.__file_path
 
 if __name__ == '__main__':
-    file = FileInfo('README.md')
+    file = File('README.md')
     print(file.getType())
