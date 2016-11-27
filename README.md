@@ -1,6 +1,8 @@
+
 # Cyther: The Cross-Platform Cython/Python/C Auto-Compiler
 
 ## Important
+
 Cyther is currently under temporary renovation and this README does not apply just yet. It represents the future `0.8.0` version, offering true cross-platform compatibility and the new and improved intermediate `makefile` system. I am making the README first, then developing the code based around that. Why you ask? Because I have no idea what I'm doing. That's why.
 
 [![Repository](https://badge.fury.io/py/cyther.svg)](https://pypi.python.org/pypi/Cyther)
@@ -22,12 +24,15 @@ Cyther is currently under temporary renovation and this README does not apply ju
 Cyther is a tool used to elegantly compile C and Cython *(and Python for that matter)*. Cyther is what I'd like to call an 'auto-compiler', because it makes the compilation process significantly easier and less cryptic than Python's standard `distutils.build_ext` does. Very similar to GNU's `make` utility, Cyther offers a three step system to compilation:
 
 ###1. Configuration
+
 Cyther will guide you through the configuration of your own development environment. It will check to make sure that all of it's dependencies are installed correctly, and are *automatically* accessible.
 
 ###2. Initialization
+
 Cyther will construct a single file that holds the commands that it will pass-off to the actual underlying compilers to handle. It is here where you can see what is happening to compile your source code. This can be used as an educational tool.
 
 ###3. Compilation
+
 Cyther will then proceed to execute that exact set of commands. This phase also takes several very intelligent arguments to dynamically run and time the code as if the compiled code were 'interpretable'. This process is also extremely fast with very minimal overhead.
 
 ## A few reasons why you may want to use Cyther

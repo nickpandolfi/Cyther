@@ -12,14 +12,6 @@ engines:
         python:
           python_version: 3
 
-  markdownlint:
-    enabled: true
-    checks:
-      MD012:
-        enabled: false
-      MD013:
-        enabled: false
-
 ratings:
   paths:
   - "cyther/**"
