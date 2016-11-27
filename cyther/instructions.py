@@ -1,4 +1,11 @@
-from .files import FileInfo
+
+"""
+This module holds the necessary functions and object definitions to handle and
+process basic instructions, whether they originate from an api usage or from
+the terminal. This is where both functionalities merge. Serious error checking.
+"""
+
+from .files import File
 
 INSTRUCTION_HAS_WHITESPACE = "Cannot parse an instruction with whitespace"
 INCOMPLETE_SET = "There must be one set of '{},{}' to finish " \
@@ -19,9 +26,16 @@ MULTIPLE_FLOW_OPERATORS = "An instruction can only have one '>' in the " \
                           "task name"
 FLOW_OPERATOR_ON_ENDS = "Greater than character (flow operator) must " \
                         "seperate filenames"
+INCORRECT_INSTRUCTION_INIT = "Instruction doesn't accept arguments " \
+                             "of type '{}', only string or individual " \
+                             "parameter setting"
+NO_INPUT_FILE = "Must have an input file specified for each instruction"
 
 
 def get_contents_between(string, opener, closer):
+    """
+    Get the contents of a string between two characters
+    """
     opener_location = string.index(opener)
     closer_location = string.index(closer)
     content = string[opener_location + 1:closer_location]
@@ -32,11 +46,20 @@ def get_contents_between(string, opener, closer):
 
 
 def check_whitespace(string):
+    """
+    Make sure thre is no whitespace in the given string. Will raise a
+    ValueError if whitespace is detected
+    """
     if string.count(' ') + string.count('\t') + string.count('\n') > 0:
         raise ValueError(INSTRUCTION_HAS_WHITESPACE)
 
 
 def check_enclosing_characters(string, opener, closer):
+    """
+    Makes sure that the enclosing characters for a definition set make sense
+    1) There is only one set
+    2) They are in the right order (opening, then closing)
+    """
     opener_count = string.count(opener)
     closer_count = string.count(closer)
     total = opener_count + closer_count
@@ -55,6 +78,10 @@ def check_enclosing_characters(string, opener, closer):
 
 
 def check_parameters(parameters, symbols):
+    """
+    Checks that the parameters given are not empty. Ones with prefix symbols
+    can be denoted by including the prefix in symbols
+    """
     for param in parameters:
         if not param:
             raise ValueError(EMPTY_PARAMETER)
@@ -67,6 +94,10 @@ def check_parameters(parameters, symbols):
 
 
 def check_dependencies(string):
+    """
+    Checks the dependencies constructor. Looks to make sure that the
+    dependencies are the first things defined
+    """
     opener, closer = '(', ')'
     check_enclosing_characters(string, opener, closer)
     if opener in string:
@@ -79,6 +110,10 @@ def check_dependencies(string):
 
 
 def check_building_options(string):
+    """
+    Checks the building options to make sure that they are defined last,
+    after the task name and the dependencies
+    """
     opener, closer = '{', '}'
     check_enclosing_characters(string, opener, closer)
     if opener in string:
@@ -91,6 +126,11 @@ def check_building_options(string):
 
 
 def check_flow_operator(string):
+    """
+    Checks the flow operator ('>') to mke sure that it:
+    1) Is non empty
+    2) There is only one of them
+    """
     greater_than_count = string.count('>')
     if greater_than_count > 1:
         raise ValueError(MULTIPLE_FLOW_OPERATORS)
@@ -108,6 +148,10 @@ def check_flow_operator(string):
 
 
 def parseDependencies(string):
+    """
+    This function actually parses the dependencies are sorts them into
+    the buildable and given dependencies
+    """
     contents = get_contents_between(string, '(', ')')
     unsorted_dependencies = contents.split(',')
     check_parameters(unsorted_dependencies, ('?',))
@@ -125,6 +169,10 @@ def parseDependencies(string):
 
 
 def parseBuildingOptions(string):
+    """
+    This will parse and sort the building options defined in the '{}'
+    constructor. Will only allow one of each argument
+    """
     contents = get_contents_between(string, '{', '}')
     unsorted_options = contents.split(',')
     check_parameters(unsorted_options, ('@', '/', '\\', '^'))
@@ -151,6 +199,11 @@ def parseBuildingOptions(string):
 
 
 def parseString(string):
+    """
+    This function takes an entire instruction in the form of a string, and
+    will parse the entire string and return a dictionary of the fields
+    gathered from the parsing
+    """
     buildable_dependencies = []
     given_dependencies = []
     output_directory = None
@@ -195,27 +248,71 @@ def parseString(string):
     return ret
 
 
+# TODO Privatize all of the attributes
 class Instruction:
+    """
+    Holds the necessary information and utilities to process and default check
+    the different fields. Provides a merging for the api and terminal
+    functionality
+    """
     def __init__(self, init=None):
-        self.output_name = None
-        self.output_name = None
-        self.__progression = None
-        # Is self.progression and starting point File objects?
-
-        self.build_directory = None
-
+        self.input = None
+        # Steps inbetween the input and output need their own individual
+        # instructions to be able to elaborate on them!
+        self.output = None
         self.buildable_dependencies = []
         self.given_dependencies = []
 
-        if init and isinstance(init, str):
-            parseString(init)
+        # Not critical information, information is obtained from ^ attributes
+        # These attribs below are 'overwriters' in a sense
+        self.output_format = None
+        self.build_directory = None
+
+        if init:
+            if isinstance(init, str):
+                ret = parseString(init)
+                self.input = File(ret['input_name'])
+                self.output = File(ret['output_name'])
+                self.output_format = ret['output_format']
+                self.buildable_dependencies = ret['buildable_dependencies']
+                self.given_dependencies = ret['given_dependencies']
+                self.building_directory = ret['building_directory']
+                self.output_directory = ret['output_directory']
+            else:
+                raise ValueError(INCORRECT_INSTRUCTION_INIT.format(type(init)))
+        else:
+            pass  # If init is not specified, the user must use the methods!
 
     def processAndSetDefaults(self):
-        return
+        """
+        The heart of the Instruction object. This method will make sure that
+        all fields not entered will be defaulted to a correct value. Also
+        checks for incongruities in the data entered, if it was by the user.
+        """
+        # INPUT, OUTPUT, GIVEN + BUILDABLE DEPS
+        if not self.input:
+            raise ValueError(NO_INPUT_FILE)
 
-    @staticmethod
-    def fileify(string):
-        return FileInfo(string)
+        if not self.output:
+            # Build directory must exist, right?
+            if not self.build_directory:
+                File()
+            pass  # Can it be built? / reference self.output_format for this
+        else:
+            pass  # if it is not congruent with other info provided
+
+        if not self.build_directory:
+            pass  # Initialize it
+
+        for dependency in self.given_dependencies:
+            pass  # Check if the dependcy exists
+
+        if self.output_format != self.output.getType():
+            raise ValueError("")
+        # Given dependencies must actually exist!
+        # output_name must be at a lower extenion level than input_name
+        # The build directory
+        return
 
     def setBuildableDependencies(self, dependencies):
         self.buildable_dependencies = dependencies
@@ -228,15 +325,15 @@ class Instruction:
 
     def setInput(self, input_name):
         if isinstance(input_name, str):
-            self.output_name = self.fileify(input_name)
+            self.input = File(input_name)
         else:
-            self.output_name = input_name
+            self.input = input_name
 
     def setOutput(self, output_name):
         if isinstance(output_name, str):
-            self.output_name = self.fileify(output_name)
+            self.output = File(output_name)
         else:
-            self.output_name = output_name
+            self.output = output_name
 
 
 

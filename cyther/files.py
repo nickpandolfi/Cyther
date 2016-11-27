@@ -10,6 +10,8 @@ import os
 
 # TODO Change all 'filename's to 'filepath's
 
+NULL_FILE_NAME = 'NULL.abc'
+
 
 def getFullPath(filename, *, error=True):
     """
@@ -87,13 +89,20 @@ def changeFileExt(filename, ext):
 
 class File:
     """
-    Holds all of the information and methods necessary to process full paths
+    Holds all of the information and methods necessary to process full paths.
+    Takes a path name and an optional constructor to build a file name on
+    if it does not exist already.
     """
-    def __init__(self, path):
+    def __init__(self, path=None, construction_dir=None):
         """If the path doesn't yet exist, it must be a FULL path!!"""
-        full_path = getFullPath(path, error=False)
-        if not full_path:
-            full_path = path
+        if path:
+            full_path = getFullPath(path, error=False)
+            if not full_path:
+                if not construction_dir:
+                    construction_dir = os.getcwd()
+                full_path = os.path.join(construction_dir, path)
+        else:
+            full_path = os.path.join(os.getcwd(), NULL_FILE_NAME)
 
         self.__file_name = os.path.basename(full_path)
         self.__file_type = os.path.splitext(full_path)[1]
@@ -103,7 +112,8 @@ class File:
     def __str__(self):
         return self.__file_path
 
-    def convertTo(self, *, directory=None, name=None, extension=None):
+    def convertTo(self, *, directory=None, name=None, extension=None,
+                  inject_cache=False):
         """
         Returns a different object with the specified changes applied to
         it. This object is not changed in the process.
@@ -115,6 +125,8 @@ class File:
             path = changeFileName(path, name)
         if extension:
             path = changeFileExt(path, extension)
+        if inject_cache:
+            path = injectCache(path)
         return File(path)
 
     def isOutDated(self, output_file):
