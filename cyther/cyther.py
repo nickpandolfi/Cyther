@@ -3,7 +3,7 @@ import time
 import re
 
 from .searcher import POUND_EXTRACT, TRIPPLE_EXTRACT
-from .launcher import multiCall, printCommands
+from .launcher import multiCall, _print_commands
 from .files import isUpdated, isOutDated
 from .commands import furtherArgsProcessing, processFiles, makeCommands
 from .definitions import WAIT_FOR_FIX, SKIPPED_COMPILATION, INTERVAL,\
@@ -39,7 +39,7 @@ def initiateCompilation(args, file):
     ####commands = finalizeCommands(args, file)
     commands = makeCommands(0, file)
     if not args['concise'] and args['print_args']:
-        printCommands(*commands)
+        _print_commands(*commands)
         if args['watch']:
             args['print_args'] = False
     response = multiCall(*commands)

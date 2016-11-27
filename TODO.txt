@@ -2,6 +2,8 @@
 MAINTAIN
 
     Keep __all__ up to date with all the useful functions
+        Have an __all__ for each module
+        Privatize all objects not in __all__
 
     Comment and properly docstring everything
 
@@ -12,38 +14,40 @@ MAINTAIN
     Make sure that you constantly search for the assumptions cyther makes
 
     Make my getIncludeAndRuntime() function is up to date with build_ext in distutils
+        This information needs to be hardcoded, where else can it be found?
+        # TODO Where can we find a reliable source ^
 
     Any name cool badges to add? Make sure you got all the recent and useful ones
     Use http://shields.io/ to generate non changing badges
 
-    Make sure the test_cyther.py file is updated to include the latest features (test everything!)
+    Make sure the test file is updated to include the latest features (test everything!)
 
 
 TO-DO (before next version)
 
     HELP TEXT:
         Have cyther's help text print its version!
+        Have each utility (cython, gcc, python) print its executable AND its version in parenthesis in the help text!
 
     DEPLOYMENT:
         Figure out how to do a github release!
-        Is it possible to webhook pypi into github??
-        Keep an eye on Code Climate, Travis
-        Follow as many conventions as possible in the bookmark 'PYPI tutorial'
+        Follow as many conventions as possible in the bookmarks set
 
-    DOCS:
-        Find the best format for the docstrings that is the most universal (What does sphinx use?)
-            Make all documentation more readable and helpful
-        Put a basic overview docstring at the beginning of each file (what is each file for?)
+    SERVICES:
+        Unhook cyther from other unnecessary services
+            Codacy, Waffle, CodeShip, AppVeyor
+        Does the repo token for travis even do anything?
+        Keep an eye on Code Climate, Travis
 
     TECHNICAL:
+        Get 'where' to find libpython!!
+        Do we have to include a script to setup.py as well as the console script?
         ON XUBUNTU: LOOK HOW CYTHON DOES IT AND SEE WHAT FLAGS YOU ARE MISSING!
         >>> Make CytherError only apply if the error was the user's fault!! <<<
         Make cytherize and getIncludeAndRuntime shorter
             Change the name of cytherize to something more meaningful
-        What is the use of the vcruntime.dll on windows installations? Does it need to be included?
+        What is the use of the vcruntime140.dll on windows installations? Does it need to be included?
         Make sure a new window doesnt get spawned on the subprocess calls (on some systems it does, some it doesnt)
-        Implement the makefile system
-            But for now make sure it created a file with just commands
         Get it working on Xubuntu ---> should cascade fix many other errors
 
     README:
@@ -53,17 +57,15 @@ TO-DO (before next version)
         Change the descripting of the readme so that it doesn't say that it is directly a compiler, but a processor instead
             It technically IS a compiler, but really, it weilds both compilers and ties them together
             User doesn't have to know WTF they are doing in order for it to completely work
-            Offers partial compiling unlike distutils
-            Dont need to know how to use distutils, instead goes simpler; How to use a makefile (tons of documentation)
-            Exists because the definition of distutil's build_ext system is very weak
         Say that if there is an error, to email me the output of the '--test' option
+            Can this info be sent automatically in bytes?
+        Use assert in testing file
+        Installation instructions into README
+        Maybe have a BASIC and an ADVANCED section? Or just progress through the file...
 
 FIX
 
     Theres an odd bug where "INSTALL_REQUIRES = ['cython']" will install the non-latest version of cython.
-
-    Sometimes the warnings from gcc or cython are percieved to be errors, because they go through the same pathway.
-        Can this be sorted out by regex style pattern recog??
 
 NEW FEATURES
 
@@ -82,8 +84,6 @@ NEW FEATURES
 
     Get the arguments of run(timer=True) to work properly, or be automatic, like IPython
 
-    Get where to find libpython!!
-
     Instead of the include option, have the system automatically detect the python {}.get_include() modules
 
     Say the search for the directories necessary for the runtime compilation fails, and returns nothing. Then run the
@@ -95,16 +95,6 @@ NEW FEATURES
     Make the example_file.pyx a prototype for the SuperObject system. Implementing live testing of it?
 
     DLLTOOL regex algorithm launched in a separate thread
-
-    Use assert in testing file
-
-    Installation instructions into README
-
-    Why isnt `cyther test` working? ----> Replicate issue on xubuntu
-
-    Unhook cyther from other unnecessary services
-
-    Does the repo token for travis even do anything?
 
 
 LOW PRIORITY
@@ -132,6 +122,10 @@ BEFORE DEPLOY (for me)
 
 QUESTIONS (for me to ask myself)
 
+
+
+    Find the best format for the docstrings that is the most universal (What does sphinx use?)
+
     Any other commands to `entry_points` other than `console-script`?
 
     http://www.linux.org/threads/gnu-binutils.6544/
@@ -157,11 +151,3 @@ QUESTIONS (for me to ask myself)
     What about packaging the libraries with cyther?? Is cross compiling possible / a good idea?
 
     What is the difference between os.name and sys.platform and platform.platform?
-
-
-1) Must read the commands in from command line
-2) Must parse them and create directed graphs
-3) Dependency resolver
-4) Generate the set of commands
-
-
