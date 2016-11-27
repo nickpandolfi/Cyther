@@ -2,8 +2,9 @@ import platform
 import sys
 import os
 import site
-
 import textwrap
+
+# TODO Get all the functions used there and bring them here
 import distutils.sysconfig
 import distutils.msvccompiler
 
@@ -11,6 +12,12 @@ from .tools import CytherError
 from .searcher import where, sift
 from .launcher import call
 from .definitions import MISSING_INCLUDE_DIRS, MISSING_RUNTIME_DIRS
+
+"""
+sys.exec_prefix
+site.USER_BASE
+sys.prefix
+"""
 
 
 def dealWithMissingStaticLib(message):
@@ -90,15 +97,16 @@ def getIncludeAndRuntime():
             library_dirs.append(user_lib)
 
     ret_object = (include_dirs, library_dirs)
-
-    filter_that = True
-    if filter_that:
-        for x, obj in enumerate(ret_object):
-            for y, item in enumerate(obj):
-                if not os.path.isdir(item):
-                    del ret_object[x][y]
+    for x, obj in enumerate(ret_object):
+        for y, item in enumerate(obj):
+            if not os.path.isdir(item):
+                del ret_object[x][y]
 
     return ret_object
+
+
+def _filter_non_existing_dirs():
+    pass
 
 
 MAJOR = str(sys.version_info.major)
@@ -145,6 +153,10 @@ DEFAULT_OUTPUT_EXTENSION = '.pyd' if IS_WINDOWS else '.so'
 
 
 PYTHON_EXECUTABLE = where('python')
+'''
+PYTHON_VERSION = call(['python', '--version'],
+                      raise_exception=True).extractVersion()
+'''
 CYTHON_EXECUTABLE = where('cython')
 GCC_EXECUTABLE = where('gcc')
 

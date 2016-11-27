@@ -285,7 +285,7 @@ class Instruction:
 
     def processAndSetDefaults(self):
         """
-        The heart of the Instruction object. This method will make sure that
+        The heart of the 'Instruction' object. This method will make sure that
         all fields not entered will be defaulted to a correct value. Also
         checks for incongruities in the data entered, if it was by the user.
         """
