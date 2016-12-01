@@ -70,6 +70,32 @@ def changeFileExt(filename, ext):
     return joinExt(os.path.splitext(filename)[0], ext)
 
 
+# TODO detect if it is a file or directory fragment
+def detectPath(path, *, isfile=None, isdir=None):
+    """
+    Detect what the path represents. Must provide a single mutually exclusive
+    keyword argument of either 'isdir' or 'isfile', depending on what you
+    want to detect for.
+    """
+    if isfile and isdir:
+        raise ValueError("Cannot specify both 'isfile' and 'isdir'")
+
+    if isfile:
+        exists = os.path.isfile(path)
+        appears_like = bool(getExtension(path))
+    elif isdir:
+        exists = os.path.isdir(path)
+        appears_like = not bool(getExtension(path))
+    else:
+        raise ValueError("Must specify 'isfile' or 'isdir'")
+
+    if exists and not appears_like:
+        raise ValueError("The path exists, but doesn't look like it should")
+
+    result = exists or appears_like
+    return result
+
+
 def getFullPath(path=None, *, must_exist=True, error=True, root=None,
                 absolute=False):
     """
@@ -81,7 +107,6 @@ def getFullPath(path=None, *, must_exist=True, error=True, root=None,
                 raise ValueError("Parameter 'root' must be a full path name")
             path = os.path.join(root, path)
         abspath = os.path.abspath(path)
-
         if must_exist:
             if os.path.exists(abspath):
                 full_path = abspath
@@ -99,42 +124,174 @@ def getFullPath(path=None, *, must_exist=True, error=True, root=None,
     return full_path
 
 
+def getExtension(path):
+    """
+    Fetch the extension of the path name 'path'
+    """
+    return os.path.splitext(path)[EXTENSION]
+
+
+def getName(path):
+    pass
+
+
+def getFileName(path):
+    pass
+
+
+def getDirectory(path):
+    if detectPath(path, isdir=True):
+        directory = path
+    else:
+        directory = os.path.dirname(path)
+    return directory
+
+OVERWRITE_ERROR = "; cannot overwrite without explicit permission"
+
+
+# TODO rename error to make more sense (it only blocks one kind of error)
+def createPath(path=None, *, name=None, ext=None, inject=None, root=None,
+               overwrite=False, exists_error=True, must_exist=False):
+    """
+    Literally magic
+    """
+    if name:
+        if path and hasName(path):
+            if not overwrite:
+                raise ValueError("The path supplied must be a "
+                                 "directory" + OVERWRITE_ERROR)
+
+        if hasExtension(name):
+            if ext:
+                if not overwrite:
+                    raise ValueError("The name supplied must not have "
+                                     "an extension" + OVERWRITE_ERROR)
+                new_name = joinExt(getJustName(name), ext)
+            else:
+                new_name = name
+        else:
+            if ext:
+                new_name = joinExt(name, ext)
+            else:
+                new_name = getJustName(name)
+    else:
+        if detectPath(path, isfile=True):
+            if ext:
+                if not overwrite:
+                    raise ValueError("Can't provide an extension with a full "
+                                     "file name" + OVERWRITE_ERROR)
+                new_name = joinExt(getJustName(name), ext)
+            else:
+                new_name = name
+        else:
+            raise ValueError("The path specified is a directory, and no name "
+                             "was provided; therefore, no name exists "
+                             "to construct off of")
+
+    if root:
+        if not isAbsolute(root):
+            raise ValueError("The root must be an absolute directory "
+                             "if specified")
+        if isAbsolute(path):
+            raise ValueError("The path cannot be absolute as well as the "
+                             "root; cannot add two absolute paths together")
+
+        if path:
+            new_directory = os.path.join(root, os.path.dirname(path))
+        else:
+            new_directory = root
+    else:
+        if path:
+            new_directory = getDirectory(path)
+        else:
+            new_directory = os.getcwd()
+
+    if inject:
+        new_directory = os.path.join(new_directory, inject)
+
+    abspath = os.path.join(new_directory, name)
+    if must_exist:
+        if not os.path.exists(abspath):
+            result = abspath
+        else:
+            if exists_error:
+                raise ValueError("The path '{}' doesn't exist".format(abspath))
+            else:
+                result = None
+    else:
+        result = abspath
+    return result
+
+
 """
-1) Make a function to tell is something is a directory or a file
-    This function could try to autodetect by doing isdir() or isfile()
-2) Make something like dirname(), but it returns the entire directory part
-    (Uses the previous function)
-    Meaning that new_dirname('yolo/swag') would return: 'yolo/swag'
+If inject
+    NEW_DIRECTORY = NEW_DIRECTORY + inject
 
-When combining the two functions, make it so that the following code is run if
-the directory OR the name OR the extension is changed. Run this function,
-then normalize the paths!
+abspath = os.path.join(NEW_DIRECTORY, NEW_NAME)
+if must_exist
+    if abspath exists
+        result = abspath
+    else
+        if exists_error
+            ERROR (The path doesn't exist)
+        else
+            result = None
+else
+    result = abspath
 
+return result
+"""
+
+
+"""
 if name
-    If path has a name already
-        ERROR (It must be a directory)
+    If path and path has a name
+        if not overwrite
+            ERROR (Path must be a directory)
 
     If name has an extension
         if ext is given
-            ERROR (cannot overwrite the name's extension, strip it first)
-        NEW_NAME == name
+            if not overwrite:
+                ERROR (cannot overwrite the name's extension, strip it first)
+            NEW_NAME = name(w/o ext) + given_ext
+        else
+            NEW_NAME = name
     else
-        NEW_NAME == name + given_ext
+        if ext is given
+            NEW_NAME = name + given_ext
+        else
+            NEW_NAME = name(w/o ext)
 else
     if path is a file, extract file name
-        NEW_NAME
+        if ext:
+            if not overwrite:
+                ERROR
+            NEW_NAME = name(w/o ext) + given_ext
+        else:
+            NEW_NAME = name
     else
         ERROR (path is a directory, no name exists)
+"""
+"""
+If root
+    If root is not absolute
+        ERROR (root must be an absolute directory if specified)
+    if path is absolute
+        ERROR (cannot add two absolute paths together...)
 
-If directory
-    NEW_DIRECTORY = directory + dirname(path)
-else
-    If path is a directory
-        NEW_DIRECTORY = path
+    If path
+        NEW_DIRECTORY = root + dirname(path)
     else
-        split the directory off (NEW_DIRECTORY = split off directory)
-
-File(NEW_DIRECTORY, NEW_NAME)
+        NEW_DIRECTORY = root
+else
+    If path
+        path = getDirectory(path)
+        If path is a directory
+            NEW_DIRECTORY = abspath(path)
+        else
+            NEW_DIRECTORY = dirname(path)
+    else
+        NEW_DIRECTORY = cwd
 """
 
 
