@@ -1,6 +1,6 @@
 # I'm just a small-town (girl) initialization file
 
-from .cyther import core, CytherError, run
+from .processing import core, CytherError, run
 from .core import info, configure, test, setup, make, clean, purge
 
 
