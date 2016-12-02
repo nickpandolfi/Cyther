@@ -1,3 +1,10 @@
+
+"""
+This module holds the different functions for testing different aspects of
+Cyther. It tets Cyther's main operation as well as the underlying utilities
+Cyther uses.
+"""
+
 import os
 import subprocess
 
@@ -7,13 +14,12 @@ from .files import createPath
 
 
 def test_cyther():
-    #An info call to display helpful info in log
+    """
+    Tests Cyther's entire core operation
+    """
     cyther.info(None)
     cyther.core('cyther info')
     subprocess.call(['cyther', 'info'])
-
-    #Do a core, command line, and function run
-    #subprocess.call(['cyther', 'build', 'example_file.pyx'])
 
     print('<@test.py> All compilation tests have been passed')
 
@@ -36,7 +42,8 @@ def test_utilities():
     }
     g = ['q']
     batches = generateBatches(t, g)
-    assert batches == [{'j'}, {'i', 'g'}, {'f', 'h'}, {'e'}, {'d'}, {'c'}, {'b'}, {'a'}]
+    assert batches == [{'j'}, {'i', 'g'}, {'f', 'h'}, {'e'},
+                       {'d'}, {'c'}, {'b'}, {'a'}]
     path = 'C:/users/Nick/non-existing-file.pyx'
     assert os.path.normpath(path) == createPath(path)
     return

@@ -1,3 +1,11 @@
+
+"""
+This module holds most of the 'constants' dealing with information on the
+user's system that doesn't change throughout the compilation process
+
+Holds tons of important low level functions and info
+"""
+
 import platform
 import sys
 import os
