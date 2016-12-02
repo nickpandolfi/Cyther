@@ -63,7 +63,7 @@ class Result:
         """
         Extracts a three digit standard format version number
         """
-        return self.extract(r'[0-9]\.[0-9]\.[0-9]')
+        return self.extract(r'[0-9]\.[0-9]\.[0-9]', none_error=True)
 
     def getStdout(self):
         """

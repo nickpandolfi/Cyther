@@ -168,8 +168,10 @@ PYTHON_VERSION = call(['python', '--version'],
 CYTHON_EXECUTABLE = where('cython')
 GCC_EXECUTABLE = where('gcc')
 
-GCC_INFO = call(['gcc', '-v'], raise_exception=True)
-CYTHON_OUTPUT = call(['cython', '-V'], raise_exception=True)
+GCC_INFO = call(['gcc', '-v'],
+                raise_exception=True).extractVersion()
+CYTHON_OUTPUT = call(['cython', '-V'],
+                     raise_exception=True).extractVersion()
 
 INFO = str()
 INFO += "\nSystem:"
