@@ -1,6 +1,13 @@
 
+"""
+This module defines how cyther can be used from the command line, and how to
+process the arguments passed in. It connects hooks to cyther.core to provide
+an entry point that makes sense.
+"""
+
 import argparse
-from .core import info, configure, test, setup, make, clean, purge
+from .core import info, configure, setup, make, clean, purge
+from .test import test_all, test_compiler, test_utilities
 
 
 help_info = "Prints the information regarding cyther's installation and " \
@@ -30,14 +37,9 @@ help_purge = "Cleans the current directory of EVERYTHING cyther related." \
 description_text = "Auto compile and build .pyx, .py, or .c files in-place"
 formatter = argparse.RawDescriptionHelpFormatter
 
-#Any others to use? Why did I choose this one?
+# Any others to use? Why did I choose this one?
 parser = argparse.ArgumentParser(description=description_text,
                                  formatter_class=formatter)
-
-
-
-
-
 
 
 commands = parser.add_subparsers()
@@ -48,22 +50,30 @@ info_parser.set_defaults(func=info)
 # Empty as of now
 
 
-
-
 # $$$$$$$$$$ COMMANDS FOR CONFIGURE $$$$$$$$$$
 configure_parser = commands.add_parser('configure', help=help_configure)
 configure_parser.set_defaults(func=configure)
 # Empty as of now
 
 
-
-
 # $$$$$$$$$$ COMMANDS FOR TEST $$$$$$$$$$
 test_parser = commands.add_parser('test', help=help_test)
-test_parser.set_defaults(func=test)
-# Empty as of now
 
+help_test_all = "Run all tests Cyther has to offer"
+help_test_compiler = "Run tests dealing with Cyther's core functionality"
+help_test_utilities = "Run tests dealing with Cyther's tools used to function"
 
+test_commands = test_parser.add_subparsers()
+test_all_parser = test_commands.add_parser('all', help=help_test_all)
+test_all_parser.set_defaults(func=test_all)
+
+test_compiler_parser = test_commands.add_parser('compiler',
+                                                help=help_test_compiler)
+test_compiler_parser.set_defaults(func=test_compiler)
+
+test_utilities_parser = test_commands.add_parser('utilities',
+                                                 help=help_test_utilities)
+test_utilities_parser.set_defaults(func=test_utilities)
 
 
 # $$$$$$$$$$ COMMANDS FOR SETUP $$$$$$$$$$
@@ -89,8 +99,6 @@ setup_parser.add_argument('--gcc', action='store', nargs='+',
 help_cython = "Arguments to pass to Cython"
 setup_parser.add_argument('--cython', action='store', nargs='+',
                           dest='cython_args', default=[], help=help_cython)
-
-
 
 
 # $$$$$$$$$$ COMMANDS FOR MAKE $$$$$$$$$$
@@ -119,27 +127,13 @@ execution_system.add_argument('--timeit', action='store_true',
                               dest='timer', help=help_timer)
 
 
-
-
 # $$$$$$$$$$ COMMANDS FOR CLEAN $$$$$$$$$$
 clean_parser = commands.add_parser('clean', help=help_clean)
 clean_parser.set_defaults(func=clean)
 # Empty as of now
 
 
-
-
 # $$$$$$$$$$ COMMANDS FOR PURGE $$$$$$$$$$
 purge_parser = commands.add_parser('purge', help=help_purge)
 purge_parser.set_defaults(func=purge)
 # Empty as of now
-
-
-"""
-Unsure:
-help_timestamp = 'If this flag is provided, cyther will not compile files' \
-                 'that have 'not been modified since last compile'
-make_parser.add_argument('--timestamp', action='store_true',
-                         help=help_timestamp)
-
-"""

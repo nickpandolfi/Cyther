@@ -3,7 +3,6 @@
 The heart of Cyther
 """
 
-from .test import test_cyther
 from .system import INFO
 from .tools import getResponse
 
@@ -33,11 +32,6 @@ def info(args):
 @polymorph
 def configure(args):
     print(args)
-
-
-@polymorph
-def test(args):
-    test_cyther()
 
 
 def setup(args):

@@ -149,12 +149,17 @@ def cytherize(args, file):
 
 
 def run(filename, timer=False, repeat=3, number=10000, precision=2):
-    with open(filename, 'r') as file:
+    with open(filename) as file:
         string = file.read()
 
-    obj = re.findall(POUND_EXTRACT, string) + re.findall(TRIPPLE_EXTRACT, string)
+    found_pound = re.findall(POUND_EXTRACT, string)
+    found_tripple = re.findall(TRIPPLE_EXTRACT, string)
+
+    obj = found_pound + found_tripple
     if not obj:
-        output = "There was no '@cyther' code collected from the file '{}'\n".format(filename)
+        output = "There was no '@cyther' code collected from the " \
+                 "file '{}'\n".format(filename)
+        # TODO This should use a result, right?
         return {'returncode': 0, 'output': output}
 
     code = ''.join([item + '\n' for item in obj])
@@ -164,7 +169,8 @@ def run(filename, timer=False, repeat=3, number=10000, precision=2):
     setup_string = SETUP_TEMPLATE.format(module_directory, module_name, '{}')
 
     if timer:
-        string = TIMER_TEMPLATE.format(setup_string, code, repeat, number, precision, '{}')
+        string = TIMER_TEMPLATE.format(setup_string, code, repeat,
+                                       number, precision, '{}')
     else:
         string = setup_string + code
 
@@ -181,10 +187,6 @@ def core(args):
     The heart of Cyther, this function controls the main loop, and can be
     used to perform any Cyther action. You can call if using Cyther
     from the module level
-    Args:
-        args (str|dict|argparse.Namespace): Polymorphesized
-                                            arguments to pass to Cyther
-    Returns: None
     """
     args = furtherArgsProcessing(args)
 

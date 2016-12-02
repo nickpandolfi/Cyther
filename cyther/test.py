@@ -13,7 +13,15 @@ from .tools import generateBatches
 from .files import createPath
 
 
-def test_cyther():
+def test_all():
+    """
+    Tests everything
+    """
+    test_utilities()
+    test_compiler()
+
+
+def test_compiler():
     """
     Tests Cyther's entire core operation
     """
@@ -50,4 +58,4 @@ def test_utilities():
 
 
 if __name__ == '__main__':
-    test_cyther()
+    test_all()

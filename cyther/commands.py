@@ -124,12 +124,6 @@ class Command(SimpleCommand, list):
         pass
 
 
-"""
-manager = CommandManager()
-command1 = Command('example.pyx', 'dep.pyx')
-"""
-
-
 class CommandManager:
     def __init__(self):
         self.__unprocessed = []
