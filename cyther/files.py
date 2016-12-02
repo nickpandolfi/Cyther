@@ -208,8 +208,10 @@ def createPath(path=None, *, name=None, ext=None, inject=None, root=None,
     """
     Literally magic
     """
-    if path.count('~') == 1:
+    if path:
         path = os.path.expanduser(path)
+    if root:
+        root = os.path.expanduser(root)
 
     if name:
         new_name = _process_name(path, name, ext, overwrite)
@@ -319,7 +321,7 @@ class File:
         Gets the name of the file as the parent directory sees it
         (ex. 'example.py')
         """
-        return _get_name(self.__path, ext=ext)
+        return _get_name(self.getPath(), ext=ext)
 
     def getExtension(self):
         """
@@ -343,4 +345,5 @@ class File:
 if __name__ == '__main__':
     pass
     # FIXME createPath('poop.o', inject='cache.swag')
-    print(createPath('~/poop.o'))
+    # TODO add the next line into test_utilities
+    # assert os.path.normpath(path) == createPath(path)

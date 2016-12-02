@@ -130,6 +130,14 @@ def call(commands, *, print_result=False, raise_exception=False,
     """
     Will call a set of commands and wrangle the output how you choose
     """
+    if isinstance(commands, str):
+        commands = commands.split()
+
+    if not (isinstance(commands, tuple) or
+            isinstance(commands, list)):
+        raise ValueError("Function 'call' does not accept a 'commands'"
+                         "argument of type '{}'".format(type(commands)))
+
     if raise_exception:
         print_result = False
     try:
