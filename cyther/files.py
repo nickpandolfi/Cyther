@@ -173,59 +173,65 @@ def isAbsolute(path):
     """
     Returns if the given path is an absolute path or not.
     """
-
     return os.path.abspath(path) == os.path.normpath(path)
 
 
-# TODO rename error to make more sense (it only blocks one kind of error)
-def createPath(path=None, *, name=None, ext=None, inject=None, root=None,
-               overwrite=False, exists_error=True, must_exist=False):
-    """
-    Literally magic
-    """
-    if name:
-        if path and hasName(path):
-            if not overwrite:
-                raise ValueError("The path supplied must be a "
-                                 "directory" + OVERWRITE_ERROR)
+def _process_name(path, name, ext, overwrite):
+    if path and hasName(path):
+        if not overwrite:
+            raise ValueError("The path supplied must be a "
+                             "directory" + OVERWRITE_ERROR)
 
-        if hasExtension(name):
-            if ext:
-                if not overwrite:
-                    raise ValueError("The name supplied must not have "
-                                     "an extension" + OVERWRITE_ERROR)
-                new_name = joinExt(getName(name, ext=False), ext)
-            else:
-                new_name = name
+    if hasExtension(name):
+        if ext:
+            if not overwrite:
+                raise ValueError("The name supplied must not have "
+                                 "an extension" + OVERWRITE_ERROR)
+            new_name = joinExt(getName(name, ext=False), ext)
         else:
-            if ext:
-                new_name = joinExt(name, ext)
-            else:
-                new_name = getName(name, ext=False)
+            new_name = name
     else:
+        if ext:
+            new_name = joinExt(name, ext)
+        else:
+            new_name = getName(name, ext=False)
+    return new_name
+
+
+def _process_no_name(path, name, ext, overwrite):
+    if path:
         if detectPath(path, isfile=True):
             if ext:
                 if not overwrite:
-                    raise ValueError("Can't provide an extension with a full "
-                                     "file name" + OVERWRITE_ERROR)
+                    raise ValueError("Can't provide an extension with a "
+                                     "full file name" + OVERWRITE_ERROR)
                 new_name = joinExt(getName(name, ext=False), ext)
             else:
                 new_name = getName(name, ext=True)
         else:
-            raise ValueError("The path specified is a directory, and no name "
-                             "was provided; therefore, no name exists "
-                             "to construct off of")
+            raise ValueError("The path specified is a directory, and no "
+                             "name was provided; therefore, no name "
+                             "exists to construct off of")
+    else:
+        raise ValueError("There was no path specified, and thus no name "
+                         "exists to construct file path from. Name was "
+                         "not specified")
 
+    return new_name
+
+
+def _process_directory(path, root, inject):
     if root:
         if not isAbsolute(root):
             raise ValueError("The root must be an absolute directory "
                              "if specified")
-        if isAbsolute(path):
-            raise ValueError("The path cannot be absolute as well as the "
-                             "root; cannot add two absolute paths together")
 
         if path:
-            new_directory = os.path.join(root, os.path.dirname(path))
+            if isAbsolute(path):
+                raise ValueError("The path cannot be absolute as well as the "
+                                 "root; cannot add two absolute paths "
+                                 "together")
+            new_directory = os.path.join(root, getDirectory(path))
         else:
             new_directory = root
     else:
@@ -237,17 +243,43 @@ def createPath(path=None, *, name=None, ext=None, inject=None, root=None,
     if inject:
         new_directory = os.path.join(new_directory, inject)
 
-    abspath = os.path.join(new_directory, new_name)
+    return new_directory
+
+
+def _process_path(path, must_exist, exists_error):
     if must_exist:
-        if not os.path.exists(abspath):
-            result = abspath
+        if not os.path.exists(path):
+            result = path
         else:
             if exists_error:
-                raise ValueError("The path '{}' doesn't exist".format(abspath))
+                raise ValueError("The path '{}' doesn't "
+                                 "exist".format(path))
             else:
                 result = None
     else:
-        result = abspath
+        result = path
+
+    return result
+
+
+# TODO Make a overriding option to tell the function if path is a dir or file
+# TODO even if it doesn't look like it (path_is_file=True, path_is_dir=False)
+def createPath(path=None, *, name=None, ext=None, inject=None, root=None,
+               overwrite=False, exists_error=True, must_exist=False):
+    """
+    Literally magic
+    """
+    if name:
+        new_name = _process_name(path, name, ext, overwrite)
+    else:
+        new_name = _process_no_name(path, name, ext, overwrite)
+
+    new_directory = _process_directory(path, root, inject)
+
+    full_path = os.path.normpath(os.path.join(new_directory, new_name))
+
+    result = _process_path(full_path, must_exist, exists_error)
+
     return result
 
 
@@ -258,12 +290,9 @@ class File:
     if it does not exist already.
     """
 
-    def __init__(self, path=None, *, error=True, must_exist=True,
-                 root=None, full_dir=False):
-        full_path = getFullPath(path, must_exist=must_exist, error=error,
-                                root=root, absolute=full_dir)
+    def __init__(self, path=None, **kwargs):
+        full_path = createPath(path, **kwargs)
         self.__file_path = full_path
-        self.__file_exists = os.path.exists(full_path)
 
         basename = os.path.basename(full_path)
         isdir = os.path.isdir(full_path)
@@ -348,6 +377,4 @@ class File:
 
 
 if __name__ == '__main__':
-    file = File()
-    new = file.createPath(extension='.p')
-    print(new)
+    print(createPath(name='poopers', ext='.c'))
