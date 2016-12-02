@@ -1,4 +1,11 @@
 
+"""
+    - 3.3
+    - 3.4
+    - pypy3
+    - nightly
+"""
+
 try:
     from setuptools import setup
 except ImportError:
@@ -11,18 +18,19 @@ URL = 'https://github.com/nickpandolfi/Cyther'
 LICENSE = 'MIT'
 
 
-
 SHORT_DESCRIPTION = "Cyther: The Cross-Platform Cython/Python/C Auto-Compiler"
-VERSION = '0.8.dev23'
+VERSION = '0.8.dev24'
 INSTALL_REQUIRES = ['cython']
-LONG_DESCRIPTION = open('README.txt').read()
 
+try:
+    LONG_DESCRIPTION = open('README.txt').read()
+except FileNotFoundError:
+    LONG_DESCRIPTION = SHORT_DESCRIPTION
 
 
 PACKAGES = ['cyther']
-#PACKAGE_DATA = {'cyther': ['../*.txt', '../data']}
+# PACKAGE_DATA = {'cyther': ['../*.txt', '../data']}
 ENTRY_POINTS = {'console_scripts': ['cyther = cyther.__main__:main']}
-
 
 
 PLATFORMS = ['Windows', 'MacOS', 'POSIX', 'Unix']
