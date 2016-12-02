@@ -1,7 +1,9 @@
+import os
+import subprocess
 
 import cyther
-import subprocess
 from .tools import generateBatches
+from .files import createPath
 
 
 def test_cyther():
@@ -17,6 +19,9 @@ def test_cyther():
 
 
 def test_utilities():
+    """
+    A function to test cyther's internal compilation and helper tools
+    """
     t = {
         'a': ['b'],
         'b': ['c'],
@@ -32,6 +37,8 @@ def test_utilities():
     g = ['q']
     batches = generateBatches(t, g)
     assert batches == [{'j'}, {'i', 'g'}, {'f', 'h'}, {'e'}, {'d'}, {'c'}, {'b'}, {'a'}]
+    path = 'C:/users/Nick/non-existing-file.pyx'
+    assert os.path.normpath(path) == createPath(path)
     return
 
 

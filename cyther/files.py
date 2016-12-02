@@ -343,7 +343,4 @@ class File:
 
 
 if __name__ == '__main__':
-    pass
-    # FIXME createPath('poop.o', inject='cache.swag')
-    # TODO add the next line into test_utilities
-    # assert os.path.normpath(path) == createPath(path)
+    pass  # FIXME createPath('poop.o', inject='cache.swag')
