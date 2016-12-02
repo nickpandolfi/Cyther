@@ -3,8 +3,7 @@ import time
 import re
 
 from .searcher import POUND_EXTRACT, TRIPPLE_EXTRACT
-from .launcher import multiCall, _print_commands
-from .files import isUpdated, isOutDated
+from .launcher import multiCall
 from .commands import furtherArgsProcessing, processFiles, makeCommands
 from .definitions import WAIT_FOR_FIX, SKIPPED_COMPILATION, INTERVAL,\
                          ERROR_PASSOFF, FINE, WATCH_STATS_TEMPLATE,\
@@ -202,4 +201,5 @@ def core(args):
 
 
 if __name__ == '__main__':
-    raise CytherError('This module is not meant to be run as a script. Try \'cyther make\' for this functionality')
+    raise CytherError('This module is not meant to be run as a script.'
+                      'Try \'cyther make\' for this functionality')

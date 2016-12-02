@@ -1,3 +1,8 @@
+
+"""
+The heart of Cyther
+"""
+
 from .test import test_cyther
 from .system import INFO
 from .tools import getResponse
