@@ -12,7 +12,6 @@ install:
 
 script:
     - cyther test
-    - nosetests
 
 addons:
     code_climate:
