@@ -6,11 +6,15 @@ for it
 """
 
 import os
+import time
 
 DRIVE = 0
 EXTENSION = 1
 NAME = 0
 OVERWRITE_ERROR = "; cannot overwrite without explicit permission"
+
+
+__all__ = ['injectCache', 'detectPath', 'createPath', 'getFullPath', 'File']
 
 
 def injectCache(path):
@@ -239,21 +243,14 @@ class File:
     """
 
     def __init__(self, path=None, **kwargs):
-        full_path = createPath(path, **kwargs)
-        self.__file_path = full_path
-
-        basename = os.path.basename(full_path)
-        isdir = os.path.isdir(full_path)
-
-        self.__file_name = str() if isdir else basename
-        self.__file_type = os.path.splitext(full_path)[EXTENSION]
-        self.__file_location = os.path.dirname(full_path)
+        self.__path = createPath(path, **kwargs)
+        self.__stamp = None
 
     def __str__(self):
-        return self.__file_path
+        return self.getPath()
 
     def __repr__(self):
-        return self.__file_path
+        return self.getPath()
 
     def getmtime(self):
         """
@@ -289,40 +286,46 @@ class File:
             return True
         return False
 
-    def isUpdated(self, previous_modified_time):
+    def stampError(self):
+        """
+        Sets the current error point to the
+        """
+        self.__stamp = time.time()
+
+    def isUpdated(self):
         """
         Figures out if the file had previously errored and hasn't
         been fixed since given a numerical time
         """
         modified_time = self.getmtime()
-        valid = modified_time > previous_modified_time
+        valid = modified_time > self.__stamp
         return valid
 
-    def getName(self):
+    def getName(self, ext=True):
         """
         Gets the name of the file as the parent directory sees it
         (ex. 'example.py')
         """
-        return self.__file_name
+        return _get_name(self.__path, ext=ext)
 
-    def getType(self):
+    def getExtension(self):
         """
         Returns the type of the file (its extension) with the '.'
         """
-        return self.__file_type
+        return _get_ext(self.getPath())
 
-    def getLocation(self):
+    def getDirectory(self):
         """
         Returns the parent directory of the file
         """
-        return self.__file_location
+        return _get_directory(self.getPath())
 
     def getPath(self):
         """
         Returns the full file path to the file, including the drive
         """
-        return self.__file_path
+        return self.__path
 
 
 if __name__ == '__main__':
-    print(createPath(name='poopers', ext='.c'))
+    file = File('poop.o')
