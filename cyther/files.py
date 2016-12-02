@@ -7,20 +7,10 @@ for it
 
 import os
 
-# TODO Change all 'filename's to 'filepath's
-
 DRIVE = 0
 EXTENSION = 1
 NAME = 0
 OVERWRITE_ERROR = "; cannot overwrite without explicit permission"
-
-
-def getParentDir(path):
-    """
-    This will return just the name of the parent directory of
-    the given file path
-    """
-    return os.path.basename(os.path.dirname(path))
 
 
 def injectCache(path):
@@ -28,47 +18,12 @@ def injectCache(path):
     This will inject a '__cythercache__' into a file path before the filename
     and after the parent directory, essentially putting it in the cache
     """
-    if getParentDir(path) == '__cythercache__':
+    if os.path.basename(os.path.dirname(path)) == '__cythercache__':
         raise FileExistsError("Can't put a cache in another cache")
     new_filename = os.path.join(os.path.dirname(path),
                                 '__cythercache__',
                                 os.path.basename(path))
     return new_filename
-
-
-def joinExt(name, ext):
-    """
-    Similar to os.path.join, except it joins a file name and an extension
-    """
-    if ext[0] == '.':
-        ret = name + ext
-    else:
-        ret = name + '.' + ext
-    return ret
-
-
-def changeFileName(path, new_name):
-    """
-    Changes the name of the file with the extension from the given path name
-    """
-    dirname = os.path.dirname(path)
-    old_basename = os.path.basename(path)
-    new_basename = joinExt(new_name, os.path.splitext(old_basename)[1])
-    return os.path.join(dirname, new_basename)
-
-
-def changeFileDir(path, dirname):
-    """
-    Changes the parent directory of the given path name
-    """
-    return os.path.join(dirname, os.path.basename(path))
-
-
-def changeFileExt(path, ext):
-    """
-    Changes the extension of the file to ext
-    """
-    return joinExt(os.path.splitext(path)[0], ext)
 
 
 # TODO Implement a must_exist parameter?
@@ -83,10 +38,10 @@ def detectPath(path, *, isfile=None, isdir=None):
 
     if isfile:
         exists = os.path.isfile(path)
-        appears_like = bool(getExtension(path))
+        appears_like = bool(_get_ext(path))
     elif isdir:
         exists = os.path.isdir(path)
-        appears_like = not bool(getExtension(path))
+        appears_like = not bool(_get_ext(path))
     else:
         raise ValueError("Must specify 'isfile' or 'isdir'")
 
@@ -97,59 +52,32 @@ def detectPath(path, *, isfile=None, isdir=None):
     return result
 
 
-def getFullPath(path=None, *, must_exist=True, error=True):
-    """
-    Gets the full absolute path of a given path
-    """
-    if path:
-        abspath = os.path.abspath(path)
-        if must_exist:
-            if os.path.exists(abspath):
-                full_path = abspath
-            else:
-                if error:
-                    raise FileNotFoundError("The path '{}' does not "
-                                            "exist".format(abspath))
-                else:
-                    full_path = None
-        else:
-            full_path = abspath
-    else:
-        full_path = os.getcwd()
-
-    return full_path
-
-
 ###############################################################################
 
+def _join_ext(name, ext):
+    """
+    Similar to os.path.join, except it joins a file name and an extension
+    """
+    if ext[0] == '.':
+        ret = name + ext
+    else:
+        ret = name + '.' + ext
+    return ret
 
-def hasExtension(fragment):
-    """
-    Returns a boolean value to denote if the path fragment 'fragment'
-    has an extension
-    """
+
+def _has_ext(fragment):
     return bool(os.path.splitext(fragment)[EXTENSION])
 
 
-def getExtension(fragment):
-    """
-    Fetch the extension of the partial path 'fragment'
-    """
+def _get_ext(fragment):
     return os.path.splitext(fragment)[EXTENSION]
 
 
-def hasName(fragment):
-    """
-    Return a boolean value to denote if the path fragment 'fragment' has a
-    name (test is done by seeing if the fragment has a extension)
-    """
-    return hasExtension(fragment)
+def _has_name(fragment):
+    return _has_ext(fragment)
 
 
-def getName(fragment, *, ext=False):
-    """
-    Fetch the file name of the partial path 'fragment'
-    """
+def _get_name(fragment, *, ext=False):
     basename = os.path.basename(fragment)
     if ext:
         result = basename
@@ -158,10 +86,7 @@ def getName(fragment, *, ext=False):
     return result
 
 
-def getDirectory(path):
-    """
-    Gets the directory part of the path provided
-    """
+def _get_directory(path):
     if detectPath(path, isdir=True):
         directory = path
     else:
@@ -169,7 +94,7 @@ def getDirectory(path):
     return directory
 
 
-def isAbsolute(path):
+def _is_absolute(path):
     """
     Returns if the given path is an absolute path or not.
     """
@@ -177,24 +102,24 @@ def isAbsolute(path):
 
 
 def _process_name(path, name, ext, overwrite):
-    if path and hasName(path):
+    if path and _has_name(path):
         if not overwrite:
             raise ValueError("The path supplied must be a "
                              "directory" + OVERWRITE_ERROR)
 
-    if hasExtension(name):
+    if _has_ext(name):
         if ext:
             if not overwrite:
                 raise ValueError("The name supplied must not have "
                                  "an extension" + OVERWRITE_ERROR)
-            new_name = joinExt(getName(name, ext=False), ext)
+            new_name = _join_ext(_get_name(name, ext=False), ext)
         else:
             new_name = name
     else:
         if ext:
-            new_name = joinExt(name, ext)
+            new_name = _join_ext(name, ext)
         else:
-            new_name = getName(name, ext=False)
+            new_name = _get_name(name, ext=False)
     return new_name
 
 
@@ -205,9 +130,9 @@ def _process_no_name(path, name, ext, overwrite):
                 if not overwrite:
                     raise ValueError("Can't provide an extension with a "
                                      "full file name" + OVERWRITE_ERROR)
-                new_name = joinExt(getName(name, ext=False), ext)
+                new_name = _join_ext(_get_name(name, ext=False), ext)
             else:
-                new_name = getName(name, ext=True)
+                new_name = _get_name(name, ext=True)
         else:
             raise ValueError("The path specified is a directory, and no "
                              "name was provided; therefore, no name "
@@ -222,21 +147,21 @@ def _process_no_name(path, name, ext, overwrite):
 
 def _process_directory(path, root, inject):
     if root:
-        if not isAbsolute(root):
+        if not _is_absolute(root):
             raise ValueError("The root must be an absolute directory "
                              "if specified")
 
         if path:
-            if isAbsolute(path):
+            if _is_absolute(path):
                 raise ValueError("The path cannot be absolute as well as the "
                                  "root; cannot add two absolute paths "
                                  "together")
-            new_directory = os.path.join(root, getDirectory(path))
+            new_directory = os.path.join(root, _get_directory(path))
         else:
             new_directory = root
     else:
         if path:
-            new_directory = getDirectory(path)
+            new_directory = _get_directory(path)
         else:
             new_directory = os.getcwd()
 
@@ -281,6 +206,29 @@ def createPath(path=None, *, name=None, ext=None, inject=None, root=None,
     result = _process_path(full_path, must_exist, exists_error)
 
     return result
+
+
+def getFullPath(path=None, *, must_exist=True, error=True):
+    """
+    Gets the full absolute path of a given path
+    """
+    if path:
+        abspath = os.path.abspath(path)
+        if must_exist:
+            if os.path.exists(abspath):
+                full_path = abspath
+            else:
+                if error:
+                    raise FileNotFoundError("The path '{}' does not "
+                                            "exist".format(abspath))
+                else:
+                    full_path = None
+        else:
+            full_path = abspath
+    else:
+        full_path = os.getcwd()
+
+    return full_path
 
 
 class File:
