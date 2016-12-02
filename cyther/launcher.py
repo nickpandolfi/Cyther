@@ -27,7 +27,8 @@ class Result:
         return self.getOutput()
 
     def extract(self, pattern, *, only_one=True,
-                allow_same=True, condense=True):
+                allow_same=True, condense=True,
+                none_error=False):
         """
         Given a regex string, it will find all of the occurences in the output
         """
@@ -50,6 +51,12 @@ class Result:
                 output = list(set(output))
                 if len(output) == 1:
                     output = output[0]
+        if not output:
+            if none_error:
+                raise LookupError("No matches for pattern '{}' could "
+                                  "be found".format(pattern))
+            else:
+                output = None
         return output
 
     def extractVersion(self):
