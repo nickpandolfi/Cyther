@@ -90,6 +90,13 @@ def _get_name(fragment, *, ext=False):
     return result
 
 
+def _has_directory(fragment):
+    if _has_ext(fragment):
+        return bool(os.path.dirname(fragment))
+    else:
+        return bool(fragment)
+
+
 def _get_directory(path):
     if detectPath(path, isdir=True):
         directory = path
@@ -136,7 +143,7 @@ def _process_no_name(path, name, ext, overwrite):
                                      "full file name" + OVERWRITE_ERROR)
                 new_name = _join_ext(_get_name(name, ext=False), ext)
             else:
-                new_name = _get_name(name, ext=True)
+                new_name = _get_name(path, ext=True)
         else:
             raise ValueError("The path specified is a directory, and no "
                              "name was provided; therefore, no name "
@@ -145,7 +152,6 @@ def _process_no_name(path, name, ext, overwrite):
         raise ValueError("There was no path specified, and thus no name "
                          "exists to construct file path from. Name was "
                          "not specified")
-
     return new_name
 
 
@@ -164,8 +170,12 @@ def _process_directory(path, root, inject):
         else:
             new_directory = root
     else:
+        # TODO This if statement can probably be cleaned up a little bit
         if path:
-            new_directory = _get_directory(path)
+            if _has_directory(path):
+                new_directory = _get_directory(path)
+            else:
+                new_directory = os.getcwd()
         else:
             new_directory = os.getcwd()
 
@@ -198,6 +208,9 @@ def createPath(path=None, *, name=None, ext=None, inject=None, root=None,
     """
     Literally magic
     """
+    if path.count('~') == 1:
+        path = os.path.expanduser(path)
+
     if name:
         new_name = _process_name(path, name, ext, overwrite)
     else:
@@ -328,4 +341,6 @@ class File:
 
 
 if __name__ == '__main__':
-    file = File('poop.o')
+    pass
+    # FIXME createPath('poop.o', inject='cache.swag')
+    print(createPath('~/poop.o'))
