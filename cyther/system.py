@@ -170,15 +170,18 @@ GCC_EXECUTABLE = where('gcc')
 
 gcc_output = call(['gcc', '-v'], raise_exception=True)
 print("gcc output: '{}'".format(gcc_output))
-GCC_INFO = gcc_output.extractVersion()
+GCC_INFO = gcc_output.getOutput()
+GCC_VERSION = gcc_output.extractVersion(default='?')
 
 cython_output = call(['cython', '-V'], raise_exception=True)
 print("cython output: '{}'".format(cython_output))
-CYTHON_OUTPUT = cython_output.extractVersion()
+CYTHON_OUTPUT = cython_output.getOutput()
+CYTHON_VERSION = cython_output.extractVersion(default='?')
 
 INFO = str()
 INFO += "\nSystem:"
 
+# TODO There must be a better way to do this...
 INFO += "\n\tPython ({}):".format(PYTHON_EXECUTABLE)
 INFO += "\n\t\tVersion: {}".format('.'.join(list(VER)))
 INFO += "\n\t\tOperating System: {}".format(OPERATING_SYSTEM)
@@ -186,7 +189,7 @@ INFO += "\n\t\t\tOS is Windows: {}".format(IS_WINDOWS)
 INFO += "\n\t\tDefault Output Extension: {}".format(DEFAULT_OUTPUT_EXTENSION)
 INFO += "\n\t\tInstallation Directory: {}".format(sys.exec_prefix)
 INFO += '\n'
-INFO += "\n\tCython ({}):".format(CYTHON_EXECUTABLE)
+INFO += "\n\tCython ({}) ({}):".format(CYTHON_VERSION, CYTHON_EXECUTABLE)
 INFO += "\n\t{}".format(textwrap.indent(CYTHON_OUTPUT, '\t'))
 
 INFO += "\n\tCyther:"
@@ -194,7 +197,7 @@ INFO += "\n\t\tIncludable Header Search Command: {}".format(INCLUDE_STRING)
 INFO += "\n\t\tRuntime Library Search Command: {}".format(RUNTIME_STRING)
 INFO += "\n\t\tRuntime Library Name: {}".format(L_OPTION)
 INFO += "\n"
-INFO += "\n\tGCC ({}):".format(GCC_EXECUTABLE)
+INFO += "\n\tGCC ({}) ({}):".format(GCC_VERSION, GCC_EXECUTABLE)
 
 INFO += "\n{}".format(textwrap.indent(GCC_INFO.splitlines()[-1], '\t\t'))
 INFO += "\n"

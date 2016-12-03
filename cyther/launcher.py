@@ -26,44 +26,60 @@ class Result:
     def __str__(self):
         return self.getOutput()
 
-    def extract(self, pattern, *, only_one=True,
-                allow_same=True, condense=True,
-                none_error=False):
+    def extract(self, pattern, *,
+                allow_only_one=False, condense=False,
+                error_if_none=False, default=None,
+                assert_equal=None, message=None):
         """
         Given a regex string, it will find all of the occurences in the output
+
+
+        error_if_none=False
         """
         searcher = re.compile(pattern)
         output = searcher.findall(self.getOutput())
-        if only_one and len(output) > 1:
-            all_same = True
-            compare = output[0]
-            for item in output:
-                if item != compare:
-                    all_same = False
 
-            if not (allow_same and all_same):
-                raise ValueError(MORE_THAN_ONE_REGEX.format(pattern))
+        if not output:
+            if error_if_none:
+                if not message:
+                    message = "No matches for pattern '{}' could be " \
+                              "found in output:\n\t{}".format(pattern, output)
+                raise LookupError(message)
             else:
-                if condense:
-                    output = compare
+                if default:
+                    output = default
+                else:
+                    output = None
         else:
             if condense:
                 output = list(set(output))
-                if len(output) == 1:
-                    output = output[0]
-        if not output:
-            if none_error:
-                raise LookupError("No matches for pattern '{}' could "
-                                  "be found".format(pattern))
-            else:
-                output = None
-        return output
 
-    def extractVersion(self):
+            if allow_only_one:
+                if len(output) > 1:
+                    raise ValueError(MORE_THAN_ONE_REGEX.format(pattern))
+                output = output[0]
+
+        if assert_equal:
+            sorted_output = sorted(output)
+            sorted_assert = sorted(assert_equal)
+            if sorted_output != sorted_assert:
+                if not message:
+                    message = "The search result:\n\t{}\nIs not equivalent " \
+                              "to the assert test provided:" \
+                              "\n\t{}".format(sorted_output, sorted_assert)
+                raise ValueError(message)
+        else:
+            return output
+
+    def extractVersion(self, default=None):
         """
         Extracts a three digit standard format version number
         """
-        return self.extract(r'[0-9]\.[0-9]\.[0-9]', none_error=True)
+
+        error_if_none = not bool(default)
+
+        return self.extract(r'\d+(?:\.\d+)+', condense=True,
+                            error_if_none=error_if_none, allow_only_one=True)
 
     def getStdout(self):
         """
@@ -151,6 +167,7 @@ def call(commands, *, print_result=False, raise_exception=False,
             _print_commands(commands)
 
     except:
+        # TODO Why couldn't we just do 'except Exception as output'
         output = traceback.format_exc()
         result = Result(1, stderr=output)
         if print_result and not raise_exception:
@@ -166,6 +183,7 @@ def call(commands, *, print_result=False, raise_exception=False,
 
 
 # TODO Should I pass on the argument 'raise_exception' to call?
+# TODO This can be done with '**kwargs'
 def multiCall(*commands, dependent=True, bundle=False,
               print_result=False, print_commands=False):
     """
@@ -200,3 +218,7 @@ def multiCall(*commands, dependent=True, bundle=False,
 
     return processed_response
 
+if __name__ == '__main__':
+    a = call('cython -V')
+    b = a.extractVersion()
+    print(b)
