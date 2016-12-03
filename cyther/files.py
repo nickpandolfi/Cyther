@@ -265,7 +265,7 @@ class File:
         return self.getPath()
 
     def __repr__(self):
-        return self.getPath()
+        return "File('{}')".format(str(self))
 
     def getmtime(self):
         """
@@ -343,4 +343,5 @@ class File:
 
 
 if __name__ == '__main__':
+    file = File('swag')
     pass  # FIXME createPath('poop.o', inject='cache.swag')

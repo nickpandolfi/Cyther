@@ -105,16 +105,16 @@ def getIncludeAndRuntime():
             library_dirs.append(user_lib)
 
     ret_object = (include_dirs, library_dirs)
-    for x, obj in enumerate(ret_object):
-        for y, item in enumerate(obj):
-            if not os.path.isdir(item):
-                del ret_object[x][y]
+    _filter_non_existing_dirs(ret_object)
 
     return ret_object
 
 
-def _filter_non_existing_dirs():
-    pass
+def _filter_non_existing_dirs(ret_object):
+    for x, obj in enumerate(ret_object):
+        for y, item in enumerate(obj):
+            if not os.path.isdir(item):
+                del ret_object[x][y]
 
 
 MAJOR = str(sys.version_info.major)
@@ -128,12 +128,12 @@ CYTHONIZABLE_FILE_EXTS = ('.pyx', '.py')
 
 DRIVE, _ = os.path.splitdrive(sys.exec_prefix)
 if not DRIVE:
-    DRIVE = os.path.normpath('/')
+    DRIVE = os.path.normpath(os.sep)
 
 CYTHER_CONFIG_FILE = os.path.join(os.path.expanduser('~'), '.cyther')
 
 INCLUDE_DIRS, RUNTIME_DIRS = getIncludeAndRuntime()
-
+print("Runtime directories: '{}'".format(RUNTIME_DIRS))
 L_OPTION = '-l' + sift(RUNTIME_DIRS)
 
 INCLUDE_STRING = ''
@@ -168,10 +168,13 @@ PYTHON_VERSION = call(['python', '--version'],
 CYTHON_EXECUTABLE = where('cython')
 GCC_EXECUTABLE = where('gcc')
 
-GCC_INFO = call(['gcc', '-v'],
-                raise_exception=True).extractVersion()
-CYTHON_OUTPUT = call(['cython', '-V'],
-                     raise_exception=True).extractVersion()
+gcc_output = call(['gcc', '-v'], raise_exception=True)
+print("gcc output: '{}'".format(gcc_output))
+GCC_INFO = gcc_output.extractVersion()
+
+cython_output = call(['cython', '-V'], raise_exception=True)
+print("cython output: '{}'".format(cython_output))
+CYTHON_OUTPUT = cython_output.extractVersion()
 
 INFO = str()
 INFO += "\nSystem:"

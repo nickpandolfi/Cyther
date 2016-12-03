@@ -8,7 +8,7 @@ Cyther uses.
 import os
 import subprocess
 
-import cyther
+# import cyther
 from .tools import generateBatches
 from .files import createPath
 

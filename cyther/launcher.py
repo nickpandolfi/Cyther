@@ -107,11 +107,7 @@ def _get_encodings():
     return stdout_encoding, stderr_encoding
 
 
-# TODO Make print_commands into an option instead of a function
 def _print_commands(*several_commands):
-    """
-    Prints a list of commands given
-    """
     for commands in several_commands:
         print(' '.join(commands).strip())
 
