@@ -10,7 +10,8 @@ import sys
 import re
 
 
-MORE_THAN_ONE_REGEX = "More than one pattern found for regex string: '{}'"
+MORE_THAN_ONE_REGEX = "More than one pattern found for regex pattern: '{}' " \
+                      "for output:\n\t{}"
 
 
 class Result:
@@ -56,7 +57,8 @@ class Result:
 
             if allow_only_one:
                 if len(output) > 1:
-                    raise ValueError(MORE_THAN_ONE_REGEX.format(pattern))
+                    raise ValueError(MORE_THAN_ONE_REGEX.format(pattern,
+                                                                output))
                 output = output[0]
 
         if assert_equal:
