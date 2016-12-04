@@ -8,7 +8,7 @@ import subprocess
 import traceback
 import sys
 
-from .searcher import extract
+from .searcher import extract, extractVersion
 
 
 class Result:
@@ -26,22 +26,12 @@ class Result:
 
     def extract(self, pattern, **kwargs):
         """
-        Given a regex string, it will find all of the occurences in the output
+        Given a regex pattern, it will find all of the occurences in the output
         """
+        return extract(pattern, self.getOutput(), **kwargs)
 
-        return extract(pattern, self.getOutput())
-
-    def extractVersion(self, default=None):
-        """
-        Extracts a three digit standard format version number
-        """
-
-        error_if_none = not bool(default)
-        # (?<=([Vv]ersion:?\s+))[0-9]+\.[0-9]+\.[0-9]+
-        # \d+(?:\.\d+)+
-        return self.extract(r'',
-                            condense=True, error_if_none=error_if_none,
-                            allow_only_one=True)
+    def extractVersion(self, default='?'):
+        return extractVersion(self.getOutput(), default=default)
 
     def getStdout(self):
         """
