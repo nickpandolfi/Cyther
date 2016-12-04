@@ -2,7 +2,6 @@
 import time
 import re
 
-from .searcher import POUND_EXTRACT, TRIPPLE_EXTRACT
 from .launcher import multiCall
 from .commands import furtherArgsProcessing, processFiles, makeCommands
 from .definitions import WAIT_FOR_FIX, SKIPPED_COMPILATION, INTERVAL,\

@@ -94,6 +94,13 @@ def extractRuntime(obj):
     return result
 
 
+def extractAtCyther(path):
+    """
+    Extracts the '@cyther' code to be run as a script after compilation
+    """
+    pass
+
+
 def extractVersion(string, default='?'):
     """
     Extracts a three digit standard format version number
