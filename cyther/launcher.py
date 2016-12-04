@@ -7,11 +7,8 @@ subprocess and handling its output correctly and efficiently
 import subprocess
 import traceback
 import sys
-import re
 
-
-MORE_THAN_ONE_REGEX = "More than one pattern found for regex pattern: '{}' " \
-                      "for output:\n\t{}"
+from .searcher import extract
 
 
 class Result:
@@ -27,51 +24,12 @@ class Result:
     def __str__(self):
         return self.getOutput()
 
-    def extract(self, pattern, *,
-                allow_only_one=False, condense=False,
-                error_if_none=False, default=None,
-                assert_equal=None, message=None):
+    def extract(self, pattern, **kwargs):
         """
         Given a regex string, it will find all of the occurences in the output
-
-
-        error_if_none=False
         """
-        searcher = re.compile(pattern)
-        output = searcher.findall(self.getOutput())
 
-        if not output:
-            if error_if_none:
-                if not message:
-                    message = "No matches for pattern '{}' could be " \
-                              "found in output:\n\t{}".format(pattern, output)
-                raise LookupError(message)
-            else:
-                if default:
-                    output = default
-                else:
-                    output = None
-        else:
-            if condense:
-                output = list(set(output))
-
-            if allow_only_one:
-                if len(output) > 1:
-                    raise ValueError(MORE_THAN_ONE_REGEX.format(pattern,
-                                                                output))
-                output = output[0]
-
-        if assert_equal:
-            sorted_output = sorted(output)
-            sorted_assert = sorted(assert_equal)
-            if sorted_output != sorted_assert:
-                if not message:
-                    message = "The search result:\n\t{}\nIs not equivalent " \
-                              "to the assert test provided:" \
-                              "\n\t{}".format(sorted_output, sorted_assert)
-                raise ValueError(message)
-        else:
-            return output
+        return extract(pattern, self.getOutput())
 
     def extractVersion(self, default=None):
         """
@@ -79,9 +37,11 @@ class Result:
         """
 
         error_if_none = not bool(default)
-
-        return self.extract(r'\d+(?:\.\d+)+', condense=True,
-                            error_if_none=error_if_none, allow_only_one=True)
+        # (?<=([Vv]ersion:?\s+))[0-9]+\.[0-9]+\.[0-9]+
+        # \d+(?:\.\d+)+
+        return self.extract(r'',
+                            condense=True, error_if_none=error_if_none,
+                            allow_only_one=True)
 
     def getStdout(self):
         """
@@ -221,6 +181,7 @@ def multiCall(*commands, dependent=True, bundle=False,
     return processed_response
 
 if __name__ == '__main__':
-    a = call('cython -V')
-    b = a.extractVersion()
-    print(b)
+    result = Result()
+    result.stdout = "Version: 1.1.1\nversion 1.1.000\nversion: \n0.0.900\n"
+    version_number = result.extractVersion()
+    print(version_number)
