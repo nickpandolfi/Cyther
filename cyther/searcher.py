@@ -33,6 +33,55 @@ def where(cmd, path=None):
         raise ValueError("Could not find '{}' in the path".format(cmd))
 
 
+def _get_content(pattern, string):
+    output = []
+    for match in re.finditer(pattern, string):
+        output.append(match.group('content'))
+    return output
+
+
+def _process_no_output(pattern, output, error_if_none, none_message, default):
+    if error_if_none:
+        if not none_message:
+            none_message = NONE_FOUND.format(pattern, output)
+        raise LookupError(none_message)
+    else:
+        if default:
+            output = default
+        else:
+            output = None
+    return output
+
+
+def _process_output(pattern, output, condense, default, multiple_message,
+                    allow_only_one):
+    if condense:
+        output = list(set(output))
+
+    if allow_only_one:
+        if len(output) > 1:
+            if default:
+                output = default
+            else:
+                if not multiple_message:
+                    multiple_message = MULTIPLE_FOUND.format(pattern,
+                                                             output)
+                raise ValueError(multiple_message)
+        output = output[0]
+
+    return output
+
+
+def _assert_output(output, assert_equal, assert_message):
+    sorted_output = sorted(output)
+    sorted_assert = sorted(assert_equal)
+    if sorted_output != sorted_assert:
+        if not assert_message:
+            assert_message = ASSERT_ERROR.format(sorted_output,
+                                                 sorted_assert)
+        raise ValueError(assert_message)
+
+
 def extract(pattern, string, assert_equal=False,
             allow_only_one=False, condense=False,
             error_if_none=False, default=None,
@@ -42,43 +91,17 @@ def extract(pattern, string, assert_equal=False,
     """
     Used by extract to filter the entries in the searcher results
     """
-    output = []
-    for match in re.finditer(pattern, string):
-        output.append(match.group('content'))
+    output = _get_content(pattern, string)
 
     if not output:
-        if error_if_none:
-            if not none_message:
-                none_message = NONE_FOUND.format(pattern, output)
-            raise LookupError(none_message)
-        else:
-            if default:
-                output = default
-            else:
-                output = None
+        output = _process_no_output(pattern, output, error_if_none,
+                                    none_message, default)
     else:
-        if condense:
-            output = list(set(output))
-
-        if allow_only_one:
-            if len(output) > 1:
-                if default:
-                    output = default
-                else:
-                    if not multiple_message:
-                        multiple_message = MULTIPLE_FOUND.format(pattern,
-                                                                 output)
-                    raise ValueError(multiple_message)
-            output = output[0]
+        output = _process_output(pattern, output, condense, default,
+                                 multiple_message, allow_only_one)
 
     if assert_equal:
-        sorted_output = sorted(output)
-        sorted_assert = sorted(assert_equal)
-        if sorted_output != sorted_assert:
-            if not assert_message:
-                assert_message = ASSERT_ERROR.format(sorted_output,
-                                                     sorted_assert)
-            raise ValueError(assert_message)
+        _assert_output(output, assert_equal, assert_message)
     else:
         return output
 
@@ -114,6 +137,5 @@ def extractVersion(string, default='?'):
     Extracts a three digit standard format version number
     """
     error_if_none = not bool(default)
-    return extract(VERSION_PATTERN, string, condense=True,
-                   error_if_none=error_if_none, allow_only_one=True,
-                   default=default)
+    return extract(VERSION_PATTERN, string, condense=True, default=default,
+                   error_if_none=error_if_none, allow_only_one=True)
