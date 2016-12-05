@@ -28,9 +28,8 @@ def initiateCompilation(args, file):
     ####commands = finalizeCommands(args, file)
     commands = makeCommands(0, file)
     if not args['concise'] and args['print_args']:
-        if args['watch']:
-            args['print_args'] = False
-    response = multiCall(*commands, print_commands=True)
+        print_commands = bool(args['watch'])
+    response = multiCall(*commands, print_commands=print_commands)
     return response
 
 
