@@ -1,46 +1,36 @@
-
 import time
-import re
 
 from .launcher import multiCall
 from .commands import furtherArgsProcessing, processFiles, makeCommands
-from .definitions import WAIT_FOR_FIX, SKIPPED_COMPILATION, INTERVAL,\
-                         ERROR_PASSOFF, FINE, WATCH_STATS_TEMPLATE,\
-                         SETUP_TEMPLATE, TIMER_TEMPLATE
+from .definitions import WAIT_FOR_FIX, SKIPPED_COMPILATION, INTERVAL, \
+    ERROR_PASSOFF, FINE, WATCH_STATS_TEMPLATE, \
+    SETUP_TEMPLATE, TIMER_TEMPLATE
+from .searcher import extractAtCyther
 from .system import *
 
 
 def cueExtractAndRun(args, file):
     """
     Cues the @cyther code execution procedure
-    Args:
-        args (dict): Compile wide arguments to use
-        file (dict): The file to extract the code from
-    Returns (dict): The response generated from 'call'
     """
     filename = file['file_path']
     if args['execute']:
         holla = run(filename)
     else:
-        holla = run(filename, True, 3, 10000, 2)
+        holla = run(filename, True)
     return holla
 
 
 def initiateCompilation(args, file):
     """
     Starts the entire compilation procedure
-    Args:
-        args (dict): Compile wide arguments to use
-        file (dict): The file to compile
-    Returns (dict): The formal response generated from 'multiCall'
     """
     ####commands = finalizeCommands(args, file)
     commands = makeCommands(0, file)
     if not args['concise'] and args['print_args']:
-        _print_commands(*commands)
         if args['watch']:
             args['print_args'] = False
-    response = multiCall(*commands)
+    response = multiCall(*commands, print_commands=True)
     return response
 
 
@@ -48,10 +38,6 @@ def cytherize(args, file):
     """
     Used by core to integrate all the pieces of information, and to interface
     with the user. Compiles and cleans up.
-    Args:
-        args (dict): Compile wide arguments to use
-        file (dict): The file to compile
-    Returns: None
     """
     if isOutDated(file):
         if isUpdated(file):
@@ -64,7 +50,7 @@ def cytherize(args, file):
         else:
             response = initiateCompilation(args, file)
 
-    ##########################################################################
+    ###########################################################################
 
     time.sleep(INTERVAL)
     if response['returncode'] == ERROR_PASSOFF:
@@ -102,34 +88,39 @@ def cytherize(args, file):
                 output = ''
 
     else:
-        raise CytherError("Unrecognized return value '{}'".format(response['returncode']))
+        raise CytherError("Unrecognized return value '{}'"
+                          "".format(response['returncode']))
 
     response['output'] += output
 
-    ####################################################################################################################
+    ###########################################################################
 
-    condition = response['returncode'] == SKIPPED_COMPILATION and not args['watch']
-    if (args['execute'] or args['timer']) and response['returncode'] == FINE or condition:
+    condition = response['returncode'] == SKIPPED_COMPILATION and not args[
+        'watch']
+    if (args['execute'] or args['timer']) and response[
+        'returncode'] == FINE or condition:
         ret = cueExtractAndRun(args, file)
         response['output'] += ret['output']
 
-    ####################################################################################################################
+    ###########################################################################
 
     if args['watch']:
-        if response['returncode'] == FINE or response['returncode'] == ERROR_PASSOFF:
+        if response['returncode'] == FINE or response[
+            'returncode'] == ERROR_PASSOFF:
             if response['returncode'] == FINE:
                 args['watch_stats']['compiles'] += 1
             else:
                 args['watch_stats']['errors'] += 1
             args['watch_stats']['counter'] += 1
-            response['output'] += WATCH_STATS_TEMPLATE.format(args['watch_stats']['counter'],
-                                                              args['watch_stats']['compiles'],
-                                                              args['watch_stats']['errors'],
-                                                              args['watch_stats']['polls'])
+            response['output'] += \
+                WATCH_STATS_TEMPLATE.format(args['watch_stats']['counter'],
+                                            args['watch_stats']['compiles'],
+                                            args['watch_stats']['errors'],
+                                            args['watch_stats']['polls'])
         else:
             args['watch_stats']['polls'] += 1
 
-    ####################################################################################################################
+    ###########################################################################
 
     if args['watch']:
         if response['returncode'] == 1:
@@ -147,24 +138,19 @@ def cytherize(args, file):
             print(response['output'])
 
 
-def run(filename, timer=False, repeat=3, number=10000, precision=2):
-    with open(filename) as file:
-        string = file.read()
-
-    found_pound = re.findall(POUND_EXTRACT, string)
-    found_tripple = re.findall(TRIPPLE_EXTRACT, string)
-
-    obj = found_pound + found_tripple
-    if not obj:
+def run(path, timer=False, repeat=3, number=10000, precision=2):
+    """
+    Extracts and runs the '@cyther' code from the given file 'path' name
+    """
+    code = extractAtCyther(path)
+    if not code:
         output = "There was no '@cyther' code collected from the " \
-                 "file '{}'\n".format(filename)
+                 "file '{}'\n".format(path)
         # TODO This should use a result, right?
         return {'returncode': 0, 'output': output}
 
-    code = ''.join([item + '\n' for item in obj])
-
-    module_directory = os.path.dirname(filename)
-    module_name = os.path.splitext(os.path.basename(filename))[0]
+    module_directory = os.path.dirname(path)
+    module_name = os.path.splitext(os.path.basename(path))[0]
     setup_string = SETUP_TEMPLATE.format(module_directory, module_name, '{}')
 
     if timer:

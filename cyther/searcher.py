@@ -83,11 +83,11 @@ def extract(pattern, string, assert_equal=False,
         return output
 
 
-def extractRuntime(obj):
+def extractRuntime(runtime_dirs):
     """
     Used to find the correct static lib name to pass to gcc
     """
-    names = [str(item) for name in obj for item in os.listdir(name)]
+    names = [str(item) for name in runtime_dirs for item in os.listdir(name)]
     string = '\n'.join(names)
     result = extract(RUNTIME_PATTERN, string,
                      condense=True, error_if_none=True)
@@ -98,7 +98,15 @@ def extractAtCyther(path):
     """
     Extracts the '@cyther' code to be run as a script after compilation
     """
-    pass
+    with open(path) as file:
+        string = file.read()
+
+    found_pound = extract(POUND_PATTERN, string)
+    found_tripple = extract(TRIPPLE_PATTERN, string)
+    all_found = found_pound + found_tripple
+    code = '\n'.join([item for item in all_found])
+
+    return code
 
 
 def extractVersion(string, default='?'):
