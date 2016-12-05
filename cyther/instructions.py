@@ -32,7 +32,7 @@ INCORRECT_INSTRUCTION_INIT = "Instruction doesn't accept arguments " \
 NO_INPUT_FILE = "Must have an input file specified for each instruction"
 
 
-def get_contents_between(string, opener, closer):
+def _get_contents_between(string, opener, closer):
     """
     Get the contents of a string between two characters
     """
@@ -45,7 +45,7 @@ def get_contents_between(string, opener, closer):
 ###############################################################################
 
 
-def check_whitespace(string):
+def _check_whitespace(string):
     """
     Make sure thre is no whitespace in the given string. Will raise a
     ValueError if whitespace is detected
@@ -54,7 +54,7 @@ def check_whitespace(string):
         raise ValueError(INSTRUCTION_HAS_WHITESPACE)
 
 
-def check_enclosing_characters(string, opener, closer):
+def _check_enclosing_characters(string, opener, closer):
     """
     Makes sure that the enclosing characters for a definition set make sense
     1) There is only one set
@@ -77,7 +77,7 @@ def check_enclosing_characters(string, opener, closer):
         raise ValueError(msg)
 
 
-def check_parameters(parameters, symbols):
+def _check_parameters(parameters, symbols):
     """
     Checks that the parameters given are not empty. Ones with prefix symbols
     can be denoted by including the prefix in symbols
@@ -93,13 +93,13 @@ def check_parameters(parameters, symbols):
 ###############################################################################
 
 
-def check_dependencies(string):
+def _check_dependencies(string):
     """
     Checks the dependencies constructor. Looks to make sure that the
     dependencies are the first things defined
     """
     opener, closer = '(', ')'
-    check_enclosing_characters(string, opener, closer)
+    _check_enclosing_characters(string, opener, closer)
     if opener in string:
         if string[0] != opener:
             raise ValueError(DEPENDENCIES_NOT_FIRST)
@@ -109,13 +109,13 @@ def check_dependencies(string):
     return ret
 
 
-def check_building_options(string):
+def _check_building_options(string):
     """
     Checks the building options to make sure that they are defined last,
     after the task name and the dependencies
     """
     opener, closer = '{', '}'
-    check_enclosing_characters(string, opener, closer)
+    _check_enclosing_characters(string, opener, closer)
     if opener in string:
         if string[-1] != closer:
             raise ValueError(OPTIONS_NOT_LAST)
@@ -125,7 +125,7 @@ def check_building_options(string):
     return ret
 
 
-def check_flow_operator(string):
+def _check_flow_operator(string):
     """
     Checks the flow operator ('>') to mke sure that it:
     1) Is non empty
@@ -147,14 +147,14 @@ def check_flow_operator(string):
 ###############################################################################
 
 
-def parseDependencies(string):
+def _parse_dependencies(string):
     """
     This function actually parses the dependencies are sorts them into
     the buildable and given dependencies
     """
-    contents = get_contents_between(string, '(', ')')
+    contents = _get_contents_between(string, '(', ')')
     unsorted_dependencies = contents.split(',')
-    check_parameters(unsorted_dependencies, ('?',))
+    _check_parameters(unsorted_dependencies, ('?',))
 
     buildable_dependencies = []
     given_dependencies = []
@@ -168,14 +168,14 @@ def parseDependencies(string):
     return buildable_dependencies, given_dependencies, string
 
 
-def parseBuildingOptions(string):
+def _parse_building_options(string):
     """
     This will parse and sort the building options defined in the '{}'
     constructor. Will only allow one of each argument
     """
-    contents = get_contents_between(string, '{', '}')
+    contents = _get_contents_between(string, '{', '}')
     unsorted_options = contents.split(',')
-    check_parameters(unsorted_options, ('@', '/', '\\', '^'))
+    _check_parameters(unsorted_options, ('@', '/', '\\', '^'))
 
     output_directory = None
     output_format = None
@@ -211,40 +211,39 @@ def parseString(string):
     building_directory = None
     output_name = None
 
-    check_whitespace(string)
+    _check_whitespace(string)
 
-    there_are_dependencies = check_dependencies(string)
+    there_are_dependencies = _check_dependencies(string)
     if there_are_dependencies:
         buildable_dependencies, \
             given_dependencies, \
-            string = parseDependencies(string)
+            string = _parse_dependencies(string)
 
-    there_are_options = check_building_options(string)
+    there_are_options = _check_building_options(string)
     if there_are_options:
         output_directory, \
             output_format, \
-            building_directory, string = parseBuildingOptions(string)
+            building_directory, string = _parse_building_options(string)
 
     if string[0] == '>':
         string = string[1:]
     if string[-1] == '>':
         string = string[:-1]
 
-    is_a_flow_operator = check_flow_operator(string)
+    is_a_flow_operator = _check_flow_operator(string)
     if is_a_flow_operator:
         greater_than_location = string.index('>')
         output_name = string[greater_than_location + 1:]
         string = string[:greater_than_location]
 
-    ret = {
-        'input_name': string,
-        'output_name': output_name,
-        'buildable_dependencies': buildable_dependencies,
-        'given_dependencies': given_dependencies,
-        'output_format': output_format,
-        'building_directory': building_directory,
-        'output_directory': output_directory
-    }
+    ret = object()
+    ret.input_name = string
+    ret.output_name = output_name
+    ret.buildable_dependencies = buildable_dependencies
+    ret.given_dependencies = given_dependencies
+    ret.output_format = output_format
+    ret.building_directory = building_directory
+    ret.output_directory = output_directory
     return ret
 
 
@@ -271,8 +270,8 @@ class Instruction:
         if init:
             if isinstance(init, str):
                 ret = parseString(init)
-                self.input = File(ret['input_name'])
-                self.output = File(ret['output_name'])
+                self.input = ret['input_name']
+                self.output = ret['output_name']
                 self.output_format = ret['output_format']
                 self.buildable_dependencies = ret['buildable_dependencies']
                 self.given_dependencies = ret['given_dependencies']
@@ -323,17 +322,11 @@ class Instruction:
     def setBuildDirectory(self, directory):
         self.build_directory = directory
 
-    def setInput(self, input_name):
-        if isinstance(input_name, str):
-            self.input = File(input_name)
-        else:
-            self.input = input_name
+    def setInput(self, input_name, **kwargs):
+        self.input = File(input_name, **kwargs)
 
-    def setOutput(self, output_name):
-        if isinstance(output_name, str):
-            self.output = File(output_name)
-        else:
-            self.output = output_name
+    def setOutput(self, output_name, **kwargs):
+        self.output = File(output_name, **kwargs)
 
 
 
