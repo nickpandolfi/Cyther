@@ -185,18 +185,25 @@ def _process_directory(path, root, inject):
     return new_directory
 
 
-def _process_path(path, must_exist, exists_error):
-    if must_exist:
-        if not os.path.exists(path):
+def _process_path(path, must_exist, exists_error, relpath, root):
+    if must_exist and not os.path.exists(path):
+        if exists_error:
+            raise ValueError("The path '{}' doesn't "
+                             "exist".format(path))
+        else:
+            result = None
+    else:
+        if not relpath:
             result = path
         else:
-            if exists_error:
-                raise ValueError("The path '{}' doesn't "
-                                 "exist".format(path))
+            if isinstance(relpath, str):
+                start = relpath
+            elif root:
+                start = root
             else:
-                result = None
-    else:
-        result = path
+                start = os.getcwd()
+
+            result = os.path.relpath(path, start=start)
 
     return result
 
@@ -204,7 +211,8 @@ def _process_path(path, must_exist, exists_error):
 # TODO Make a overriding option to tell the function if path is a dir or file
 # TODO even if it doesn't look like it (path_is_file=True, path_is_dir=False)
 def createPath(path=None, *, name=None, ext=None, inject=None, root=None,
-               overwrite=False, exists_error=True, must_exist=False):
+               overwrite=False, exists_error=True, must_exist=False,
+               relpath=None):
     """
     Literally magic
     """
@@ -222,7 +230,7 @@ def createPath(path=None, *, name=None, ext=None, inject=None, root=None,
 
     full_path = os.path.normpath(os.path.join(new_directory, new_name))
 
-    result = _process_path(full_path, must_exist, exists_error)
+    result = _process_path(full_path, must_exist, exists_error, relpath, root)
 
     return result
 

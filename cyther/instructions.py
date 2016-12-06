@@ -338,3 +338,9 @@ class InstructionManager:
     def parseInstructions(self, instructions):
         for instruction in instructions:
             self.parseInstruction(instruction)
+
+    def to_file(self):
+        pass
+
+    def from_file(self):
+        pass
