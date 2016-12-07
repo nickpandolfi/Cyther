@@ -197,6 +197,9 @@ def _process_path(path, must_exist, exists_error, relpath, root):
             result = path
         else:
             if isinstance(relpath, str):
+                if not _is_absolute(relpath):
+                    raise ValueError("If relpath is manually specified, it "
+                                     "must be an absolute path")
                 start = relpath
             elif root:
                 start = root
@@ -216,6 +219,7 @@ def createPath(path=None, *, name=None, ext=None, inject=None, root=None,
     """
     Literally magic
     """
+    # TODO Get a function to expand a path name
     if path:
         path = os.path.expanduser(path)
     if root:
@@ -352,4 +356,5 @@ class File:
 
 if __name__ == '__main__':
     file = File('swag')
+    print(file)
     pass  # FIXME createPath('poop.o', inject='cache.swag')
