@@ -11,10 +11,29 @@ import time
 DRIVE = 0
 EXTENSION = 1
 NAME = 0
+
+
+__all__ = ['createPath', 'File']
+
+
 OVERWRITE_ERROR = "; cannot overwrite without explicit permission"
-
-
-__all__ = ['createPath', 'getPath', 'File']
+PATH_HAS_EXT = "Path '{}' has an extension, cannot override to a directory"
+PATH_NOT_DIR = "The path supplied must be a directory"
+NAME_HAS_EXT = "The name supplied must not have an extension"
+FILE_NAME_AND_EXT = "Can't provide an extension with a full file name"
+NO_NAME_PATH_IS_DIR = "The path specified is a directory, and no name was " \
+                      "provided; therefore, no name exists to construct off of"
+NO_NAME_NO_PATH = "There was no path specified, and thus no name exists to " \
+                  "construct file path from. Name was not specified"
+ROOT_NOT_ABS = "The root must be an absolute directory if specified"
+PATH_AND_ROOT_ABS = "The path cannot be absolute as well as the root; cannot " \
+                    "add two absolute paths together"
+INJECT_IS_FILE = "Parameter 'inject' must be a directory"
+RELPATH_NOT_ABS = "If relpath is manually specified, it must be an " \
+                  "absolute path"
+NOT_SAME_DRIVE = "Calculating relpath requires that the comparator path is " \
+                 "of the same drive"
+NOT_EXIST = "The path '{}' doesn't exist"
 
 
 def _join_ext(name, ext):
@@ -76,8 +95,7 @@ def _isfile(path, override=None):
         result = True
     elif override is False:
         if _isfile(path):
-            raise ValueError("Path '{}' has an extension, cannot "
-                             "override to a directory".format(path))
+            raise ValueError(PATH_HAS_EXT.format(path))
         result = False
     else:
         result = bool(_get_ext(path))
@@ -98,14 +116,12 @@ def _ensure_same_drives(path1, path2):
 def _process_existing_name(path, name, ext, overwrite):
     if path and _has_name(path):
         if not overwrite:
-            raise ValueError("The path supplied must be a "
-                             "directory" + OVERWRITE_ERROR)
+            raise ValueError(PATH_NOT_DIR + OVERWRITE_ERROR)
 
     if _has_ext(name):
         if ext:
             if not overwrite:
-                raise ValueError("The name supplied must not have "
-                                 "an extension" + OVERWRITE_ERROR)
+                raise ValueError(NAME_HAS_EXT + OVERWRITE_ERROR)
             new_name = _join_ext(_get_name(name, ext=False), ext)
         else:
             new_name = name
@@ -122,19 +138,14 @@ def _process_non_existing_name(path, name, ext, overwrite):
         if _isfile(path):
             if ext:
                 if not overwrite:
-                    raise ValueError("Can't provide an extension with a "
-                                     "full file name" + OVERWRITE_ERROR)
+                    raise ValueError(FILE_NAME_AND_EXT + OVERWRITE_ERROR)
                 new_name = _join_ext(_get_name(name, ext=False), ext)
             else:
                 new_name = _get_name(path, ext=True)
         else:
-            raise ValueError("The path specified is a directory, and no "
-                             "name was provided; therefore, no name "
-                             "exists to construct off of")
+            raise ValueError(NO_NAME_PATH_IS_DIR)
     else:
-        raise ValueError("There was no path specified, and thus no name "
-                         "exists to construct file path from. Name was "
-                         "not specified")
+        raise ValueError(NO_NAME_NO_PATH)
     return new_name
 
 
@@ -159,17 +170,13 @@ def _process_name(path, name, ext, overwrite):
 
 
 def _process_directory(path, root, inject):
-    # TODO What if path is absolute???
     if root:
         if not _is_absolute(root):
-            raise ValueError("The root must be an absolute directory "
-                             "if specified")
+            raise ValueError(ROOT_NOT_ABS)
 
         if path:
             if _is_absolute(path):
-                raise ValueError("The path cannot be absolute as well as the "
-                                 "root; cannot add two absolute paths "
-                                 "together")
+                raise ValueError(PATH_AND_ROOT_ABS)
             new_directory = os.path.join(root, _get_directory(path))
         else:
             new_directory = root
@@ -185,7 +192,7 @@ def _process_directory(path, root, inject):
 
     if inject:
         if _isfile(inject):
-            raise ValueError("Parameter 'inject' must be a directory")
+            raise ValueError(INJECT_IS_FILE)
         new_directory = os.path.join(new_directory, inject)
 
     return new_directory
@@ -205,8 +212,7 @@ def _format_path(path, root, relpath, reduce):
     else:
         if isinstance(relpath, str):
             if not _is_absolute(relpath):
-                raise ValueError("If relpath is manually specified, it "
-                                 "must be an absolute path")
+                raise ValueError(RELPATH_NOT_ABS)
             start = relpath
         elif root:
             start = root
@@ -216,8 +222,7 @@ def _format_path(path, root, relpath, reduce):
         is_same_drive = _ensure_same_drives(path, start)
 
         if not is_same_drive:
-            raise ValueError("Calculating relpath requires that the "
-                             "comparator path is of the same drive")
+            raise ValueError(NOT_SAME_DRIVE)
 
         new_path = os.path.relpath(path, start=start)
 
@@ -236,7 +241,7 @@ def _check_path(path, must_exist, exists_error, exists):
 
     if must_exist and not os.path.exists(path):
         if exists_error:
-            raise ValueError("The path '{}' doesn't exist".format(path))
+            raise ValueError(NOT_EXIST.format(path))
         else:
             result = False
     else:
@@ -245,7 +250,6 @@ def _check_path(path, must_exist, exists_error, exists):
     return result
 
 
-# TODO Make a overriding option to tell the function if path is a dir or file
 def createPath(path=None, *, name=None, ext=None, inject=None, root=None,
                overwrite=False, exists_error=True, must_exist=False,
                relpath=None, reduce=False, exists=False):
