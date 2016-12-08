@@ -1,6 +1,6 @@
 import argparse
 
-from .files import getFullPath
+from .files import getPath
 from .system import *
 from .arguments import parser
 from .objects import SimpleCommand
@@ -58,7 +58,7 @@ def processFiles(args):
         else:
             file['include'] = INCLUDE_STRING
 
-        file['file_path'] = getFullPath(filename)
+        file['file_path'] = getPath(filename)
         file['file_base_name'] = \
         os.path.splitext(os.path.basename(file['file_path']))[0]
         file['no_extension'], file['extension'] = os.path.splitext(
