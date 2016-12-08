@@ -14,44 +14,8 @@ NAME = 0
 OVERWRITE_ERROR = "; cannot overwrite without explicit permission"
 
 
-__all__ = ['injectCache', 'detectPath', 'createPath', 'getPath', 'File']
+__all__ = ['createPath', 'getPath', 'File']
 
-
-def injectCache(path):
-    """
-    This will inject a '__cythercache__' into a file path before the filename
-    and after the parent directory, essentially putting it in the cache
-    """
-    if os.path.basename(os.path.dirname(path)) == '__cythercache__':
-        raise FileExistsError("Can't put a cache in another cache")
-    new_filename = os.path.join(os.path.dirname(path),
-                                '__cythercache__',
-                                os.path.basename(path))
-    return new_filename
-
-
-def _check_format(path, isfile=False, isdir=False):
-    if isfile and isdir:
-        raise ValueError("Cannot specify both 'isfile' and 'isdir'")
-    elif not (isfile or isdir):
-        pass  # Do an auto check
-
-
-def _isfile(path, override=None):
-    if override is True:
-        result = True
-    elif override is False:
-        if _isfile(path):
-            raise ValueError("Path '{}' has an extension, cannot "
-                             "override to a directory".format(path))
-        result = False
-    else:
-        result = bool(_get_ext(path))
-
-    return result
-
-
-###############################################################################
 
 def _join_ext(name, ext):
     """
@@ -107,6 +71,20 @@ def _is_absolute(path):
     return os.path.abspath(path) == os.path.normpath(path)
 
 
+def _isfile(path, override=None):
+    if override is True:
+        result = True
+    elif override is False:
+        if _isfile(path):
+            raise ValueError("Path '{}' has an extension, cannot "
+                             "override to a directory".format(path))
+        result = False
+    else:
+        result = bool(_get_ext(path))
+
+    return result
+
+
 def _get_drive(path):
     return os.path.splitdrive(path)[DRIVE]
 
@@ -160,7 +138,28 @@ def _process_non_existing_name(path, name, ext, overwrite):
     return new_name
 
 
+def _expand_users(*args):
+    expanded = []
+    for arg in args:
+        if arg:
+            expanded.append(os.path.expanduser(arg))
+        else:
+            expanded.append(None)
+
+    return expanded
+
+
+def _process_name(path, name, ext, overwrite):
+    if name:
+        new_name = _process_existing_name(path, name, ext, overwrite)
+    else:
+        new_name = _process_non_existing_name(path, name, ext, overwrite)
+
+    return new_name
+
+
 def _process_directory(path, root, inject):
+    # TODO What if path is absolute???
     if root:
         if not _is_absolute(root):
             raise ValueError("The root must be an absolute directory "
@@ -175,11 +174,14 @@ def _process_directory(path, root, inject):
         else:
             new_directory = root
     else:
-
+        cwd = os.getcwd()
         if path and _has_directory(path):
-            new_directory = _get_directory(path)
+            if _is_absolute(path):
+                new_directory = _get_directory(path)
+            else:
+                new_directory = os.path.join(cwd, _get_directory(path))
         else:
-            new_directory = os.getcwd()
+            new_directory = cwd
 
     if inject:
         if _isfile(inject):
@@ -189,7 +191,15 @@ def _process_directory(path, root, inject):
     return new_directory
 
 
+def _construct_path(new_directory, new_name):
+    path = os.path.normpath(os.path.join(new_directory, new_name))
+    return path
+
+
 def _format_path(path, root, relpath, reduce):
+    if reduce:
+        relpath = True
+
     if not relpath:
         result = path
     else:
@@ -219,72 +229,35 @@ def _format_path(path, root, relpath, reduce):
     return result
 
 
-def _check_path(path, must_exist, exists_error):
+def _check_path(path, must_exist, exists_error, exists):
+    if exists:
+        exists_error = False
+        must_exist = True
+
     if must_exist and not os.path.exists(path):
         if exists_error:
             raise ValueError("The path '{}' doesn't exist".format(path))
         else:
-            result = None
+            result = False
     else:
         result = path
 
     return result
 
 
-def _process_name(path, name, ext, overwrite):
-    if name:
-        new_name = _process_existing_name(path, name, ext, overwrite)
-    else:
-        new_name = _process_non_existing_name(path, name, ext, overwrite)
-
-    return new_name
-
-
-def _construct_path(new_directory, new_name):
-    path = os.path.normpath(os.path.join(new_directory, new_name))
-    return path
-
-
-def _expand_user(*args):
-    expanded = []
-    for arg in args:
-        if arg:
-            expanded.append(os.path.expanduser(arg))
-        else:
-            expanded.append(None)
-
-    return expanded
-
-
 # TODO Make a overriding option to tell the function if path is a dir or file
-# TODO even if it doesn't look like it (path_is_file=True, path_is_dir=False)
-# TODO Get createPath to use getFullPath
-# TODO      Make it so that getFullPath goes the relative processing or not
-# TODO Get a function to expand any path name ('.', '..', and '~')
-# TODO Where does the name get expanded?
-
-
 def createPath(path=None, *, name=None, ext=None, inject=None, root=None,
                overwrite=False, exists_error=True, must_exist=False,
-               relpath=None, reduce=False):
-
-    # Expand the '~' user shortcut
-    path, root = _expand_user(path, root)
-
-    # Make only the new name
+               relpath=None, reduce=False, exists=False):
+    """
+    Path manipulation black magic
+    """
+    path, root = _expand_users(path, root)
     new_name = _process_name(path, name, ext, overwrite)
-
-    # Make only the new directory
     new_directory = _process_directory(path, root, inject)
-
-    # Join the new directory and the new name
     full_path = _construct_path(new_directory, new_name)
-
-    # Format the path
     final_path = _format_path(full_path, root, relpath, reduce)
-
-    # Check the path
-    result = _check_path(final_path, must_exist, exists_error)
+    result = _check_path(final_path, must_exist, exists_error, exists)
 
     return result
 
@@ -382,17 +355,16 @@ class File:
 
 
 def test_createPath():
-    print(createPath('test.o'))
-    print(createPath(name='test', ext='pyx', root='G:/'))
-    print(createPath(name='yolo', ext='.py'))
-    file = createPath('X:/absolute/directory', name='file.c')
-    print(file)
-    file2 = createPath(file, inject='__cythercache__')
-    print(file2)
-    file3 = createPath(file2, name='bloopers.c', ext='.u', overwrite=True)
-    print(file3)
-    file4 = createPath(file3, relpath=True, reduce=True)
-    print(file4)
+    """
+    Tests createPath to make sure its working
+    """
+    assert createPath('test.o') != 'test.o'
+    assert createPath('test.o') == createPath(name='test', ext='o')
+    assert createPath('parent/test.o') == createPath('test.o', inject='parent')
+
+    test_path = os.path.abspath('test.o')
+    assert createPath(test_path) == test_path
+    assert createPath(test_path, relpath=True) != test_path
 
 if __name__ == '__main__':
     test_createPath()
