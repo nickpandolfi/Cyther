@@ -134,7 +134,7 @@ CYTHER_CONFIG_FILE = os.path.join(os.path.expanduser('~'), '.cyther')
 
 INCLUDE_DIRS, RUNTIME_DIRS = getIncludeAndRuntime()
 print("Runtime directories: '{}'".format(RUNTIME_DIRS))
-L_OPTION = '-l' + extractRuntime(RUNTIME_DIRS)
+# L_OPTION = '-l' + extractRuntime(RUNTIME_DIRS)
 
 INCLUDE_STRING = ''
 for directory in INCLUDE_DIRS:
@@ -171,12 +171,12 @@ GCC_EXECUTABLE = where('gcc')
 gcc_output = call(['gcc', '-v'], raise_exception=True)
 print("gcc output: '{}'".format(gcc_output))
 GCC_INFO = gcc_output.getOutput()
-GCC_VERSION = gcc_output.extractVersion(default='?')
+GCC_VERSION = gcc_output.extractVersion()
 
 cython_output = call(['cython', '-V'], raise_exception=True)
 print("cython output: '{}'".format(cython_output))
 CYTHON_OUTPUT = cython_output.getOutput()
-CYTHON_VERSION = cython_output.extractVersion(default='?')
+CYTHON_VERSION = cython_output.extractVersion()
 
 INFO = str()
 INFO += "\nSystem:"
@@ -195,7 +195,7 @@ INFO += "\n\t{}".format(textwrap.indent(CYTHON_OUTPUT, '\t'))
 INFO += "\n\tCyther:"
 INFO += "\n\t\tIncludable Header Search Command: {}".format(INCLUDE_STRING)
 INFO += "\n\t\tRuntime Library Search Command: {}".format(RUNTIME_STRING)
-INFO += "\n\t\tRuntime Library Name: {}".format(L_OPTION)
+INFO += "\n\t\tRuntime Library Name(s): {}".format(RUNTIME_DIRS)
 INFO += "\n"
 INFO += "\n\tGCC ({}) ({}):".format(GCC_VERSION, GCC_EXECUTABLE)
 
