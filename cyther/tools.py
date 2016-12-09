@@ -110,3 +110,24 @@ def batchErrorProcessing(tasks):
         message += "\n\t".join(msg)
 
     raise ValueError(message)
+
+def test_generateBatches():
+    """
+    Tests functionality of the generateBatches function
+    """
+    t = {
+        'a': ['b'],
+        'b': ['c'],
+        'c': ['d', 'e', 'f', 'g'],
+        'd': ['e', 'g', 'j'],
+        'e': ['f'],
+        'f': ['i', 'j'],
+        'g': ['j'],
+        'h': ['i'],
+        'i': ['j'],
+        'j': ['q'],
+    }
+    g = ['q']
+    batches = generateBatches(t, g)
+    assert batches == [{'j'}, {'i', 'g'}, {'f', 'h'}, {'e'},
+                       {'d'}, {'c'}, {'b'}, {'a'}]
