@@ -1,14 +1,15 @@
 # I'm just a small-town (girl) initialization file
 
-from .processing import core, CytherError, run
-from .core import info, configure, test, setup, make, clean, purge
+# TODO RE-ENABLE!
+# from .processing import core, CytherError, run
+# from .core import info, configure, test, setup, make, clean, purge
 
 
 try:
     from shutil import which
 except ImportError:
-    raise CytherError("The current version of Python doesn't support the"
-                      "function 'which', normally located in shutil")
+    raise ValueError("The current version of Python doesn't support the"
+                     "function 'which', normally located in shutil")
 
 
 __author__ = "Nicholas C. Pandolfi"
