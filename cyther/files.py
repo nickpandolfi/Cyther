@@ -16,6 +16,15 @@ NAME = 0
 __all__ = ['createPath', 'File']
 
 
+class OverwriteError(Exception):
+    """
+    Denotes if the user tried to overwrite a part of a file without giving
+    explicit permission
+    """
+    def __init__(self, *args, **kwargs):
+        super(OverwriteError, self).__init__(*args, **kwargs)
+
+
 OVERWRITE_ERROR = "; cannot overwrite without explicit permission"
 PATH_HAS_EXT = "Path '{}' has an extension, cannot override to a directory"
 PATH_NOT_DIR = "The path supplied must be a directory"
@@ -83,13 +92,6 @@ def _get_directory(path):
     return directory
 
 
-def _is_absolute(path):
-    """
-    Returns if the given path is an absolute path or not.
-    """
-    return os.path.abspath(path) == os.path.normpath(path)
-
-
 def _isfile(path, override=None):
     if override is True:
         result = True
@@ -107,6 +109,7 @@ def _get_drive(path):
     return os.path.splitdrive(path)[DRIVE]
 
 
+# TODO This is probably not cross platform...
 def _ensure_same_drives(path1, path2):
     if _get_drive(path1) != _get_drive(path2):
         return False
@@ -116,12 +119,12 @@ def _ensure_same_drives(path1, path2):
 def _process_existing_name(path, name, ext, overwrite):
     if path and _has_name(path):
         if not overwrite:
-            raise ValueError(PATH_NOT_DIR + OVERWRITE_ERROR)
+            raise OverwriteError(PATH_NOT_DIR + OVERWRITE_ERROR)
 
     if _has_ext(name):
         if ext:
             if not overwrite:
-                raise ValueError(NAME_HAS_EXT + OVERWRITE_ERROR)
+                raise OverwriteError(NAME_HAS_EXT + OVERWRITE_ERROR)
             new_name = _join_ext(_get_name(name, ext=False), ext)
         else:
             new_name = name
@@ -138,7 +141,7 @@ def _process_non_existing_name(path, name, ext, overwrite):
         if _isfile(path):
             if ext:
                 if not overwrite:
-                    raise ValueError(FILE_NAME_AND_EXT + OVERWRITE_ERROR)
+                    raise OverwriteError(FILE_NAME_AND_EXT + OVERWRITE_ERROR)
                 new_name = _join_ext(_get_name(name, ext=False), ext)
             else:
                 new_name = _get_name(path, ext=True)
@@ -171,11 +174,11 @@ def _process_name(path, name, ext, overwrite):
 
 def _process_directory(path, root, inject):
     if root:
-        if not _is_absolute(root):
+        if not os.path.isabs(root):
             raise ValueError(ROOT_NOT_ABS)
 
         if path:
-            if _is_absolute(path):
+            if os.path.isabs(path):
                 raise ValueError(PATH_AND_ROOT_ABS)
             new_directory = os.path.join(root, _get_directory(path))
         else:
@@ -183,7 +186,7 @@ def _process_directory(path, root, inject):
     else:
         cwd = os.getcwd()
         if path and _has_directory(path):
-            if _is_absolute(path):
+            if os.path.isabs(path):
                 new_directory = _get_directory(path)
             else:
                 new_directory = os.path.join(cwd, _get_directory(path))
@@ -203,7 +206,7 @@ def _construct_path(new_directory, new_name):
     return path
 
 
-def _format_path(path, root, relpath, reduce):
+def _format_path(path, root, relpath, reduce, return_dir):
     if reduce:
         relpath = True
 
@@ -211,7 +214,7 @@ def _format_path(path, root, relpath, reduce):
         result = path
     else:
         if isinstance(relpath, str):
-            if not _is_absolute(relpath):
+            if not os.path.isabs(relpath):
                 raise ValueError(RELPATH_NOT_ABS)
             start = relpath
         elif root:
@@ -231,6 +234,10 @@ def _format_path(path, root, relpath, reduce):
         else:
             result = new_path
 
+    # TODO What if result is already a directory? Do we care?
+    if return_dir:
+        result = os.path.dirname(result)
+
     return result
 
 
@@ -241,7 +248,7 @@ def _check_path(path, must_exist, exists_error, exists):
 
     if must_exist and not os.path.exists(path):
         if exists_error:
-            raise ValueError(NOT_EXIST.format(path))
+            raise FileNotFoundError(NOT_EXIST.format(path))
         else:
             result = False
     else:
@@ -252,7 +259,7 @@ def _check_path(path, must_exist, exists_error, exists):
 
 def createPath(path=None, *, name=None, ext=None, inject=None, root=None,
                overwrite=False, exists_error=True, must_exist=False,
-               relpath=None, reduce=False, exists=False):
+               relpath=None, reduce=False, exists=False, return_dir=False):
     """
     Path manipulation black magic
     """
@@ -260,7 +267,7 @@ def createPath(path=None, *, name=None, ext=None, inject=None, root=None,
     new_name = _process_name(path, name, ext, overwrite)
     new_directory = _process_directory(path, root, inject)
     full_path = _construct_path(new_directory, new_name)
-    final_path = _format_path(full_path, root, relpath, reduce)
+    final_path = _format_path(full_path, root, relpath, reduce, return_dir)
     result = _check_path(final_path, must_exist, exists_error, exists)
 
     return result
@@ -360,15 +367,61 @@ class File:
 
 def test_createPath():
     """
-    Tests createPath to make sure its working
+    Tests createPath to make sure it's working correctly
     """
+
+    # cwd tacking
     assert createPath('test.o') != 'test.o'
+
+    # name building
     assert createPath('test.o') == createPath(name='test', ext='o')
+
+    # injection
     assert createPath('parent/test.o') == createPath('test.o', inject='parent')
 
     test_path = os.path.abspath('test.o')
+
+    # creation of abspath, returning of same directory, unchanged
     assert createPath(test_path) == test_path
+
+    # relpath is different from abspath
     assert createPath(test_path, relpath=True) != test_path
+
+    # Fake path
+    fake_file_name = 'abcd' * 3 + '.guyfieri'
+    fake_path = os.path.join(os.getcwd(), fake_file_name)
+
+    # Overloading overwriting call (tests many things)
+    assert createPath(fake_path, name='is', ext='dumb', inject='cyther',
+                      overwrite=True) == createPath(name='is', ext='dumb',
+                                                    inject='cyther')
+
+    # Make sure overwriting doesn't work without 'overwrite=' keyword
+    try:
+        createPath(fake_path, name='is', ext='dumb', inject='nick')
+        raise AssertionError("This command shouldn't have worked")
+    except OverwriteError:
+        pass
+
+    another_fake_dir = os.path.abspath("nick/says/cyther/is.dumb")
+    fake_root = createPath(another_fake_dir, return_dir=True)
+    faker_root = os.path.dirname(os.path.dirname(fake_root))
+
+    # Another nifty overloading call
+    assert createPath('says/cyther', root=faker_root,
+                      name='is.dumb') == another_fake_dir
+
+    # make sure non-existant name doesn't exist
+    try:
+        createPath(fake_path, must_exist=True)
+    except FileNotFoundError:
+        pass
+
+    # Do the same but without exists_error
+    assert not createPath(fake_path, must_exist=True, exists_error=False)
+
+    # Test the 'exists' keyword (works like os.path.exists)
+    assert not createPath(fake_path, exists=True)
 
 if __name__ == '__main__':
     test_createPath()

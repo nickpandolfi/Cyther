@@ -9,6 +9,10 @@ class CytherError(Exception):
 
 
 def getResponse(message, acceptableResponses):
+    """
+    Ask the user to input something on the terminal level, check their response
+    and ask again if they didn't answer correctly
+    """
     if isinstance(acceptableResponses, str):
         acceptableResponses = (acceptableResponses,)
     else:
@@ -21,6 +25,7 @@ def getResponse(message, acceptableResponses):
     return response
 
 
+# TODO What about the __file__ attribute
 # TODO Make this automatic if 'numpy' is seen in the source code?
 def getDirsToInclude(string):
     """
@@ -37,8 +42,8 @@ def getDirsToInclude(string):
             try:
                 exec('import {}'.format(module))
             except ImportError:
-                raise CytherError("The module '{}' does not"
-                                  "exist".format(module))
+                raise FileNotFoundError("The module '{}' does not"
+                                        "exist".format(module))
             try:
                 dirs.append('-I{}'.format(eval(module).get_include()))
             except AttributeError:
@@ -49,8 +54,8 @@ def getDirsToInclude(string):
 def removeGivensFromTasks(tasks, givens):
     for given in givens:
         if given in tasks:
-            raise Exception("Task '{}' is not supposed to be an"
-                            " exception".format(given))
+            raise Exception("Task '{}' is not supposed to be a"
+                            " given".format(given))
         for task in tasks:
             if given in tasks[task]:
                 tasks[task].remove(given)
@@ -81,6 +86,10 @@ def generateBatches(tasks, givens):
     return batches
 
 
+GIVENS_NOT_SPECIFIED = "The dependencies '{}' should be givens if not " \
+                       "specified as tasks"
+
+
 def batchErrorProcessing(tasks):
     should_be_givens = []
     total_deps = {dep for deps in tasks.values() for dep in deps}
@@ -90,8 +99,7 @@ def batchErrorProcessing(tasks):
 
     if should_be_givens:
         string = ', '.join(should_be_givens)
-        message = "The dependencies '{}' should be givens if not" \
-                  " specified as tasks".format(string)
+        message = GIVENS_NOT_SPECIFIED.format(string)
     else:
         message = "Circular dependency found:\n\t"
         msg = []
