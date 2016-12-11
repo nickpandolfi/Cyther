@@ -1,26 +1,4 @@
 
-MAINTAIN
-
-    Keep __all__ up to date with all the useful functions
-        Have an __all__ for each module
-        Privatize all objects not in __all__
-
-    Comment and properly docstring everything
-
-    Keep the -h following all the other common -h practices
-
-    Make sure that the -h is up to date, including all the version info of all the external features (gcc/Cython)
-
-    Make sure that you constantly search for the assumptions cyther makes
-
-    Make my getIncludeAndRuntime() function is up to date with build_ext in distutils
-
-    Any name cool badges to add? Make sure you got all the recent and useful ones
-    Use http://shields.io/ to generate non changing badges
-
-    Make sure the test file is updated to include the latest features (test everything!)
-
-
 TO-DO (before next version)
 
     NON-CRITICAL
@@ -46,7 +24,25 @@ TO-DO (before next version)
 
 
 
+
+
+
+
+MAINTAIN
+    Keep __all__ up to date with all the useful functions
+        Have an __all__ for each module
+        Privatize all objects not in __all__
+    Comment and properly docstring everything
+    Keep the -h following all the other common -h practices
+    Make sure that the -h is up to date, including all the version info of all the external features (gcc/Cython)
+    Make sure that you constantly search for the assumptions cyther makes
+    Make my getIncludeAndRuntime() function is up to date with build_ext in distutils
+    Any name cool badges to add? Make sure you got all the recent and useful ones (http://shields.io/)
+    Make sure the test file is updated to include the latest features
+
+
 FUTURE UPDATES
+    Travis OSX tests are not working. It seems to be their issue. Keep an eye on it.
     Make CytherError only apply if the error was the user's fault
     Where can we find a reliable source of code in build_ext (getIncludeandRuntime())
     Have cyther's help text print its version! (Its needs to know its own version)
@@ -54,90 +50,45 @@ FUTURE UPDATES
     Theres an odd bug where "INSTALL_REQUIRES = ['cython']" will install the non-latest version of cython.
     Find and follow as many conventions as possible in the bookmarks set
     Make sure a new window doesnt get spawned on the subprocess calls (on some systems it does, some it doesnt)
+    Fix this stupid line: platform.platform().strip().lower().startswith('windows')
+    Incorporate the format of '----- >> watch stats << ------' into watch
 
+    Q) Even bother getting Cyther to work with python 2 or pypy(3)?
+    Q) Whats up with pypi version badge doing '?.?.?'
+    Q) Can ar recompile static libraries? (http://www.linux.org/threads/gnu-binutils.6544/)
+    Q) Any other commands to `entry_points` other than `console-script`?
+    Q) What do the platform names even look like? Is their structure reliable? Does it need to be?
+    Q) Is it necessary to make sure that os.pardir will never be a problem??
+    Q) What is the difference between os.name and sys.platform and platform.platform?
     Q) Can error info be sent automatically in bytes?
 
-NEW FEATURES
-
-    I like the format of this: '------- >> begin captured stdout << --------'
-        Incorporate into 'watch'
-
-    Have the CYTHER_CONFIG_FILE hold the paths to the compiler executables!
-        Then, it may be ok to not have gcc in the path, and thus a seperate and private gcc can be used
-
-    So for this ^ we need a massive function to search through the drive as far as possible and implement regex patterns
-
-    BUT HOW TO THE INDIVIDUAL CYTHER OPTIONS FIT INTO THE MAKEFILE SYSTEM?
-
-    Make something like an 'instance' object to create independantly of core, THEN pass to core
-        What it will do it be an object holding the attribute values of the different arg_parse flags.
-
-    Get the arguments of run(timer=True) to work properly, or be automatic, like IPython
-
-    Instead of the include option, have the system automatically detect the python {}.get_include() modules
-
-    Say the search for the directories necessary for the runtime compilation fails, and returns nothing. Then run the
-    crawl algorithm over the whole DRIVE to find a lib file that matches the REGEX definition
-
-    Make cyther able to use the microsoft compiler cl; to mesh well with the windows system
-        However, we need a powerful searching algorithm to find all the correct executables...
-
-    Make the example_file.pyx a prototype for the SuperObject system. Implementing live testing of it?
-
-    DLLTOOL regex algorithm launched in a separate thread
-
-
-LOW PRIORITY
-
-    Erase Cyther's usage of distutils entirely
-
-    Always back up the previous compile if there was one. Then if there is an error, don't overwrite it with anything,
-    but instead, keep the backup version. Have the new compilation attempt be built in the __cythercache__ directory
-
-########################################################################################################################
 
 BEFORE DEPLOY (for me)
-
     Make sure that the version specified makes sense (major.minor.patch)
-
     Make sure that the README reflects the new interface changes
-
     Make sure that the CHANGELOG is up to date and includes the current version change
-
     Delete the comments that are no longer needed. Any junk or temporary commented code should be extracted
-
-    Write a test script that actually tests the whole deal. Have it run every scenario and then
-    USE the actual extension that it makes
+    Update testing script to cover any new features
 
 
-QUESTIONS (for me to ask myself)
-
-
-
+BIG QUESTIONS
+    Is it useful at all to always back up the previous compile?
+    Erase Cyther's usage of distutils entirely?
+    What about packaging the libraries with cyther?? Is cross compiling possible / a good idea?
     Find the best format for the docstrings that is the most universal (What does sphinx use?)
 
-    Any other commands to `entry_points` other than `console-script`?
-
-    http://www.linux.org/threads/gnu-binutils.6544/
-
-    Can ar recompile static libraries?
-
-    Is there a better way to get the version of gcc / basic information?
-
-    How to deal with non-standard extensions that people might be using? Don't error, but just have it print that
-    it is non standard, and work anyway? What about Regex?
-
-    Don't have args and file, have only one object with everything in it. Does this even make sense?
-
-    Is it wise to take out the checking procedures with the getIncludeAndRuntime() function. Why are they necessary??
-
-    Will sift ever have to return multiple results for the lib directories??
-
-    What about lines like this platform.platform().strip().lower().startswith('windows')??
-    What do the platform names even look like? Is their structure reliable? Does it need to be?
-
-    Is it necessary to make sure that os.pardir will never be a problem??
-
-    What about packaging the libraries with cyther?? Is cross compiling possible / a good idea?
-
-    What is the difference between os.name and sys.platform and platform.platform?
+SORT THESE CHANGES
+    Have the CYTHER_CONFIG_FILE hold the paths to the compiler executables!
+        Then, it may be ok to not have gcc in the path, and thus a seperate and private gcc can be used
+    So for this ^ we need a massive function to search through the drive as far as possible and implement regex patterns
+    BUT HOW TO THE INDIVIDUAL CYTHER OPTIONS FIT INTO THE MAKEFILE SYSTEM?
+    Make something like an 'instance' object to create independantly of core, THEN pass to core
+        What it will do it be an object holding the attribute values of the different arg_parse flags.
+    Get the arguments of run(timer=True) to work properly, or be automatic, like IPython
+    Instead of the include option, have the system automatically detect the python {}.get_include() modules
+    Say the search for the directories necessary for the runtime compilation fails, and returns nothing. Then run the
+        crawl algorithm over the whole DRIVE to find a lib file that matches the REGEX definition
+    Make cyther able to use the microsoft compiler cl; to mesh well with the windows system
+        However, we need a powerful searching algorithm to find all the correct executables...
+    Make the example_file.pyx a prototype for the SuperObject system. Implementing live testing of it?
+    DLLTOOL regex algorithm launched in a separate thread
