@@ -14,8 +14,6 @@ MAINTAIN
     Make sure that you constantly search for the assumptions cyther makes
 
     Make my getIncludeAndRuntime() function is up to date with build_ext in distutils
-        This information needs to be hardcoded, where else can it be found?
-        # TODO Where can we find a reliable source ^
 
     Any name cool badges to add? Make sure you got all the recent and useful ones
     Use http://shields.io/ to generate non changing badges
@@ -25,47 +23,39 @@ MAINTAIN
 
 TO-DO (before next version)
 
-    HELP TEXT:
-        Have cyther's help text print its version!
-        Have each utility (cython, gcc, python) print its executable AND its version in parenthesis in the help text!
-
-    DEPLOYMENT:
+    NON-CRITICAL
         Figure out how to do a github release!
-        Follow as many conventions as possible in the bookmarks set
-
-    SERVICES:
-        Unhook cyther from other unnecessary services
-            Codacy, Waffle, CodeShip, AppVeyor
-        Does the repo token for travis even do anything?
-        Keep an eye on Code Climate, Travis
-
-    TECHNICAL:
-        Get 'where' to find libpython!!
-        Do we have to include a script to setup.py as well as the console script?
-        ON XUBUNTU: LOOK HOW CYTHON DOES IT AND SEE WHAT FLAGS YOU ARE MISSING!
-        >>> Make CytherError only apply if the error was the user's fault!! <<<
-        Make cytherize and getIncludeAndRuntime shorter
-            Change the name of cytherize to something more meaningful
-        What is the use of the vcruntime140.dll on windows installations? Does it need to be included?
-        Make sure a new window doesnt get spawned on the subprocess calls (on some systems it does, some it doesnt)
-        Get it working on Xubuntu ---> should cascade fix many other errors
-
-    README:
-        Try the automatic page generator tool for github!
-
-        Fix the help text in the readme to not have 'Nothing here yet'
-        Change the descripting of the readme so that it doesn't say that it is directly a compiler, but a processor instead
-            It technically IS a compiler, but really, it weilds both compilers and ties them together
-            User doesn't have to know WTF they are doing in order for it to completely work
-        Say that if there is an error, to email me the output of the '--test' option
-            Can this info be sent automatically in bytes?
-        Use assert in testing file
         Installation instructions into README
-        Maybe have a BASIC and an ADVANCED section? Or just progress through the file...
+        Fix the help text in the readme to not have 'Nothing here yet'
+        Get 'where' to find libpython!! (Polymorphesize this function to be awesome)
 
-FIX
+    CRITICAL
+        GENERAL
+            Look how Cython builds the commands on xubuntu and figure out what you are missing
+            What is the use of the vcruntime140.dll on windows installations? Does it need to be included?
 
+        ORDERED
+            Figure out how to minimally represent an instruction (what is necessary once extraneous info is processed??)
+                Make sure that an 'Instruction' instance has enough information in the baseline info to work with dependencies and other instructions
+            Finish setDefaults() of Instruction once Instruction baseline info is known
+            Now Instruction is done, work on InstructionManager
+            Integrate the generateBatches command into it
+            What do we go to after this is done? Do we compile commands then and there??
+
+
+
+
+
+FUTURE UPDATES
+    Make CytherError only apply if the error was the user's fault
+    Where can we find a reliable source of code in build_ext (getIncludeandRuntime())
+    Have cyther's help text print its version! (Its needs to know its own version)
+    Update Cyther's github page to be a full tutorial (make readme readable by formatting)
     Theres an odd bug where "INSTALL_REQUIRES = ['cython']" will install the non-latest version of cython.
+    Find and follow as many conventions as possible in the bookmarks set
+    Make sure a new window doesnt get spawned on the subprocess calls (on some systems it does, some it doesnt)
+
+    Q) Can error info be sent automatically in bytes?
 
 NEW FEATURES
 
