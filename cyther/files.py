@@ -1,3 +1,4 @@
+
 """
 This module holds the utilities necessary to process full path names and hold
 their parsed information, so other tools can easily extract this information
@@ -363,65 +364,3 @@ class File:
         Returns the full file path to the file, including the drive
         """
         return self.__path
-
-
-def test_createPath():
-    """
-    Tests createPath to make sure it's working correctly
-    """
-
-    # cwd tacking
-    assert createPath('test.o') != 'test.o'
-
-    # name building
-    assert createPath('test.o') == createPath(name='test', ext='o')
-
-    # injection
-    assert createPath('parent/test.o') == createPath('test.o', inject='parent')
-
-    test_path = os.path.abspath('test.o')
-
-    # creation of abspath, returning of same directory, unchanged
-    assert createPath(test_path) == test_path
-
-    # relpath is different from abspath
-    assert createPath(test_path, relpath=True) != test_path
-
-    # Fake path
-    fake_file_name = 'abcd' * 3 + '.guyfieri'
-    fake_path = os.path.join(os.getcwd(), fake_file_name)
-
-    # Overloading overwriting call (tests many things)
-    assert createPath(fake_path, name='is', ext='dumb', inject='cyther',
-                      overwrite=True) == createPath(name='is', ext='dumb',
-                                                    inject='cyther')
-
-    # Make sure overwriting doesn't work without 'overwrite=' keyword
-    try:
-        createPath(fake_path, name='is', ext='dumb', inject='nick')
-        raise AssertionError("This command shouldn't have worked")
-    except OverwriteError:
-        pass
-
-    another_fake_dir = os.path.abspath("nick/says/cyther/is.dumb")
-    fake_root = createPath(another_fake_dir, return_dir=True)
-    faker_root = os.path.dirname(os.path.dirname(fake_root))
-
-    # Another nifty overloading call
-    assert createPath('says/cyther', root=faker_root,
-                      name='is.dumb') == another_fake_dir
-
-    # make sure non-existant name doesn't exist
-    try:
-        createPath(fake_path, must_exist=True)
-    except FileNotFoundError:
-        pass
-
-    # Do the same but without exists_error
-    assert not createPath(fake_path, must_exist=True, exists_error=False)
-
-    # Test the 'exists' keyword (works like os.path.exists)
-    assert not createPath(fake_path, exists=True)
-
-if __name__ == '__main__':
-    test_createPath()

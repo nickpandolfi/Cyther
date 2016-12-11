@@ -5,11 +5,7 @@ Cyther. It tets Cyther's main operation as well as the underlying utilities
 Cyther uses.
 """
 
-import subprocess
-
-# import cyther
-from .tools import test_generateBatches
-from .files import test_createPath
+from .aberdeen import test_generateBatches, test_createPath
 
 
 def test_all():
@@ -24,6 +20,9 @@ def test_compiler():
     """
     Tests Cyther's entire core operation
     """
+    import subprocess
+    import cyther
+
     cyther.info(None)
     cyther.core('cyther info')
     subprocess.call(['cyther', 'info'])
@@ -38,7 +37,7 @@ def test_utilities():
 
     test_generateBatches()
     test_createPath()
-    return
+    return None
 
 
 if __name__ == '__main__':
