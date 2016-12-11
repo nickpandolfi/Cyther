@@ -198,6 +198,15 @@ def _parse_building_options(string):
     return output_directory, output_format, building_directory, string
 
 
+"""
+(example_file.o)[yolo.pyx]{^local} example_file.pyx{o}
+
+Starting Point (task_name is the filename!)
+    [Intermediate steps]
+    Endpoint
+"""
+
+
 def parseString(string):
     """
     This function takes an entire instruction in the form of a string, and

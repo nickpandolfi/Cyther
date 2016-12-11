@@ -1,18 +1,65 @@
+
 import argparse
 
-from .files import getPath
 from .system import *
 from .arguments import parser
-from .objects import SimpleCommand
 
 
-"""
-(example_file.o)[yolo.pyx]{^local} example_file.pyx{o}
+COMMAND_FILENAME = '.cyther'
 
-Starting Point (task_name is the filename!)
-    [Intermediate steps]
-    Endpoint
-"""
+
+class SimpleCommand:
+    def __init__(self):
+        self.runtime_names = []
+        self.include_names = []
+        self.cython_name = None
+        self.python_name = None
+        self.c_name = None
+        self.o_name = None
+        self.dll_name = None
+
+    def getCythonFileName(self):
+        return self.cython_name
+
+    def setCythonFileName(self, obj):
+        self.cython_name = obj
+
+    def getPythonFileName(self):
+        return self.python_name
+
+    def setPythonFileName(self, obj):
+        self.python_name = obj
+
+    def getCName(self):
+        return self.c_name
+
+    def setCName(self, obj):
+        self.c_name = obj
+
+    def getOName(self):
+        return self.o_name
+
+    def setOName(self, obj):
+        self.o_name = obj
+
+    def getDLLName(self):
+        return self.dll_name
+
+    def setDLLName(self, obj):
+        self.dll_name = obj
+
+    def getRuntimeNames(self):
+        return self.runtime_names
+
+    def setRuntimeNames(self, obj):
+        self.runtime_names = obj
+
+    def getIncludeNames(self):
+        return self.include_names
+
+    def setIncludeNames(self, obj):
+        self.include_names = obj
+
 
 
 def furtherArgsProcessing(args):
@@ -109,28 +156,17 @@ Put them into cytherize
 """
 
 
-class Command(SimpleCommand, list):
-    def __init__(self, task_name, dependencies):
-        super(Command, self).__init__()
-        self.__task_name = task_name
-        self.__dependencies = dependencies
-
-    def generateCommands(self):
-        """
-        1) Sort the commands
-        2) Return the commands in the form of a list
-        3) This does what makeCommands does right now
-        """
-        pass
-
-
-class CommandManager:
+class Commands:
+    """
+    Class to hold the data and methods for processing a manager of instructions
+    into commands to execute in order to do what should be accomplished
+    """
     def __init__(self):
         self.__unprocessed = []
 
     def toFile(self, filename=None):
         if not filename:
-            filename = 'cytherize'
+            filename = COMMAND_FILENAME
 
         commands = self.generateCommands()
         string = str()
@@ -146,9 +182,9 @@ class CommandManager:
     @staticmethod
     def fromFile(filename=None):
         if not filename:
-            filename = 'cytherize'
+            filename = COMMAND_FILENAME
 
-        with open(filename, 'r') as file:
+        with open(filename) as file:
             lines = file.readlines()
 
         output = []
@@ -157,18 +193,14 @@ class CommandManager:
 
         return output
 
-    def addCommand(self, command):
-        # TODO Should we unpack it here?
-        # task_name to command
-        # task_name to dependencies
-        self.__unprocessed.append(command)
-
-
     def generateCommands(self):
-        sorted_task_names = []
-        # dependency sorting
-        commands = []
-        return commands
+        """
+        Generate a list of lists of commands from the internal manager object
+        """
+        # 1) Sort the commands
+        # 2) Return the commands in the form of a list
+        # 3) This does what makeCommands does right now
+        pass
 
 
 def makeCommands(file):
