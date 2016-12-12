@@ -62,7 +62,10 @@ def _has_ext(fragment):
 
 
 def _get_ext(fragment):
-    return os.path.splitext(fragment)[EXTENSION]
+    if fragment[0] == '.':
+        return os.path.splitext(fragment)[NAME]
+    else:
+        return os.path.splitext(fragment)[EXTENSION]
 
 
 def _has_name(fragment):
@@ -101,7 +104,8 @@ def _isfile(path, override=None):
             raise ValueError(PATH_HAS_EXT.format(path))
         result = False
     else:
-        result = bool(_get_ext(path))
+        extension = _get_ext(path)
+        result = bool(extension)
 
     return result
 
