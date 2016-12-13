@@ -18,6 +18,12 @@ def test_createPath():
     # name building
     assert createPath('test.o') == createPath(name='test', ext='o')
 
+    # name building using only an extension
+    assert createPath('.tester') == createPath(ext='tester')
+
+    # another only extension example by using 'name' parameter
+    assert createPath('.tester') == createPath(name='.tester')
+
     # injection
     assert createPath('parent/test.o') == createPath('test.o', inject='parent')
 

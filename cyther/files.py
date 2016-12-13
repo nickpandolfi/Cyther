@@ -111,14 +111,11 @@ def _isfile(path, override=None):
 
 
 def _get_drive(path):
-    return os.path.splitdrive(path)[DRIVE]
+    return os.path.splitdrive(os.path.normpath(path))[DRIVE]
 
 
-# TODO This is probably not cross platform...
 def _ensure_same_drives(path1, path2):
-    if _get_drive(path1) != _get_drive(path2):
-        return False
-    return True
+    return _get_drive(path1) == _get_drive(path2)
 
 
 def _process_existing_name(path, name, ext, overwrite):
@@ -153,7 +150,10 @@ def _process_non_existing_name(path, name, ext, overwrite):
         else:
             raise ValueError(NO_NAME_PATH_IS_DIR)
     else:
-        raise ValueError(NO_NAME_NO_PATH)
+        if ext:
+            new_name = _join_ext('', ext)
+        else:
+            raise ValueError(NO_NAME_NO_PATH)
     return new_name
 
 
@@ -262,6 +262,7 @@ def _check_path(path, must_exist, exists_error, exists):
     return result
 
 
+# TODO Make parameters to pass in to override how to function identifies a path
 def createPath(path=None, *, name=None, ext=None, inject=None, root=None,
                overwrite=False, exists_error=True, must_exist=False,
                relpath=None, reduce=False, exists=False, return_dir=False):
