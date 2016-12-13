@@ -52,6 +52,7 @@ FUTURE UPDATES
     Make sure a new window doesnt get spawned on the subprocess calls (on some systems it does, some it doesnt)
     Fix this stupid line: platform.platform().strip().lower().startswith('windows')
     Incorporate the format of '----- >> watch stats << ------' into watch
+    Get cyther to modify distutils imported at runtime to compile everything instead of distutils
 
     Q) Even bother getting Cyther to work with python 2 or pypy(3)?
     Q) Whats up with pypi version badge doing '?.?.?'
@@ -61,6 +62,7 @@ FUTURE UPDATES
     Q) Is it necessary to make sure that os.pardir will never be a problem??
     Q) What is the difference between os.name and sys.platform and platform.platform?
     Q) Can error info be sent automatically in bytes?
+    Q) C interpreter for cyther to check if a file is C? Probably not...
 
 
 BEFORE DEPLOY (for me)

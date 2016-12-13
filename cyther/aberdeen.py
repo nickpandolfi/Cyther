@@ -10,66 +10,66 @@ def test_createPath():
     """
 
     import os
-    from .files import createPath, OverwriteError
+    from .files import path, OverwriteError
 
     # cwd tacking
-    assert createPath('test.o') != 'test.o'
+    assert path('test.o') != 'test.o'
 
     # name building
-    assert createPath('test.o') == createPath(name='test', ext='o')
+    assert path('test.o') == path(name='test', ext='o')
 
     # name building using only an extension
-    assert createPath('.tester') == createPath(ext='tester')
+    assert path('.tester') == path(ext='tester')
 
     # another only extension example by using 'name' parameter
-    assert createPath('.tester') == createPath(name='.tester')
+    assert path('.tester') == path(name='.tester')
 
     # injection
-    assert createPath('parent/test.o') == createPath('test.o', inject='parent')
+    assert path('parent/test.o') == path('test.o', inject='parent')
 
     test_path = os.path.abspath('test.o')
 
     # creation of abspath, returning of same directory, unchanged
-    assert createPath(test_path) == test_path
+    assert path(test_path) == test_path
 
     # relpath is different from abspath
-    assert createPath(test_path, relpath=True) != test_path
+    assert path(test_path, relpath=True) != test_path
 
     # Fake path
     fake_file_name = 'abcd' * 3 + '.guyfieri'
     fake_path = os.path.join(os.getcwd(), fake_file_name)
 
     # Overloading overwriting call (tests many things)
-    assert createPath(fake_path, name='is', ext='dumb', inject='cyther',
-                      overwrite=True) == createPath(name='is', ext='dumb',
-                                                    inject='cyther')
+    assert path(fake_path, name='is', ext='dumb', inject='cyther',
+                overwrite=True) == path(name='is', ext='dumb',
+                                        inject='cyther')
 
     # Make sure overwriting doesn't work without 'overwrite=' keyword
     try:
-        createPath(fake_path, name='is', ext='dumb', inject='nick')
+        path(fake_path, name='is', ext='dumb', inject='nick')
         raise AssertionError("This command shouldn't have worked")
     except OverwriteError:
         pass
 
     another_fake_dir = os.path.abspath("nick/says/cyther/is.dumb")
-    fake_root = createPath(another_fake_dir, return_dir=True)
+    fake_root = path(another_fake_dir, return_dir=True)
     faker_root = os.path.dirname(os.path.dirname(fake_root))
 
     # Another nifty overloading call
-    assert createPath('says/cyther', root=faker_root,
-                      name='is.dumb') == another_fake_dir
+    assert path('says/cyther', root=faker_root,
+                name='is.dumb') == another_fake_dir
 
     # make sure non-existant name doesn't exist
     try:
-        createPath(fake_path, must_exist=True)
+        path(fake_path, must_exist=True)
     except FileNotFoundError:
         pass
 
     # Do the same but without exists_error
-    assert not createPath(fake_path, must_exist=True, exists_error=False)
+    assert not path(fake_path, must_exist=True, exists_error=False)
 
     # Test the 'exists' keyword (works like os.path.exists)
-    assert not createPath(fake_path, exists=True)
+    assert not path(fake_path, exists=True)
 
 
 def test_generateBatches():
