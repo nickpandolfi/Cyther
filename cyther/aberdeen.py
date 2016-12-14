@@ -10,7 +10,7 @@ def test_createPath():
     """
 
     import os
-    from .files import path, OverwriteError
+    from .files import path, exists, get, OverwriteError
 
     # cwd tacking
     assert path('test.o') != 'test.o'
@@ -37,7 +37,7 @@ def test_createPath():
 
     # Fake path
     fake_file_name = 'abcd' * 3 + '.guyfieri'
-    fake_path = os.path.join(os.getcwd(), fake_file_name)
+    fake_path = os.path.abspath(fake_file_name)
 
     # Overloading overwriting call (tests many things)
     assert path(fake_path, name='is', ext='dumb', inject='cyther',
@@ -51,25 +51,15 @@ def test_createPath():
     except OverwriteError:
         pass
 
-    another_fake_dir = os.path.abspath("nick/says/cyther/is.dumb")
-    fake_root = path(another_fake_dir, return_dir=True)
+    another_fake = os.path.abspath("nick/says/cyther/is.dumb")
+    fake_root = get(path(another_fake), 'dir')
     faker_root = os.path.dirname(os.path.dirname(fake_root))
 
     # Another nifty overloading call
-    assert path('says/cyther', root=faker_root,
-                name='is.dumb') == another_fake_dir
+    assert path('says/cyther', root=faker_root, name='is.dumb') == another_fake
 
     # make sure non-existant name doesn't exist
-    try:
-        path(fake_path, must_exist=True)
-    except FileNotFoundError:
-        pass
-
-    # Do the same but without exists_error
-    assert not path(fake_path, must_exist=True, exists_error=False)
-
-    # Test the 'exists' keyword (works like os.path.exists)
-    assert not path(fake_path, exists=True)
+    assert not exists(path(fake_path))
 
 
 def test_generateBatches():

@@ -6,6 +6,7 @@ TO-DO (before next version)
         Installation instructions into README
         Fix the help text in the readme to not have 'Nothing here yet'
         Get 'where' to find libpython!! (Polymorphesize this function to be awesome)
+            where (identifier, start=None, isexec, isfile, isdir)
 
     CRITICAL
         GENERAL
@@ -42,6 +43,7 @@ MAINTAIN
 
 
 FUTURE UPDATES
+    Figure out how to include a C file AS A DATA FILE
     Travis OSX tests are not working. It seems to be their issue. Keep an eye on it.
     Make CytherError only apply if the error was the user's fault
     Where can we find a reliable source of code in build_ext (getIncludeandRuntime())
