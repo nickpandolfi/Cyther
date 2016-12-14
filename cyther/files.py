@@ -64,6 +64,17 @@ def _join_ext(name, ext):
     return ret
 
 
+def _sort_output(results):
+    if not results:
+        raise ValueError("Must specify at least one identifier")
+    elif len(results) == 1:
+        ret = results[0]
+    else:
+        ret = tuple(results)
+
+    return ret
+
+
 def _process_existing_name(path_name, name, ext, overwrite, file_override):
     if path_name and detect(path_name, 'name', file_override=file_override):
         if not overwrite:
@@ -92,7 +103,8 @@ def _process_non_existing_name(path_name, name, ext, overwrite, file_override):
                     raise OverwriteError(FILE_NAME_AND_EXT + OVERWRITE_ERROR)
                 new_name = _join_ext(get(name, 'name'), ext)
             else:
-                new_name = get(path_name, '*name')
+                new_name = get(path_name, 'name.ext',
+                               file_override=file_override)
         else:
             raise ValueError(NO_NAME_PATH_IS_DIR)
     else:
@@ -134,16 +146,21 @@ def _process_directory(path_name, root, inject, file_override):
         if path_name:
             if os.path.isabs(path_name):
                 raise ValueError(PATH_AND_ROOT_ABS)
-            new_directory = os.path.join(root, get(path_name, '*dir'))
+            new_directory = os.path.join(root,
+                                         get(path_name, '+dir',
+                                             file_override=file_override))
         else:
             new_directory = root
     else:
         cwd = os.getcwd()
         if path_name and detect(path_name, 'dir', file_override=file_override):
             if os.path.isabs(path_name):
-                new_directory = get(path_name, '*dir')
+                new_directory = get(path_name, '+dir',
+                                    file_override=file_override)
             else:
-                new_directory = os.path.join(cwd, get(path_name, '*dir'))
+                new_directory = os.path.join(cwd,
+                                             get(path_name, '+dir',
+                                                 file_override=file_override))
         else:
             new_directory = cwd
 
@@ -189,17 +206,6 @@ def _format_path(path_name, root, relpath, reduce):
     return result
 
 
-def _sort_output(results):
-    if not results:
-        raise ValueError("Must specify at least one identifier")
-    elif len(results) == 1:
-        ret = results[0]
-    else:
-        ret = tuple(results)
-
-    return ret
-
-
 def exists(path_name, istype=None):
     """
     Checks to make sure a path name exists within the file system given a path
@@ -223,20 +229,16 @@ def detect(path_name, *args, file_override=None):
     """
     results = []
     for item in args:
-        if item == 'isfile':
+        if item == 'isfile' or item == 'name':
             has_ext = '.' in os.path.basename(path_name)
-            looks_like_file = has_ext and not (file_override is False)
-            r = looks_like_file or (file_override is True)
+            r = has_ext or file_override
         elif item == 'isdir':
             not_has_ext = '.' not in os.path.basename(path_name)
-            looks_like_dir = not_has_ext and not (file_override is True)
-            r = looks_like_dir or (file_override is False)
+            r = not_has_ext and not file_override
         elif item == 'isabs':
             r = os.path.isabs(path_name)
         elif item == 'ext':
             r = '.' in os.path.basename(path_name)
-        elif item == 'name':
-            r = detect(path_name, 'isfile')
         elif item == 'dir':
             r = bool(os.path.dirname(path_name))
         else:
@@ -246,7 +248,7 @@ def detect(path_name, *args, file_override=None):
     return _sort_output(results)
 
 
-def get(path_name, *args):
+def get(path_name, *args, file_override=None):
     """
     This function will extract different portions of a path's name
     """
@@ -255,8 +257,8 @@ def get(path_name, *args):
     for item in args:
         if item == 'drive':
             r = os.path.splitdrive(os.path.normpath(path_name))[DRIVE]
-        elif item == '*dir':
-            if detect(path_name, 'isdir'):
+        elif item == '+dir':
+            if detect(path_name, 'isdir', file_override=file_override):
                 r = path_name
             else:
                 r = os.path.dirname(path_name)
@@ -264,13 +266,13 @@ def get(path_name, *args):
             r = os.path.dirname(path_name)
         elif item == 'parent':
             r = os.path.basename(os.path.dirname(path_name))
-        elif item == '*name':
-            if detect(path_name, 'isfile'):
+        elif item == 'name.ext':
+            if detect(path_name, 'isfile', file_override=file_override):
                 r = os.path.basename(path_name)
             else:
                 r = ''
         elif item == 'name':
-            if detect(path_name, 'isfile'):
+            if detect(path_name, 'isfile', file_override=file_override):
                 r = os.path.splitext(os.path.basename(path_name))[NAME]
             else:
                 r = ''
@@ -376,7 +378,7 @@ class File:
         Gets the name of the file as the parent directory sees it
         (ex. 'example.py')
         """
-        identifier = '*name' if ext else 'name'
+        identifier = 'name.ext' if ext else 'name'
         return get(self.getPath(), identifier)
 
     def getExtension(self):

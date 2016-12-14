@@ -41,8 +41,7 @@ def test_createPath():
 
     # Overloading overwriting call (tests many things)
     assert path(fake_path, name='is', ext='dumb', inject='cyther',
-                overwrite=True) == path(name='is', ext='dumb',
-                                        inject='cyther')
+                overwrite=True) == path(name='is', ext='dumb', inject='cyther')
 
     # Make sure overwriting doesn't work without 'overwrite=' keyword
     try:
@@ -60,6 +59,9 @@ def test_createPath():
 
     # make sure non-existant name doesn't exist
     assert not exists(path(fake_path))
+
+    # Create a fake executable (no extension)
+    assert path('test', file_override=True) == os.path.abspath('test')
 
 
 def test_generateBatches():
