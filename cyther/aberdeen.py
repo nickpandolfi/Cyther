@@ -21,6 +21,7 @@ def test_path():
     assert path('.tester') == path(ext='.tester')
     assert path('.tester') == path(name='.tester')
     assert path('.tester') != path(name='tester')
+    assert path('.woopsie.yaml') == path(name='.woopsie', ext='yaml')
 
     assert path('parent/test.o') == path('test.o', inject='parent')
 
@@ -51,7 +52,7 @@ def test_path():
     assert path(os.path.join('says', 'cyther'),
                 root=faker_root, name='is.dumb') == another_fake
     assert not exists(path(fake_path))
-    assert path('test', file_override=True) == os.path.abspath('test')
+    assert path('test', override=True) == os.path.abspath('test')
 
 
 def test_generateBatches():
