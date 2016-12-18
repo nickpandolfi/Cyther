@@ -22,6 +22,10 @@ def test_path():
     assert path('.tester') == path(name='.tester')
     assert path('.tester') != path(name='tester')
     assert path('.woopsie.yaml') == path(name='.woopsie', ext='yaml')
+    p1 = path('.woopsie.yaml')
+    p2 = path(name='.woopsie', ext='yaml', overwrite=True, multi_ext=False)
+    print(p1, p2)
+    assert p1 != p2
 
     assert path('parent/test.o') == path('test.o', inject='parent')
 

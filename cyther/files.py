@@ -20,6 +20,8 @@ ISDIR = False
 
 EXT = '.'
 
+OVERWRITE_ERROR = "; cannot overwrite without explicit permission"
+
 __all__ = ['identify', 'detect', 'get', 'path', 'exists', 'File']
 
 
@@ -32,14 +34,74 @@ class OverwriteError(Exception):
         super(OverwriteError, self).__init__(*args, **kwargs)
 
 
-OVERWRITE_ERROR = "; cannot overwrite without explicit permission"
+def normalize(path_name, override=None):
+    """
+    Prepares a path name to be worked with. Path name must not be empty. This
+    function will return the 'normpath'ed path and the identity of the path.
+    This function takes an optional overriding argument for the identity.
+    """
+    if not path_name:
+        raise ValueError("The path name provided is empty")
+
+    identity = identify(path_name, override=override)
+
+    return os.path.normpath(path_name), identity
 
 
-def _join_ext(name, extension, ext=EXT):
-    if extension[0] == ext:
+def identify(path_name, *, check_exists=True, override=None, default=ISDIR):
+    """
+    Identify the type of a given path name (file or directory). If check_exists
+    is specified to be false, then the function will not set the identity based
+    on the path existing or not. If override is specified as either ISDIR or
+    ISFILE, then the function will try its best to over-ride the identity to be
+    what you have specified. The 'default' parameter is what the function will
+    default the identity to if 'override' is not specified, and the path looks
+    like it could be both a directory and a file.
+    """
+
+    head, tail = os.path.split(path_name)
+
+    if check_exists and os.path.exists(path_name):
+        if os.path.isfile(path_name):
+            if override == ISDIR:
+                raise ValueError("Cannot override a path as a directory if it "
+                                 "is a file that already exists")
+            result = ISFILE
+        elif os.path.isdir(path_name):
+            if override == ISFILE:
+                raise ValueError("Cannot override a path as a file if it is "
+                                 "a directory that already exists")
+            result = ISDIR
+        else:
+            raise Exception("Path exists but isn't a file or a directory...")
+    elif not tail:
+        if override is None:
+            result = ISDIR
+        else:
+            result = override
+    elif has_ext(tail):
+        if override is None:
+            result = ISFILE
+        else:
+            result = override
+    else:
+        if override is None:
+            result = default
+        else:
+            result = override
+
+    return result
+
+
+def join_ext(name, extension):
+    """
+    Joins a given name with an extension. If the extension doesn't have a '.'
+    it will add it for you
+    """
+    if extension[0] == EXT:
         ret = name + extension
     else:
-        ret = name + ext + extension
+        ret = name + EXT + extension
     return ret
 
 
@@ -52,42 +114,98 @@ def _sort_output(results):
         ret = tuple(results)
     return ret
 
-###########################################################################
+
+def is_file(path_name, **kwargs):
+    """
+    Determines if the given path name is a file
+    """
+    return identify(path_name, **kwargs) == ISFILE
 
 
-def _isfile(path_name, override=None):
-    return identify(path_name, override=override) == ISFILE
+def is_dir(path_name, **kwargs):
+    """
+    Determines if the given path name is a directory
+    """
+    return identify(path_name, **kwargs) == ISDIR
 
 
-def _isdir(path_name, override=None):
-    return identify(path_name, override=override) == ISDIR
+def get_drive(path_name):
+    """
+    Gets the part of the path that specified the drive. If this cannot be found
+    it will return an empty string
+    """
+    return os.path.splitdrive(path_name)[DRIVE]
 
 
-def _has_ext(path_name, ext=EXT):
-    return ext in os.path.basename(path_name)
+def has_ext(path_name, *, multiple=None, if_all_ext=False):
+    """
+    Determine if the given path name has an extension
+    """
+    base = os.path.basename(path_name)
+    count = base.count(EXT)
+
+    if not if_all_ext and base[0] == EXT and count != 0:
+        count -= 1
+
+    if multiple is None:
+        return count >= 1
+    elif multiple:
+        return count > 1
+    else:
+        return count == 1
 
 
-def _has_dir(path_name):
+def get_ext(path_name, *, if_all_ext=False):
+    """
+    Get an extension from the given path name. If an extension cannot be found,
+    it will return an empty string
+    """
+    if has_ext(path_name):
+        return os.path.splitext(path_name)[EXTENSION]
+    elif if_all_ext and has_ext(path_name, if_all_ext=True):
+        return os.path.splitext(path_name)[NAME]
+    else:
+        return ''
+
+
+def has_dir(path_name):
+    """
+    Determine if the given path name contains a directory part, even if the
+    path refers to a file
+    """
     return bool(os.path.dirname(path_name))
 
 
-def _get_drive(path_name):
-    return os.path.splitdrive(os.path.normpath(path_name))[DRIVE]
+def get_dir(path_name, *, greedy=False,
+            override=None, identity=None):
+    """
+    Gets the directory path of the given path name. If the argument 'greedy'
+    is specified as True, then if the path name represents a directory itself,
+    the function will return the whole path
+    """
+    if identity is None:
+        identity = identify(path_name, override=override)
 
+    path_name = os.path.normpath(path_name)
 
-def _get_dir(path_name, override=None):
-    if _isdir(path_name, override):
-        r = path_name
+    if greedy and identity == ISDIR:
+        return path_name
     else:
-        r = os.path.dirname(path_name)
-    return r
+        return os.path.dirname(path_name)
 
 
-def _get_parent(path_name):
+def get_parent(path_name):
+    """
+    Gets the parent directory of the given path name
+    """
     return os.path.basename(os.path.dirname(path_name))
 
 
-def _get_name(path_name, ext, identity=None):
+########################################################################################################################################################################
+
+
+def get_name(path_name, *, ext=True,
+             override=None, identity=None):
     if identity == ISFILE or (identity is None and identify(path_name)):
         if ext:
             r = os.path.basename(path_name)
@@ -97,32 +215,8 @@ def _get_name(path_name, ext, identity=None):
         r = ''
     return r
 
-
-def _get_ext(path_name, ext=EXT):
-    basename = os.path.basename(path_name)
-    if _has_ext(basename):
-        if basename[0] == ext:
-            r = os.path.splitext(basename)[NAME]
-        else:
-            r = os.path.splitext(basename)[EXTENSION]
-    else:
-        r = ''
-    return r
-
+# os.path.join(get_dir(path_name), get_name)) == os.path.normpath(path_name)
 ###########################################################################
-
-
-def _expand_users(*args):
-    expanded = []
-    for arg in args:
-        if arg:
-            expanded.append(os.path.expanduser(arg))
-        else:
-            expanded.append(None)
-
-    if len(expanded) == 1:
-        expanded = expanded[0]
-    return expanded
 
 
 def _process_existing_name(path_name, name, ext, overwrite, identity,
@@ -132,19 +226,19 @@ def _process_existing_name(path_name, name, ext, overwrite, identity,
             raise OverwriteError("The path supplied must be a directory" +
                                  OVERWRITE_ERROR)
 
-    if _has_ext(name):
+    if has_ext(name):
         if ext:
             if not overwrite and not multi_ext:
                 raise OverwriteError("The name supplied must not have an "
                                      "extension" + OVERWRITE_ERROR)
-            new_name = _join_ext(_get_name(name, False), ext)
+            new_name = join_ext(get_name(name, False), ext)
         else:
             new_name = name
     else:
         if ext:
-            new_name = _join_ext(name, ext)
+            new_name = join_ext(name, ext)
         else:
-            new_name = _get_name(name, False)
+            new_name = get_name(name, False)
     return new_name
 
 
@@ -155,16 +249,16 @@ def _process_non_existing_name(path_name, name, ext, overwrite, identity):
                 if not overwrite:
                     raise OverwriteError("Can't provide an extension with a "
                                          "full file name" + OVERWRITE_ERROR)
-                new_name = _join_ext(_get_name(name, False), ext)
+                new_name = join_ext(get_name(name, False), ext)
             else:
-                new_name = _get_name(path_name, True, identity)
+                new_name = get_name(path_name, True, identity)
         else:
             raise ValueError("The path specified is a directory, and no name "
                              "was provided; therefore, no name exists to "
                              "construct off of")
     else:
         if ext:
-            new_name = _join_ext('', ext)
+            new_name = join_ext('', ext)
         else:
             raise ValueError("There was no path specified, and thus no name "
                              "exists to construct file path from. Name was "
@@ -185,20 +279,14 @@ def _process_name(path_name, name, ext, overwrite, identity, multi_ext):
 
 def _process_directory(path_name, root, inject, override):
     if root:
-        if not os.path.isabs(root):
-            raise ValueError("The root must be an absolute directory "
-                             "if specified")
         if path_name:
-            if os.path.isabs(path_name):
-                raise ValueError("The path cannot be absolute as well as the r"
-                                 "oot; cannot add two absolute paths together")
-            new_directory = os.path.join(root, _get_dir(path_name, override))
+            new_directory = os.path.join(root, get_dir(path_name, override))
         else:
             new_directory = root
     else:
         cwd = os.getcwd()
-        if path_name and _has_dir(path_name):
-            dir_extension = _get_dir(path_name, override)
+        if path_name and has_dir(path_name):
+            dir_extension = get_dir(path_name, override)
             if os.path.isabs(path_name):
                 new_directory = dir_extension
             else:
@@ -207,8 +295,6 @@ def _process_directory(path_name, root, inject, override):
             new_directory = cwd
 
     if inject:
-        if _isfile(inject):
-            raise ValueError("Parameter 'inject' must be a directory")
         new_directory = os.path.join(new_directory, inject)
 
     return new_directory
@@ -231,7 +317,7 @@ def _format_path(path_name, root, relpath, reduce):
         else:
             start = os.getcwd()
 
-        if _get_drive(path_name) != _get_drive(start):
+        if get_drive(path_name) != get_drive(start):
             raise ValueError("Calculating relpath requires that the "
                              "comparator path is of the same drive")
 
@@ -244,45 +330,47 @@ def _format_path(path_name, root, relpath, reduce):
 
     return result
 
-###########################################################################
 
-
-def identify(path_name, *, override=None, check_exists=True, default=ISDIR):
-    """
-    Identify the type of a given path name (file or directory)
-    """
-    if not path_name:
-        if path_name is None:
-            return None
-        else:
-            raise ValueError("The path name provided is empty")
-
-    result = None
-    head, tail = os.path.split(path_name)
-
-    if check_exists and os.path.exists(path_name):
-        if os.path.isfile(path_name):
-            result = ISFILE
-        elif os.path.isdir(path_name):
-            result = ISDIR
-        else:
-            raise Exception("Path exists but isn't a file or a directory...")
-    elif not tail:
-        result = ISDIR
-    elif _has_ext(tail):
-        result = ISFILE
-
-    if result is None:
-        if override is not None:
-            result = override
-        else:
-            result = default
+def _init_and_check(path_name, override, root, inject):
+    if path_name:
+        identity = identify(path_name, override=override)
+        path_name = os.path.expanduser(path_name)
     else:
-        if override is not None:
-            if result != override:
-                raise ValueError("The path '{}' appears to be ")
+        identity = None
 
-    return result
+    if root:
+        if identify(root) == ISFILE:
+            raise ValueError("Parameter 'root' cannot be a file")
+        elif not os.path.isabs(root):
+            raise ValueError("The root must be an absolute directory if "
+                             "specified")
+        elif os.path.isabs(path_name):
+            raise ValueError("The path cannot be absolute as well as the r"
+                             "oot; cannot add two absolute paths together")
+        root = os.path.expanduser(root)
+
+    if is_file(inject):
+        raise ValueError("Parameter 'inject' must be a directory")
+
+    return path_name, root, identity
+
+
+def path(path_name=None, *, name=None, ext=None, inject=None, overwrite=False,
+         relpath=None, reduce=False, override=None, root=None,
+         multi_ext=True):
+    """
+    Path manipulation black magic
+    """
+    path_name, root, identity = _init_and_check(path_name, override, root, inject)
+
+    new_name = _process_name(path_name, name, ext, overwrite, identity, multi_ext)
+    new_directory = _process_directory(path_name, root, inject, identity)
+
+    full_path = os.path.normpath(os.path.join(new_directory, new_name))
+
+    final_path = _format_path(full_path, root, relpath, reduce)
+
+    return final_path
 
 
 def exists(path_name, istype=None):
@@ -314,9 +402,9 @@ def detect(path_name, *args, override=None):
         elif item == 'isabs':
             r = os.path.isabs(path_name)
         elif item == 'ext':
-            r = _has_ext(path_name)
+            r = has_ext(path_name)
         elif item == 'dir':
-            r = _has_dir(path_name)
+            r = has_dir(path_name)
         else:
             raise ValueError("Item '{}' not supported in function "
                              "detect".format(item))
@@ -333,19 +421,19 @@ def get(path_name, *args, override=None):
 
     for item in args:
         if item == 'drive':
-            r = _get_drive(path_name)
+            r = get_drive(path_name)
         elif item == '+dir':
-            r = _get_dir(path_name, override)
+            r = get_dir(path_name, override)
         elif item == 'dir':
             r = os.path.dirname(path_name)
         elif item == 'parent':
-            r = _get_parent(path_name)
+            r = get_parent(path_name)
         elif item == 'name.ext':
-            r = _get_name(path_name, True, override)
+            r = get_name(path_name, True, override)
         elif item == 'name':
-            r = _get_name(path_name, False, override)
+            r = get_name(path_name, False, override)
         elif item == 'ext':
-            r = _get_ext(path_name)
+            r = get_ext(path_name)
         else:
             raise ValueError("Item '{}' not supported in "
                              "function get".format(item))
@@ -353,24 +441,6 @@ def get(path_name, *args, override=None):
         results.append(r)
 
     return _sort_output(results)
-
-
-def path(path_name=None, *, name=None, ext=None, inject=None, overwrite=False,
-         relpath=None, reduce=False, override=None, root=None,
-         multi_ext=True):
-    """
-    Path manipulation black magic
-    """
-    identity = identify(path_name, override=override)
-    path_name, root = _expand_users(path_name, root)
-
-    new_name = _process_name(path_name, name, ext, overwrite,
-                             identity, multi_ext)
-    new_directory = _process_directory(path_name, root, inject, identity)
-    full_path = os.path.normpath(os.path.join(new_directory, new_name))
-    final_path = _format_path(full_path, root, relpath, reduce)
-
-    return final_path
 
 
 class File:
@@ -442,7 +512,7 @@ class File:
         Gets the name of the file as the parent directory sees it
         (ex. 'example.py')
         """
-        return _get_name(self.getPath(), ext)
+        return get_name(self.getPath(), ext)
 
     def getExtension(self):
         """
