@@ -10,7 +10,20 @@ def test_path():
     """
 
     import os
-    from .files import path, exists, get, OverwriteError
+    from .files import ISFILE, ISDIR, path, exists, get_dir, OverwriteError,\
+        normalize
+
+    cwd = os.getcwd()
+    cwd_and_file = os.path.abspath('test.py')
+    assert normalize(cwd) == (os.path.normpath(cwd), ISDIR)
+    assert normalize(cwd_and_file) == (os.path.normpath(cwd_and_file), ISFILE)
+    user_and_file = os.path.join('~', 'test.py')
+    expanded_file = os.path.expanduser(user_and_file)
+    assert normalize(user_and_file) == (expanded_file, ISFILE)
+
+    example_path = os.path.abspath('test.o')
+    assert path(example_path) == example_path
+    assert path(example_path, relpath=True) != example_path
 
     assert path('test.o') != 'test.o'
     assert path('test.o') == os.path.abspath('test.o')
@@ -21,19 +34,11 @@ def test_path():
     assert path('.tester') == path(ext='.tester')
     assert path('.tester') == path(name='.tester')
     assert path('.tester') != path(name='tester')
-    assert path('.woopsie.yaml') == path(name='.woopsie', ext='yaml')
-    p1 = path('.woopsie.yaml')
-    p2 = path(name='.woopsie', ext='yaml', overwrite=True, multi_ext=False)
-    print(p1, p2)
-    assert p1 != p2
+    assert path('.config.yaml') == path(name='.config', ext='yaml')
+    assert path(os.path.join('parent', 'test.o')) == path('test.o',
+                                                          inject='parent')
+    #assert path('a.config', ext='yml', overwrite=True)
 
-    assert path('parent/test.o') == path('test.o', inject='parent')
-
-    test_path = os.path.abspath('test.o')
-    assert path(test_path) == test_path
-    assert path(test_path, relpath=True) != test_path
-
-    # Fake path
     fake_file_name = 'abcd' * 3 + '.guyfieri'
     fake_path = os.path.abspath(fake_file_name)
 
@@ -50,13 +55,15 @@ def test_path():
 
     another_fake = os.path.abspath(os.path.join("nick", "says",
                                                 "cyther", "is.dumb"))
-    fake_root = get(path(another_fake), 'dir')
-    faker_root = os.path.dirname(os.path.dirname(fake_root))
-
-    assert path(os.path.join('says', 'cyther'),
-                root=faker_root, name='is.dumb') == another_fake
+    faker_root = os.path.dirname(os.path.dirname(get_dir(path(another_fake))))
+    p1 = path(os.path.join('says', 'cyther'), root=faker_root, name='is.dumb')
+    assert p1 == another_fake
     assert not exists(path(fake_path))
-    assert path('test', override=True) == os.path.abspath('test')
+
+    assert path('test', ISFILE) == os.path.abspath('test')
+    example_path = os.path.abspath(os.path.join('a.b.c', 'test.o'))
+    calculated_path = path('a.b.c', ISDIR, name='test.o')
+    assert calculated_path == example_path
 
 
 def test_generateBatches():

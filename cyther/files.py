@@ -22,7 +22,12 @@ EXT = '.'
 
 OVERWRITE_ERROR = "; cannot overwrite without explicit permission"
 
-__all__ = ['identify', 'detect', 'get', 'path', 'exists', 'File']
+__all__ = ['normalize', 'identify', 'ISFILE', 'ISDIR',
+           'detect', 'get', 'exists',
+           'path', 'File',
+           'join_ext', 'is_file', 'is_dir',
+           'has_ext', 'has_dir',
+           'get_drive', 'get_ext', 'get_dir', 'get_name']
 
 
 class OverwriteError(Exception):
@@ -44,8 +49,9 @@ def normalize(path_name, override=None):
         raise ValueError("The path name provided is empty")
 
     identity = identify(path_name, override=override)
+    new_path_name = os.path.normpath(os.path.expanduser(path_name))
 
-    return os.path.normpath(path_name), identity
+    return new_path_name, identity
 
 
 def identify(path_name, *, check_exists=True, override=None, default=ISDIR):
@@ -75,11 +81,11 @@ def identify(path_name, *, check_exists=True, override=None, default=ISDIR):
         else:
             raise Exception("Path exists but isn't a file or a directory...")
     elif not tail:
-        if override is None:
-            result = ISDIR
-        else:
-            result = override
-    elif has_ext(tail):
+        if override == ISFILE:
+            raise ValueError("Cannot interpret a path with a slash at the end "
+                             "to be a file")
+        result = ISDIR
+    elif has_ext(tail, if_all_ext=True):
         if override is None:
             result = ISFILE
         else:
@@ -176,8 +182,7 @@ def has_dir(path_name):
     return bool(os.path.dirname(path_name))
 
 
-def get_dir(path_name, *, greedy=False,
-            override=None, identity=None):
+def get_dir(path_name, *, greedy=False, override=None, identity=None):
     """
     Gets the directory path of the given path name. If the argument 'greedy'
     is specified as True, then if the path name represents a directory itself,
@@ -204,9 +209,15 @@ def get_parent(path_name):
 ########################################################################################################################################################################
 
 
-def get_name(path_name, *, ext=True,
-             override=None, identity=None):
-    if identity == ISFILE or (identity is None and identify(path_name)):
+def get_name(path_name, *, ext=True, override=None, identity=None):
+    """
+    Gets the name par of the path name given. By 'name' I mean the basename of
+    a filename's path, such as 'test.o' in the path: 'C:/test/test.o'
+    """
+    if identity is None:
+        identity = identify(path_name, override=override)
+
+    if identity == ISFILE:
         if ext:
             r = os.path.basename(path_name)
         else:
@@ -216,6 +227,7 @@ def get_name(path_name, *, ext=True,
     return r
 
 # os.path.join(get_dir(path_name), get_name)) == os.path.normpath(path_name)
+# assert path('test', ISFILE) == path('test', ISFILE, root=os.getcwd())
 ###########################################################################
 
 
@@ -231,27 +243,30 @@ def _process_existing_name(path_name, name, ext, overwrite, identity,
             if not overwrite and not multi_ext:
                 raise OverwriteError("The name supplied must not have an "
                                      "extension" + OVERWRITE_ERROR)
-            new_name = join_ext(get_name(name, False), ext)
+            new_name = join_ext(get_name(name, ext=False,
+                                         override=ISFILE), ext)
         else:
             new_name = name
     else:
         if ext:
             new_name = join_ext(name, ext)
         else:
-            new_name = get_name(name, False)
+            new_name = get_name(name, ext=False, override=ISFILE)
     return new_name
 
 
-def _process_non_existing_name(path_name, name, ext, overwrite, identity):
+def _process_non_existing_name(path_name, name, ext, overwrite, identity,
+                               multi_ext):
     if path_name:
         if identity == ISFILE:
             if ext:
                 if not overwrite:
                     raise OverwriteError("Can't provide an extension with a "
                                          "full file name" + OVERWRITE_ERROR)
-                new_name = join_ext(get_name(name, False), ext)
+                new_name = join_ext(get_name(name, ext=False,
+                                             override=ISFILE), ext)
             else:
-                new_name = get_name(path_name, True, identity)
+                new_name = get_name(path_name, ext=True, identity=identity)
         else:
             raise ValueError("The path specified is a directory, and no name "
                              "was provided; therefore, no name exists to "
@@ -272,21 +287,23 @@ def _process_name(path_name, name, ext, overwrite, identity, multi_ext):
                                           identity, multi_ext)
     else:
         new_name = _process_non_existing_name(path_name, name, ext, overwrite,
-                                              identity)
+                                              identity, multi_ext)
 
     return new_name
 
 
-def _process_directory(path_name, root, inject, override):
+def _process_directory(path_name, root, inject, identity):
     if root:
         if path_name:
-            new_directory = os.path.join(root, get_dir(path_name, override))
+            new_directory = os.path.join(root, get_dir(path_name,
+                                                       identity=identity,
+                                                       greedy=True))
         else:
             new_directory = root
     else:
         cwd = os.getcwd()
-        if path_name and has_dir(path_name):
-            dir_extension = get_dir(path_name, override)
+        if path_name and (has_dir(path_name) or identity == ISDIR):
+            dir_extension = get_dir(path_name, identity=identity, greedy=True)
             if os.path.isabs(path_name):
                 new_directory = dir_extension
             else:
@@ -333,37 +350,39 @@ def _format_path(path_name, root, relpath, reduce):
 
 def _init_and_check(path_name, override, root, inject):
     if path_name:
-        identity = identify(path_name, override=override)
-        path_name = os.path.expanduser(path_name)
+        path_name, identity = normalize(path_name, override)
     else:
         identity = None
 
     if root:
-        if identify(root) == ISFILE:
+        root_name, root_identity = normalize(root)
+        if root_identity == ISFILE:
             raise ValueError("Parameter 'root' cannot be a file")
-        elif not os.path.isabs(root):
+        elif not os.path.isabs(root_name):
             raise ValueError("The root must be an absolute directory if "
                              "specified")
         elif os.path.isabs(path_name):
             raise ValueError("The path cannot be absolute as well as the r"
                              "oot; cannot add two absolute paths together")
-        root = os.path.expanduser(root)
 
-    if is_file(inject):
+    if inject and is_file(inject):
         raise ValueError("Parameter 'inject' must be a directory")
 
     return path_name, root, identity
 
 
-def path(path_name=None, *, name=None, ext=None, inject=None, overwrite=False,
-         relpath=None, reduce=False, override=None, root=None,
+def path(path_name=None, override=None, *, name=None, ext=None, inject=None,
+         overwrite=False, relpath=None, reduce=False, root=None,
          multi_ext=True):
     """
     Path manipulation black magic
     """
-    path_name, root, identity = _init_and_check(path_name, override, root, inject)
+    path_name, root, identity = _init_and_check(path_name, override,
+                                                root, inject)
 
-    new_name = _process_name(path_name, name, ext, overwrite, identity, multi_ext)
+    new_name = _process_name(path_name, name, ext, overwrite,
+                             identity, multi_ext)
+
     new_directory = _process_directory(path_name, root, inject, identity)
 
     full_path = os.path.normpath(os.path.join(new_directory, new_name))
