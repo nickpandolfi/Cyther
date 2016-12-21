@@ -10,13 +10,18 @@ def test_path():
     """
 
     import os
-    from .files import ISFILE, ISDIR, path, exists, get_dir, OverwriteError,\
-        normalize
+    from .files import ISFILE, ISDIR, path, get_dir, OverwriteError, normalize
 
     cwd = os.getcwd()
+    assert path() == os.getcwd()
+    p1 = path(['one', 'two', 'three'])
+    p2 = os.path.normpath(os.path.join(cwd, 'one', 'two', 'three'))
+    assert p1 == p2
+
     cwd_and_file = os.path.abspath('test.py')
     assert normalize(cwd) == (os.path.normpath(cwd), ISDIR)
     assert normalize(cwd_and_file) == (os.path.normpath(cwd_and_file), ISFILE)
+
     user_and_file = os.path.join('~', 'test.py')
     expanded_file = os.path.expanduser(user_and_file)
     assert normalize(user_and_file) == (expanded_file, ISFILE)
@@ -35,17 +40,10 @@ def test_path():
     assert path('.tester') == path(name='.tester')
     assert path('.tester') != path(name='tester')
     assert path('.config.yaml') == path(name='.config', ext='yaml')
-    assert path(os.path.join('parent', 'test.o')) == path('test.o',
-                                                          inject='parent')
-    #assert path('a.config', ext='yml', overwrite=True)
+    assert path(os.path.join('p', 'test.o')) == path('test.o', inject='p')
 
     fake_file_name = 'abcd' * 3 + '.guyfieri'
     fake_path = os.path.abspath(fake_file_name)
-
-    path1 = path(fake_path, name='is', ext='dumb',
-                 inject='cyther', overwrite=True)
-    path2 = path(name='is', ext='dumb', inject='cyther')
-    assert path1 == path2
 
     try:
         path(fake_path, name='is', ext='dumb', inject='nick')
@@ -58,7 +56,6 @@ def test_path():
     faker_root = os.path.dirname(os.path.dirname(get_dir(path(another_fake))))
     p1 = path(os.path.join('says', 'cyther'), root=faker_root, name='is.dumb')
     assert p1 == another_fake
-    assert not exists(path(fake_path))
 
     assert path('test', ISFILE) == os.path.abspath('test')
     example_path = os.path.abspath(os.path.join('a.b.c', 'test.o'))

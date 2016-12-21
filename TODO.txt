@@ -43,6 +43,7 @@ MAINTAIN
 
 
 FUTURE UPDATES
+    Make 'path' add a pathsep at the end of the path if it is a directory
     Figure out how to include a C file AS A DATA FILE
     Travis OSX tests are not working. It seems to be their issue. Keep an eye on it.
     Make CytherError only apply if the error was the user's fault
