@@ -133,7 +133,8 @@ if not DRIVE:
 CYTHER_CONFIG_FILE = os.path.join(os.path.expanduser('~'), '.cyther')
 
 INCLUDE_DIRS, RUNTIME_DIRS = getIncludeAndRuntime()
-print("Runtime directories: '{}'".format(RUNTIME_DIRS))
+print("Include: '{}'".format(INCLUDE_DIRS))
+print("Runtime: '{}'".format(RUNTIME_DIRS))
 # L_OPTION = '-l' + extractRuntime(RUNTIME_DIRS)
 
 INCLUDE_STRING = ''

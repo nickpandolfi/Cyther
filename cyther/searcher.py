@@ -9,6 +9,8 @@ import os
 import re
 import shutil
 
+from .files import get_drive, path, ISDIR
+
 MULTIPLE_FOUND = "More than one pattern found for regex pattern: '{}' " \
                  "for output:\n\t{}"
 NONE_FOUND = "No matches for pattern '{}' could be found in output:\n\t{}"
@@ -33,75 +35,118 @@ def where(cmd, path=None):
         raise ValueError("Could not find '{}' in the path".format(cmd))
 
 
-def _get_content(pattern, string):
+def has_parent(path_name):
+    """
+    Takes in a file path, and will check that the path has a specific parent
+    directory
+    """
+    target = os.path.normpath(path_name)
+    base = os.path.basename(target)
+    if target != base:
+        # Target is NOT a single component
+        parent_check = os.path.dirname(target)
+    else:
+        # Target is a single component
+        parent_check = None
+
+
+def find(target, start=None):
+    """
+    Finds a given 'target' (filename string) in the file system
+    """
+    if not target or not isinstance(target, str):
+        raise TypeError("Parameter 'target' must be a filename string")
+
+    if os.path.isabs(target):
+        return os.path.isfile(target)
+    else:
+        dirname, basename = os.path.split(target)
+
+    if not start:
+        top = get_drive(os.getcwd())
+    elif os.path.isdir(start):
+        top = start
+    else:
+        raise ValueError("Parameter 'start' must be a directory if specified")
+
+    results = []
+    for (dirpath, dirnames, filenames) in os.walk(top):
+        if target in filenames:
+            results.append(path(dirpath, ISDIR, name=target))
+
+    return process_output(results, condense=True)
+
+
+def get_content(pattern, string):
+    """
+    Finds the 'content' tag from a 'pattern' in the provided 'string'
+    """
     output = []
     for match in re.finditer(pattern, string):
         output.append(match.group('content'))
     return output
 
 
-def _process_no_output(pattern, output, error_if_none, none_message, default):
-    if error_if_none:
-        if not none_message:
-            none_message = NONE_FOUND.format(pattern, output)
-        raise LookupError(none_message)
-    else:
-        if default:
-            output = default
-        else:
-            output = None
-    return output
+MULTIPLE = 'multiple'
+NONE = 'none'
 
 
-def _process_output(pattern, output, condense, default, multiple_message,
-                    allow_only_one):
+def process_output(output, *, condense=False, one=False, default=None,
+                   default_if_multiple=True, default_if_none=True):
+    """
+    Taking a iterative container (list, tuple), this function will process its
+    contents and condense if necessary. It also has functionality to try to
+    assure that the output has only one item in it if desired. If this is not
+    the case, then it will return a 'default' in place of the output, if
+    specified.
+    """
     if condense:
         output = list(set(output))
 
-    if allow_only_one:
+    if one:
         if len(output) > 1:
-            if default:
+            if default and default_if_multiple:
                 output = default
             else:
-                if not multiple_message:
-                    multiple_message = MULTIPLE_FOUND.format(pattern,
-                                                             output)
-                raise ValueError(multiple_message)
-        output = output[0]
+                return MULTIPLE
+        elif len(output) == 1:
+            output = output[0]
+        else:
+            if default and default_if_none:
+                return default
+            else:
+                return NONE
 
     return output
 
 
-def _assert_output(output, assert_equal, assert_message):
+def assert_output(output, assert_equal):
+    """
+    Check that two outputs have the same contents as one another, even if they
+    aren't sorted yet
+    """
     sorted_output = sorted(output)
     sorted_assert = sorted(assert_equal)
     if sorted_output != sorted_assert:
-        if not assert_message:
-            assert_message = ASSERT_ERROR.format(sorted_output,
-                                                 sorted_assert)
-        raise ValueError(assert_message)
+        raise ValueError(ASSERT_ERROR.format(sorted_output, sorted_assert))
 
 
-def extract(pattern, string, assert_equal=False,
-            allow_only_one=False, condense=False,
-            error_if_none=False, default=None,
-            multiple_message=None,
-            none_message=None,
-            assert_message=None):
+def extract(pattern, string, *, assert_equal=False, one=False,
+            condense=False, default=None, default_if_multiple=True,
+            default_if_none=True):
     """
-    Used by extract to filter the entries in the searcher results
+    Used to extract a given regex pattern from a string, given several options
     """
-    output = _get_content(pattern, string)
 
-    if not output:
-        output = _process_no_output(pattern, output, error_if_none,
-                                    none_message, default)
-    else:
-        output = _process_output(pattern, output, condense, default,
-                                 multiple_message, allow_only_one)
+    output = get_content(pattern, string)
+
+    output = process_output(output, condense=condense, default=default,
+                            one=one,
+                            default_if_multiple=default_if_multiple,
+                            default_if_none=default_if_none)
 
     if assert_equal:
-        _assert_output(output, assert_equal, assert_message)
+        assert_output(output, assert_equal)
     else:
         return output
 
@@ -112,16 +157,15 @@ def extractRuntime(runtime_dirs):
     """
     names = [str(item) for name in runtime_dirs for item in os.listdir(name)]
     string = '\n'.join(names)
-    result = extract(RUNTIME_PATTERN, string,
-                     condense=True, error_if_none=True)
+    result = extract(RUNTIME_PATTERN, string, condense=True)
     return result
 
 
-def extractAtCyther(path):
+def extractAtCyther(path_name):
     """
     Extracts the '@cyther' code to be run as a script after compilation
     """
-    with open(path) as file:
+    with open(path_name) as file:
         string = file.read()
 
     found_pound = extract(POUND_PATTERN, string)
@@ -136,6 +180,5 @@ def extractVersion(string, default='?'):
     """
     Extracts a three digit standard format version number
     """
-    error_if_none = not bool(default)
     return extract(VERSION_PATTERN, string, condense=True, default=default,
-                   error_if_none=error_if_none, allow_only_one=True)
+                   one=True)

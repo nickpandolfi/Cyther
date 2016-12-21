@@ -1,11 +1,4 @@
 
-"""
-    - 3.3
-    - 3.4
-    - pypy3
-    - nightly
-"""
-
 try:
     from setuptools import setup
 except ImportError:
@@ -19,7 +12,7 @@ LICENSE = 'MIT'
 
 
 SHORT_DESCRIPTION = "Cyther: The Cross-Platform Cython/Python/C Auto-Compiler"
-VERSION = '0.8.dev24'
+VERSION = '0.8.dev28'
 INSTALL_REQUIRES = ['cython']
 
 try:
