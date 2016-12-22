@@ -5,7 +5,7 @@ Cyther. It tets Cyther's main operation as well as the underlying utilities
 Cyther uses.
 """
 
-from .aberdeen import test_generateBatches, test_path
+from .aberdeen import test_generateBatches, test_path, test_dict_file
 
 
 def test_all():
@@ -37,6 +37,7 @@ def test_utilities():
 
     test_generateBatches()
     test_path()
+    test_dict_file()
     return None
 
 

@@ -1,6 +1,4 @@
 
-import os
-
 
 class CytherError(Exception):
     """A custom error used to denote that an exception was Cyther related"""
@@ -10,16 +8,16 @@ class CytherError(Exception):
 
 def write_dict_to_file(file_path, obj):
     """
-    Write a dictionary of strings to a file
+    Write a dictionary of string keys to a file
     """
-    string = ''
+    lines = []
     for key, value in obj.items():
-        string += key + ':' + value + os.linesep
+        lines.append(key + ':' + repr(value) + '\n')
 
     with open(file_path, 'w+') as file:
-        chars = file.write(string)
+        file.writelines(lines)
 
-    return chars
+    return None
 
 
 def read_dict_from_file(file_path):
@@ -27,12 +25,12 @@ def read_dict_from_file(file_path):
     Read a dictionary of strings from a file
     """
     with open(file_path) as file:
-        string = file.read()
+        lines = file.read().splitlines()
 
     obj = {}
-    for line in string.splitlines():
+    for line in lines:
         key, value = line.split(':')
-        obj[key] = value
+        obj[key] = eval(value)
 
     return obj
 

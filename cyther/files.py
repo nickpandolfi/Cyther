@@ -19,11 +19,7 @@ ISFILE = True
 ISDIR = False
 
 EXT = '.'
-
-
-__all__ = ['normalize', 'identify', 'ISFILE', 'ISDIR', 'path', 'File',
-           'join_ext', 'has_ext', 'has_dir',
-           'get_drive', 'get_ext', 'get_dir', 'get_name']
+USER = '~'
 
 
 class OverwriteError(Exception):

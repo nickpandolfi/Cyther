@@ -3,10 +3,29 @@
 A module that defines the different testing procedures to be used by test.py
 """
 
+import os
+
+
+def test_dict_file():
+    """
+    Tests 'write_dict_to_file' and 'read_dict_from_file' from tools.py
+    """
+
+    from .tools import write_dict_to_file, read_dict_from_file
+
+    file_path = os.path.abspath('abcd_test_dbca.txt')
+    dictionary = {'key1': 'value1',
+                  'key2': ('value2', 'value3'),
+                  'key3': 'value4'}
+    write_dict_to_file(file_path, dictionary)
+    extracted_dict = read_dict_from_file(file_path)
+    assert dictionary == extracted_dict
+    os.remove(file_path)
+
 
 def test_path():
     """
-    Tests createPath to make sure it's working correctly
+    Tests 'path' function in 'files.py' to make sure it's working correctly
     """
 
     import os

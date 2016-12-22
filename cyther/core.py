@@ -29,38 +29,6 @@ def info(args):
     print(INFO)
 
 
-
-"""
-CONFIG IS NEVER RUN AUTOMATICALLY, ITS ALWAYS RUN BY USER
-
-get_config_file:
-    Checks for the config file inplace
-        If its non-existant, it looks in the users home directory
-
-write_config_file:
-    Open the config file path passed in and write the data structure to the
-    file by first putting it in some sort of format
-
-read_config_file:
-    Open the config file passed in and parse the data into
-    some sort of structure. Then take this and return it
-
-check_config_info:
-    Checks all the fields in the config file to make sure that they are valid
-    paths that contain the correct data necessary to compile something
-
-make_config_file:
-    Options: --auto, --guided, --manual
-    Places for the file: --inplace, --user
-
-    If get_config_file finds a file,
-
-    If the config file is found, then theres a problem
-
-    Print a message to display correct example usage
-"""
-
-
 @polymorph
 def configure(args):
     """
