@@ -9,19 +9,7 @@ import os
 import re
 import shutil
 
-from .files import get_drive, path, ISDIR
-
-MULTIPLE_FOUND = "More than one pattern found for regex pattern: '{}' " \
-                 "for output:\n\t{}"
-NONE_FOUND = "No matches for pattern '{}' could be found in output:\n\t{}"
-ASSERT_ERROR = "The search result:\n\t{}\nIs not equivalent to the assert " \
-               "test provided:\n\t{}"
-
-RUNTIME_PATTERN = r"(?<=lib)(?P<content>.+?)(?=\.so|\.a)"
-POUND_PATTERN = r"#\s*@\s?[Cc]yther +(?P<content>.+?)\s*?(\n|$)"
-TRIPPLE_PATTERN = r"(?P<quote>'{3}|\"{3})(.|\n)+?@[Cc]yther\s+" \
-                  r"(?P<content>(.|\n)+?)\s*(?P=quote)"
-VERSION_PATTERN = r"[Vv]ersion:?\s+(?P<content>([0-9]+\.){1,}((dev)?[0-9]+))"
+from .files import get_system_drives, has_suffix
 
 
 def where(cmd, path=None):
@@ -35,55 +23,28 @@ def where(cmd, path=None):
         raise ValueError("Could not find '{}' in the path".format(cmd))
 
 
-def has_parent(path_name):
+def search_file(pattern, file_path):
     """
-    Takes in a file path, and will check that the path has a specific parent
-    directory
+    Search a given file's contents for the regex pattern given as 'pattern'
     """
-    target = os.path.normpath(path_name)
-    base = os.path.basename(target)
-    if target != base:
-        # Target is NOT a single component
-        parent_check = os.path.dirname(target)
-    else:
-        # Target is a single component
-        parent_check = None
+    try:
+        with open(file_path) as file:
+            string = file.read()
+    except PermissionError:
+        return []
+
+    matches = re.findall(pattern, string)
+
+    return matches
 
 
-def find(target, start=None):
-    """
-    Finds a given 'target' (filename string) in the file system
-    """
-    if not target or not isinstance(target, str):
-        raise TypeError("Parameter 'target' must be a filename string")
-
-    if os.path.isabs(target):
-        return os.path.isfile(target)
-    else:
-        dirname, basename = os.path.split(target)
-
-    if not start:
-        top = get_drive(os.getcwd())
-    elif os.path.isdir(start):
-        top = start
-    else:
-        raise ValueError("Parameter 'start' must be a directory if specified")
-
-    results = []
-    for (dirpath, dirnames, filenames) in os.walk(top):
-        if target in filenames:
-            results.append(path(dirpath, ISDIR, name=target))
-
-    return process_output(results, condense=True)
-
-
-def get_content(pattern, string):
+def get_content(pattern, string, tag='content'):
     """
     Finds the 'content' tag from a 'pattern' in the provided 'string'
     """
     output = []
     for match in re.finditer(pattern, string):
-        output.append(match.group('content'))
+        output.append(match.group(tag))
     return output
 
 
@@ -120,6 +81,10 @@ def process_output(output, *, condense=False, one=False, default=None,
     return output
 
 
+ASSERT_ERROR = "The search result:\n\t{}\nIs not equivalent to the assert " \
+               "test provided:\n\t{}"
+
+
 def assert_output(output, assert_equal):
     """
     Check that two outputs have the same contents as one another, even if they
@@ -131,6 +96,44 @@ def assert_output(output, assert_equal):
         raise ValueError(ASSERT_ERROR.format(sorted_output, sorted_assert))
 
 
+def find(init, start=None, content=None, one=False):
+    """
+    Finds a given 'target' (filename string) in the file system
+    """
+    if not init:
+        raise ValueError("Parameter 'init' must not be empty")
+    elif isinstance(init, str):
+        target = init
+        suffix = None
+    elif isinstance(init, list):
+        target = init.pop()
+        if init:
+            suffix = init
+        else:
+            suffix = None
+    else:
+        raise TypeError("Parameter 'init' cannot be type "
+                        "'{}'".format(type(init)))
+
+    if not start:
+        start = get_system_drives()
+    elif isinstance(start, str) and os.path.isdir(start):
+        start = [start]
+    else:
+        raise TypeError("Parameter 'start' must be None, tuple, or list")
+
+    results = []
+    for top in start:
+        for (dirpath, dirnames, filenames) in os.walk(top):
+            file_path = os.path.normpath(os.path.join(dirpath, target))
+            if target in filenames or exec and os.access(file_path, os.X_OK):
+                if not suffix or has_suffix(dirpath, suffix):
+                    if not content or search_file(content, file_path):
+                        results.append(file_path)
+
+    return process_output(results, one=one)
+
+
 def extract(pattern, string, *, assert_equal=False, one=False,
             condense=False, default=None, default_if_multiple=True,
             default_if_none=True):
@@ -140,8 +143,8 @@ def extract(pattern, string, *, assert_equal=False, one=False,
 
     output = get_content(pattern, string)
 
-    output = process_output(output, condense=condense, default=default,
-                            one=one,
+    output = process_output(output, one=one, condense=condense,
+                            default=default,
                             default_if_multiple=default_if_multiple,
                             default_if_none=default_if_none)
 
@@ -149,6 +152,9 @@ def extract(pattern, string, *, assert_equal=False, one=False,
         assert_output(output, assert_equal)
     else:
         return output
+
+
+RUNTIME_PATTERN = r"(?<=lib)(?P<content>.+?)(?=\.so|\.a)"
 
 
 def extractRuntime(runtime_dirs):
@@ -159,6 +165,11 @@ def extractRuntime(runtime_dirs):
     string = '\n'.join(names)
     result = extract(RUNTIME_PATTERN, string, condense=True)
     return result
+
+
+POUND_PATTERN = r"#\s*@\s?[Cc]yther +(?P<content>.+?)\s*?(\n|$)"
+TRIPPLE_PATTERN = r"(?P<quote>'{3}|\"{3})(.|\n)+?@[Cc]yther\s+" \
+                  r"(?P<content>(.|\n)+?)\s*(?P=quote)"
 
 
 def extractAtCyther(path_name):
@@ -174,6 +185,9 @@ def extractAtCyther(path_name):
     code = '\n'.join([item for item in all_found])
 
     return code
+
+
+VERSION_PATTERN = r"[Vv]ersion:?\s+(?P<content>([0-9]+\.){1,}((dev)?[0-9]+))"
 
 
 def extractVersion(string, default='?'):

@@ -193,6 +193,52 @@ def get_name(path_name, *, ext=True, override=None, identity=None):
         r = ''
     return r
 
+
+def disintegrate(path_name):
+    """
+    Disintegrates the path name by splitting all of the components apart
+    """
+    return os.path.normpath(path_name).split(os.sep)
+
+
+def get_system_drives():
+    """
+    Get the available drive names on the system. Always returns a list.
+    """
+    drives = []
+    if os.name == 'nt':
+        import ctypes
+        bitmask = ctypes.windll.kernel32.GetLogicalDrives()
+        letter = ord('A')
+        while bitmask > 0:
+            if bitmask & 1:
+                name = chr(letter) + ':\\'
+                if os.path.isdir(name):
+                    drives.append(name)
+            bitmask >>= 1
+            letter += 1
+    else:
+        drives.append(get_drive(os.getcwd()))
+
+    return drives
+
+
+def has_suffix(path_name, suffix):
+    """
+    Determines if path_name has a suffix of at least 'suffix'
+    """
+    if isinstance(suffix, str):
+        suffix = disintegrate(suffix)
+
+    components = disintegrate(path_name)
+
+    for i in range(-1, -(len(suffix) + 1), -1):
+        if components[i] != suffix[i]:
+            break
+    else:
+        return True
+    return False
+
 ###########################################################################
 
 
