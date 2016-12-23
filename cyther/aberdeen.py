@@ -6,6 +6,37 @@ A module that defines the different testing procedures to be used by test.py
 import os
 
 
+def test_extract():
+    """
+    Tests some extraction procedures to make sure they return the correct
+    amounts of values, and nothing when appropriate
+    """
+
+    from .searcher import NONE, MULTIPLE,\
+        extractAtCyther, extractRuntime, extractVersion
+
+    string = \
+        """
+        test test test test
+
+        This is a word
+
+        version 3.4.5.100
+
+        Hi
+        """
+
+    assert extractVersion(string) == '3.4.5.100'
+
+    string2 = \
+        """
+        Version 3.4
+        version: 3.5
+        """
+
+    assert extractVersion(string2) == '?'
+
+
 def test_dict_file():
     """
     Tests 'write_dict_to_file' and 'read_dict_from_file' from tools.py
