@@ -172,12 +172,13 @@ TRIPPLE_PATTERN = r"(?P<quote>'{3}|\"{3})(.|\n)+?@[Cc]yther\s+" \
                   r"(?P<content>(.|\n)+?)\s*(?P=quote)"
 
 
-def extractAtCyther(path_name):
+def extractAtCyther(string):
     """
     Extracts the '@cyther' code to be run as a script after compilation
     """
-    with open(path_name) as file:
-        string = file.read()
+    if isinstance(string, str) and os.path.isfile(string):
+        with open(string) as file:
+            string = file.read()
 
     found_pound = extract(POUND_PATTERN, string)
     found_tripple = extract(TRIPPLE_PATTERN, string)

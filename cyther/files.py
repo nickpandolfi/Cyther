@@ -435,7 +435,7 @@ class File:
         Gets the name of the file as the parent directory sees it
         (ex. 'example.py')
         """
-        return get_name(self.getPath(), ext)
+        return get_name(self.getPath(), ext=ext)
 
     def getExtension(self):
         """

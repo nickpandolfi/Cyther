@@ -6,35 +6,58 @@ A module that defines the different testing procedures to be used by test.py
 import os
 
 
+def test_find():
+    """
+    Tests the all-powerful find function from cyther.searcher
+    """
+
+    from .searcher import find
+
+    assert find('guy_fieri_headshots.png') == []
+
+
 def test_extract():
     """
     Tests some extraction procedures to make sure they return the correct
     amounts of values, and nothing when appropriate
     """
 
-    from .searcher import NONE, MULTIPLE,\
-        extractAtCyther, extractRuntime, extractVersion
+    from .searcher import NONE, MULTIPLE, extract,\
+        extractAtCyther, extractVersion
 
     string = \
         """
-        test test test test
+        test test test
 
         This is a word
-
+        '''
+        @cyther Hello
+        '''
+        #@Cyther import penguins
         version 3.4.5.100
 
         Hi
         """
 
+    assert extract('(?P<content>test)', string) == ['test', 'test', 'test']
+    assert extract('(?P<content>test)', string, one=True) == MULTIPLE
+    a = extract('(?P<content>test)', string, one=True, condense=True)
+    assert a == 'test'
+    assert extract('(?P<content>flounder)', string, one=True) == NONE
+    assert extract('(?P<content>word)', string, one=True) == 'word'
     assert extractVersion(string) == '3.4.5.100'
 
     string2 = \
         """
         Version 3.4
-        version: 3.5
         """
 
+    assert extractVersion(string2) == '3.4'
+    string2 += "\nversion: 3.5\n"
     assert extractVersion(string2) == '?'
+
+    a = extractAtCyther(string)
+    assert a == 'import penguins\nHello'
 
 
 def test_dict_file():

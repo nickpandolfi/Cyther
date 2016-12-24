@@ -5,9 +5,6 @@ Cyther. It tets Cyther's main operation as well as the underlying utilities
 Cyther uses.
 """
 
-from .aberdeen import test_generateBatches, test_path, test_dict_file,\
-    test_extract
-
 
 def test_all():
     """
@@ -35,11 +32,15 @@ def test_utilities():
     """
     A function to test cyther's internal compilation and helper tools
     """
+    from .aberdeen import test_generateBatches, test_path, test_dict_file, \
+        test_extract, test_find
 
     test_generateBatches()
     test_path()
     test_dict_file()
     test_extract()
+    test_find()
+
     return None
 
 
