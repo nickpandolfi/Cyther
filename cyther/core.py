@@ -4,9 +4,7 @@ The heart of Cyther
 """
 
 from .system import INFO
-from .tools import getResponse
-
-import os
+from .project import purge_project, clean_project
 import argparse
 
 """
@@ -52,39 +50,9 @@ def build(args):
 
 @polymorph
 def clean(args):
-    pass
+    clean_project()
 
 
 @polymorph
 def purge(args):
-    print('Current Directory: {}'.format(os.getcwd()))
-    directories = os.listdir(os.getcwd())
-    if '__cythercache__' in directories:
-        response = getResponse("Would you like to delete the cache and"
-                               "everything in it? [y/n]: ", ('y', 'n'))
-        if response == 'y':
-            print("Listing local '__cythercache__':")
-            cache_dir = os.path.join(os.getcwd(), "__cythercache__")
-            to_delete = []
-            contents = os.listdir(cache_dir)
-            if contents:
-                for filename in contents:
-                    print('\t' + filename)
-                    filepath = os.path.join(cache_dir, filename)
-                    to_delete.append(filepath)
-            else:
-                print("\tNothing was found in the cache")
-
-            check_response = getResponse("Delete all these files? (^)"
-                                         "[y/n]: ", ('y', 'n'))
-            if check_response == 'y':
-                for filepath in to_delete:
-                    os.remove(filepath)
-                os.rmdir(cache_dir)
-            else:
-                print("Skipping the deletion... all files are fine!")
-        else:
-            print("Skipping deletion of the cache")
-    else:
-        print("Couldn't find a cache file ('__cythercache__')"
-              "in this directory")
+    purge_project()
