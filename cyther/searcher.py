@@ -96,9 +96,15 @@ def assert_output(output, assert_equal):
         raise ValueError(ASSERT_ERROR.format(sorted_output, sorted_assert))
 
 
-def find(init, start=None, content=None, one=False):
+# TODO Find any directory that matches a certain pattern?
+# TODO Pool this function to make it lightning quick
+# TODO ^ but this may require me to rewrite os.walk
+def find(init, start=None, PATH=None, EXEC=False, on_first=False,
+         content=None, one=False):
     """
     Finds a given 'target' (filename string) in the file system
+
+    on_first: End function when the first item is found, return that item
     """
     if not init:
         raise ValueError("Parameter 'init' must not be empty")
@@ -126,7 +132,7 @@ def find(init, start=None, content=None, one=False):
     for top in start:
         for (dirpath, dirnames, filenames) in os.walk(top):
             file_path = os.path.normpath(os.path.join(dirpath, target))
-            if target in filenames or exec and os.access(file_path, os.X_OK):
+            if target in filenames or EXEC and os.access(file_path, os.X_OK):
                 if not suffix or has_suffix(dirpath, suffix):
                     if not content or search_file(content, file_path):
                         results.append(file_path)

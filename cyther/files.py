@@ -353,6 +353,7 @@ def _format_path(path_name, root, relpath, reduce):
     return result
 
 
+# TODO Will '~' mean anything on a system with no user specified? Possible?
 def path(path_name=None, override=None, *, root=None, name=None, ext=None,
          inject=None, relpath=None, reduce=False):
     """

@@ -43,7 +43,9 @@ MAINTAIN
 
 
 FUTURE UPDATES
-    Make 'path' add a pathsep at the end of the path if it is a directory
+    Make the 'make_config' utilities not overwrite the config file if found, or ask smartly instead...
+    Make utilities to check if the fields in a config file are valid before it is fully loaded and used.
+    Make 'path' add a pathsep at the end of the path if it is a directory. Safe?
     Figure out how to include a C file AS A DATA FILE
     Travis OSX tests are not working. It seems to be their issue. Keep an eye on it.
     Make CytherError only apply if the error was the user's fault
@@ -56,6 +58,7 @@ FUTURE UPDATES
     Fix this stupid line: platform.platform().strip().lower().startswith('windows')
     Incorporate the format of '----- >> watch stats << ------' into watch
     Get cyther to modify distutils imported at runtime to compile everything instead of distutils
+    Make 'path(root='.')' work
 
     Q) Even bother getting Cyther to work with python 2 or pypy(3)?
     Q) Whats up with pypi version badge doing '?.?.?'
