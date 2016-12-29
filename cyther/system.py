@@ -15,6 +15,8 @@ import textwrap
 # TODO Get all the functions used there and bring them here
 import distutils.sysconfig
 import distutils.msvccompiler
+import distutils.command.build_ext
+import distutils.command.build_clib
 
 from .tools import CytherError
 from .searcher import where, extractRuntime
@@ -95,14 +97,12 @@ def getIncludeAndRuntime():
         else:
             library_dirs.append(os.getcwd())
 
-    user = True
-    if user:
-        user_include = os.path.join(site.USER_BASE, "include")
-        user_lib = os.path.join(site.USER_BASE, "lib")
-        if os.path.isdir(user_include):
-            include_dirs.append(user_include)
-        if os.path.isdir(user_lib):
-            library_dirs.append(user_lib)
+    user_include = os.path.join(site.USER_BASE, "include")
+    user_lib = os.path.join(site.USER_BASE, "lib")
+    if os.path.isdir(user_include):
+        include_dirs.append(user_include)
+    if os.path.isdir(user_lib):
+        library_dirs.append(user_lib)
 
     ret_object = (include_dirs, library_dirs)
     _filter_non_existing_dirs(ret_object)
@@ -129,8 +129,6 @@ CYTHONIZABLE_FILE_EXTS = ('.pyx', '.py')
 DRIVE, _ = os.path.splitdrive(sys.exec_prefix)
 if not DRIVE:
     DRIVE = os.path.normpath(os.sep)
-
-CYTHER_CONFIG_FILE = os.path.join(os.path.expanduser('~'), '.cyther')
 
 INCLUDE_DIRS, RUNTIME_DIRS = getIncludeAndRuntime()
 print("Include: '{}'".format(INCLUDE_DIRS))

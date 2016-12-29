@@ -5,7 +5,7 @@ This module deals with operations regarding individual cyther projects
 
 import os
 
-from .tools import getResponse
+from .tools import get_input
 from .files import path, ISDIR
 
 CACHE_NAME = "__cythercache__"
@@ -38,8 +38,8 @@ def purge_project():
     print('Current Directory: {}'.format(os.getcwd()))
     directories = os.listdir(os.getcwd())
     if CACHE_NAME in directories:
-        response = getResponse("Would you like to delete the cache and"
-                               "everything in it? [y/n]: ", ('y', 'n'))
+        response = get_input("Would you like to delete the cache and"
+                             "everything in it? [y/n]: ", ('y', 'n'))
         if response == 'y':
             print("Listing local '__cythercache__':")
             cache_dir = os.path.join(os.getcwd(), "__cythercache__")
@@ -53,7 +53,7 @@ def purge_project():
             else:
                 print("\tNothing was found in the cache")
 
-            check_response = getResponse("Delete all these files? (^)"
+            check_response = get_input("Delete all these files? (^)"
                                          "[y/n]: ", ('y', 'n'))
             if check_response == 'y':
                 for filepath in to_delete:
