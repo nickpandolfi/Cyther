@@ -7,8 +7,7 @@ import os
 
 from .tools import get_input
 from .files import path, ISDIR
-
-CACHE_NAME = "__cythercache__"
+from .definitions import CACHE_NAME
 
 
 def assure_cache(project_path=None):
@@ -54,7 +53,7 @@ def purge_project():
                 print("\tNothing was found in the cache")
 
             check_response = get_input("Delete all these files? (^)"
-                                         "[y/n]: ", ('y', 'n'))
+                                       "[y/n]: ", ('y', 'n'))
             if check_response == 'y':
                 for filepath in to_delete:
                     os.remove(filepath)

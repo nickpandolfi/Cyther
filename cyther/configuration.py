@@ -7,13 +7,39 @@ hold critical data about where different compile-critical directories exist.
 import os
 
 from .files import path, USER
+from .searcher import find
 from .tools import read_dict_from_file, write_dict_to_file, get_input
+from .definitions import CONFIG_FILE_NAME, VER, DOT_VER
 
-CONFIG_FILE_NAME = '.cyther'
+
+class IncludeDirectoryError(Exception):
+    """A custom error used to denote an error with your include directories"""
+    none = "No include directory found for this version of python"
+    no_default = "There appears to be no default include directory; Cyther " \
+                 "was not able to find a suitable directory to default to"
+
+    def __init__(self, *args, **kwargs):
+        super(IncludeDirectoryError, self).__init__(*args, **kwargs)
+
 
 INCLUDE_DIRS_KEY = 'include_search_directory'
 RUNTIME_DIRS_KEY = 'runtime_search_directory'
 RUNTIME_KEY = 'runtime_libraries'
+
+
+def purge_configs():
+    """
+    These will delete any configs found in either the current directory or the
+    user's home directory
+    """
+    user_config = path(CONFIG_FILE_NAME, root=USER)
+    inplace_config = path(CONFIG_FILE_NAME)
+
+    if os.path.isfile(user_config):
+        os.remove(user_config)
+
+    if os.path.isfile(inplace_config):
+        os.remove(inplace_config)
 
 
 def write_config_file(file_path, data):
@@ -84,11 +110,7 @@ INPLACE_CONFIG_EXISTS = "There is a config file in the current directory, " \
 NO_CONFIGS_EXIST = "No configs were found, it's safe " \
                    "to make the config file anywhere\n"
 
-COMPLEX_PROMPT = "Where do you want to make the config file? " \
-                 "[user/inplace/default/''=exit]: "
-
-COMPLEX_REDO_PROMPT = "Incorrect response, must be 'user', 'inplace', " \
-                      "'default', or '' (empty) to exit: "
+COMPLEX_PROMPT = "Where do you want to make the config file?"
 
 
 def _complex_decision(*, guided):
@@ -122,9 +144,7 @@ def _complex_decision(*, guided):
             print(NO_CONFIGS_EXIST)
 
         # Get the user's response to said situation ^
-        response = get_input(COMPLEX_PROMPT,
-                             ('user', 'inplace', 'default', ''),
-                             redo_prompt=COMPLEX_REDO_PROMPT)
+        response = get_input(COMPLEX_PROMPT,('user', 'inplace', 'default', ''))
 
         # Decide what to do based on the user's error checked response
         if response == 'user':
@@ -139,19 +159,17 @@ def _complex_decision(*, guided):
     else:
         result = default
 
-    return result
+    return result, code
 
-SIMPLE_PROMPT = "Do you want to overwrite '{}'? [y/n]: "
 
-SIMPLE_REDO_PROMPT = "Incorrect response, must be 'y' or 'n': "
+SIMPLE_PROMPT = "Do you want to overwrite '{}'?"
 
 
 def _simple_decision(directory, *, guided):
     config_name = path(CONFIG_FILE_NAME, root=directory)
     if os.path.isfile(config_name):
         if guided:
-            response = get_input(SIMPLE_PROMPT.format(config_name), ('y', 'n'),
-                                 redo_prompt=SIMPLE_REDO_PROMPT)
+            response = get_input(SIMPLE_PROMPT.format(config_name), ('y', 'n'))
             if response == 'n':
                 exit()
     return config_name
@@ -164,11 +182,73 @@ def _make_config_location(*, guided):
         if path() == path(USER):
             result = _simple_decision(current, guided=guided)
         else:
-            result = _complex_decision(guided=guided)
+            result, code = _complex_decision(guided=guided)
     else:
         result = _simple_decision(current, guided=guided)
 
     return result
+
+
+INCLUDE_PROMPT = "Choose the number of one of the listed include directories" \
+                 " above, or enter 'default' to do what Cyther thinks is best"
+
+
+# TODO Implement support if there was only one include dir found by 'find'
+def _make_include_dirs(*, guided):
+    include_dirs = find(['include', 'Python.h'], content="Py_PYTHON_H")
+
+    include = None
+    for include_path in include_dirs:
+        # TODO This is your current condition... This may not be accurate
+        if VER in include_path or DOT_VER in include_path:
+            if not include:
+                include = os.path.dirname(include_path)
+            else:
+                if not guided:
+                    raise Exception()
+
+    if guided:
+        checker = []
+        for offset, include_path in enumerate(include_dirs):
+            number = offset + 1
+            print("{}): '{}'\n".format(number, include_path))
+            checker.append(number)
+
+        response = get_input(INCLUDE_PROMPT, tuple(checker) + ('default', ''))
+        if not response:
+            exit()
+            return
+        elif response == 'default':
+            if not include:
+                raise IncludeDirectoryError(IncludeDirectoryError.no_default)
+        else:
+            offset = int(response) - 1
+            include = include_dirs[offset]
+    else:
+        if not include:
+            raise IncludeDirectoryError(IncludeDirectoryError.none)
+
+    return include
+
+
+def _make_runtime_dirs(*, guided):
+    return []
+
+
+def _make_runtime(*, guided):
+    return ''
+
+
+def make_config_data(*, guided):
+    """
+    Makes the data necessary to construct a functional config file
+    """
+    config_data = {}
+    config_data[INCLUDE_DIRS_KEY] = _make_include_dirs(guided=guided)
+    config_data[RUNTIME_DIRS_KEY] = _make_runtime_dirs(guided=guided)
+    config_data[RUNTIME_KEY] = _make_runtime(guided=guided)
+
+    return config_data
 
 
 def make_config(guided=False):
@@ -176,7 +256,12 @@ def make_config(guided=False):
     Options: --auto, --guided, --manual
     Places for the file: --inplace, --user
     """
-    return _make_config_location(guided=guided)
+    config_path = _make_config_location(guided=guided)
+
+    config_data = make_config_data(guided=guided)
+
+    write_config_file(config_path, config_data)
+    #return config_path
 
 
 def generate_configurations():

@@ -60,6 +60,7 @@ FUTURE UPDATES
     Get cyther to modify distutils imported at runtime to compile everything instead of distutils
     Make 'path(root='.')' work
 
+    Q) Can I use the Python source code from PSF to literally figure out where the include/runtime dirs were installed?
     Q) Even bother getting Cyther to work with python 2 or pypy(3)?
     Q) Whats up with pypi version badge doing '?.?.?'
     Q) Can ar recompile static libraries? (http://www.linux.org/threads/gnu-binutils.6544/)

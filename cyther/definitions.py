@@ -1,4 +1,16 @@
 
+import sys
+
+CACHE_NAME = "__cythercache__"
+CONFIG_FILE_NAME = '.cyther'
+
+MAJOR = str(sys.version_info.major)
+MINOR = str(sys.version_info.minor)
+VER = MAJOR + MINOR
+DOT_VER = MAJOR + '.' + MINOR
+
+###############################################################################
+
 FINE = 0
 ERROR_PASSOFF = 1
 SKIPPED_COMPILATION = 1337

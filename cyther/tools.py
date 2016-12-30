@@ -38,14 +38,21 @@ def read_dict_from_file(file_path):
 RESPONSES_ERROR = "Argument 'acceptableResponses' cannot be of type: '{}'"
 
 
-# TODO Make get_input take the 'check' parameter and inject it into the prompt
-def get_input(prompt, check, *, redo_prompt=None):
+def get_input(prompt, check, *, redo_prompt=None, repeat_prompt=False):
     """
     Ask the user to input something on the terminal level, check their response
     and ask again if they didn't answer correctly
     """
     if isinstance(check, str):
         check = (check,)
+
+    prompt += " [{}]: ".format('/'.join(check))
+
+    if repeat_prompt:
+        redo_prompt = prompt
+    elif not redo_prompt:
+        redo_prompt = "Incorrect input, please choose from {}: " \
+                      "".format(str(check))
 
     if callable(check):
         def checker(r): return check(r)
