@@ -1,6 +1,7 @@
 # Custom
 __cythercache__/
 .idea/
+.cyther
 /DO_NOT_DISTRIBUTE.txt
 /pypi.py
 /import_cyther.py
