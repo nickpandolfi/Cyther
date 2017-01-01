@@ -15,9 +15,16 @@ from .definitions import CONFIG_FILE_NAME, VER, DOT_VER
 
 class DirectoryError(Exception):
     """A custom error used to denote an error with a system of directories"""
-    no_include = "No include directory found for this version of python"
-    no_default = "There appears to be no default include directory; Cyther " \
-                 "was not able to find a suitable directory to default to"
+    should_be_guided = "If this is the case, please DO run in guided mode so" \
+                       " you can manually choose which one you wish to use"
+    no_include_dirs = "No include directory found for this version of Python"
+    multiple_include = "Multiple include directories were found for this " \
+                       "version of Python. " + should_be_guided
+
+    no_runtime_dirs = "No runtime library search directories were found for" \
+                      " this version of Python"
+    multiple_runtime_dirs = "Multiple runtime search directories were found " \
+                            "for this version of Python. " + should_be_guided
 
     def __init__(self, *args, **kwargs):
         super(DirectoryError, self).__init__(*args, **kwargs)
@@ -225,48 +232,55 @@ def _filter_include_dirs(include_dirs):
     filtered_dirs = []
     for include_path in include_dirs:
         if _check_include_dir_identity(include_path):
-            filtered_dirs.append(include_path)
+            filtered_dirs.append(os.path.dirname(include_path))
     return filtered_dirs
 
 
-INCLUDE_PROMPT = "Choose the number of one of the listed include directories" \
-                 " above, or enter 'default' to do what Cyther thinks is best"
+INCLUDE_PROMPT = "Choose one of the listed include directories above (by " \
+                 "entering the number), or enter nothing to exit the process"
 
 
 def _make_include_dirs(*, guided):
     unfiltered_dirs = find(['include', 'Python.h'], content="Py_PYTHON_H")
-    filtered_dirs = _filter_include_dirs(unfiltered_dirs)
+    include_dirs = _filter_include_dirs(unfiltered_dirs)
 
-    if not filtered_dirs:
-        raise DirectoryError(DirectoryError.no_include)
-    elif len(filtered_dirs) == 1:
-        return filtered_dirs[0]
+    if not include_dirs:
+        raise DirectoryError(DirectoryError.no_include_dirs)
+    elif len(include_dirs) == 1:
+        return include_dirs[0]
     elif not guided:
         # Be indecisive if multiple valid directories are found
-        raise Exception()
+        raise DirectoryError(DirectoryError.multiple_include)
     else:
-        return get_choice(INCLUDE_PROMPT, filtered_dirs)
+        return get_choice(INCLUDE_PROMPT, include_dirs)
+
+
+def _filter_runtime_dirs(rumtime_dirs):
+    filtered_dirs = []
+    for include_path in rumtime_dirs:
+        filtered_dirs.append(os.path.dirname(include_path))
+    return filtered_dirs
+
+
+RUNTIME_DIRS_PROMPT = "Choose one of the listed runtime search directories " \
+                      "above (by entering the number), or enter nothing to " \
+                      "exit the process"
 
 
 def _make_runtime_dirs(*, guided):
-    runtime_filename = _make_full_runtime()
-    runtime_dirs = find(runtime_filename)
+    # Dont need to filter on this one
+    unfiltered_dirs = find(_make_full_runtime())
+    runtime_dirs = _filter_runtime_dirs(unfiltered_dirs)
 
-    single_runtime = None
-    for r in runtime_dirs:
-        if not single_runtime:
-            single_runtime = r
-        else:
-            if not guided:
-                raise Exception()
-
-    if guided:
-        single_runtime = get_choice(runtime_dirs, single_runtime)
+    if not runtime_dirs:
+        raise DirectoryError(DirectoryError.no_runtime_dirs)
+    elif len(runtime_dirs) == 1:
+        return runtime_dirs[0]
+    elif not guided:
+        # Be indecisive if multiple valid dirs are found
+        raise DirectoryError(DirectoryError.multiple_runtime_dirs)
     else:
-        if not single_runtime:
-            raise DirectoryError(DirectoryError.none)
-
-    return single_runtime
+        return get_choice(RUNTIME_DIRS_PROMPT, runtime_dirs)
 
 
 def _make_full_runtime():
@@ -290,7 +304,7 @@ def make_config_data(*, guided):
     return config_data
 
 
-def make_config(guided=False):
+def make_config_file(guided=False):
     """
     Options: --auto, --guided, --manual
     Places for the file: --inplace, --user
@@ -304,12 +318,21 @@ def make_config(guided=False):
 
 def generate_configurations(*, guided=False, fresh_start=False, save=False):
     """
-    Use 'get_config' to find a configuration file
-    If not found, then generate it on the fly, and return it
+    If a config file is found in the standard locations, it will be loaded and
+    the config data would be retuned. If not found, then generate the data on
+    the fly, and return it
     """
+
+    if fresh_start:
+        purge_configs()
+
     loaded_status, loaded_data = get_config()
     if loaded_status != CONFIG_VALID:
-        config_data = make_config_data(guided=guided)
+        if save:
+            make_config_file(guided=guided)
+            status, config_data = get_config()
+        else:
+            config_data = make_config_data(guided=guided)
     else:
         config_data = loaded_data
 
@@ -317,6 +340,5 @@ def generate_configurations(*, guided=False, fresh_start=False, save=False):
 
 
 def test():
-    #print(get_config())
-    #print(generate_configurations(guided=False))
-    print(get_choice('Yo', ['a', 'b', 'c']))
+    from pprint import pprint
+    pprint(generate_configurations(guided=True, save=True))

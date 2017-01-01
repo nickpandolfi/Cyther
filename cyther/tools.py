@@ -29,7 +29,7 @@ def read_dict_from_file(file_path):
 
     obj = {}
     for line in lines:
-        key, value = line.split(':')
+        key, value = line.split(':', maxsplit=1)
         obj[key] = eval(value)
 
     return obj
