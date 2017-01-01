@@ -225,7 +225,9 @@ def _make_config_location(*, guided):
 
 # TODO Check this condition... It may not be accurate
 def _check_include_dir_identity(include_path):
-    return (VER in include_path) or (DOT_VER in include_path)
+    condition1 = (VER in include_path) or (DOT_VER in include_path)
+    condition2 = 'include' in include_path
+    return condition1 and condition2
 
 
 def _filter_include_dirs(include_dirs):
@@ -241,7 +243,7 @@ INCLUDE_PROMPT = "Choose one of the listed include directories above (by " \
 
 
 def _make_include_dirs(*, guided):
-    unfiltered_dirs = find(['include', 'Python.h'], content="Py_PYTHON_H")
+    unfiltered_dirs = find('Python.h', content="Py_PYTHON_H")
     include_dirs = _filter_include_dirs(unfiltered_dirs)
 
     if not include_dirs:
@@ -316,6 +318,7 @@ def make_config_file(guided=False):
     write_config_file(config_path, config_data)
 
 
+# TODO Make errors cascade out to the outside (this is why travis !catching it)
 def generate_configurations(*, guided=False, fresh_start=False, save=False):
     """
     If a config file is found in the standard locations, it will be loaded and
@@ -341,4 +344,4 @@ def generate_configurations(*, guided=False, fresh_start=False, save=False):
 
 def test():
     from pprint import pprint
-    pprint(generate_configurations(guided=True, save=True))
+    pprint(generate_configurations(fresh_start=True, guided=True, save=True))

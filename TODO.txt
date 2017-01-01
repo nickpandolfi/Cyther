@@ -60,6 +60,7 @@ FUTURE UPDATES
     Get cyther to modify distutils imported at runtime to compile everything instead of distutils
     Make 'path(root='.')' work
 
+    Q) Include an entry point that sits outside of 'cyther/' that is a simple argparse starter (called cyther_manual.py or something)
     Q) What to do about type checking in non-user functions!
     Q) Can I use the Python source code from PSF to literally figure out where the include/runtime dirs were installed?
     Q) Even bother getting Cyther to work with python 2 or pypy(3)?
