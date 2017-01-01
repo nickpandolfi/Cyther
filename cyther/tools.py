@@ -46,7 +46,14 @@ def get_input(prompt, check, *, redo_prompt=None, repeat_prompt=False):
     if isinstance(check, str):
         check = (check,)
 
-    prompt += " [{}]: ".format('/'.join(check))
+    to_join = []
+    for item in check:
+        if item:
+            to_join.append(str(item))
+        else:
+            to_join.append("''")
+
+    prompt += " [{}]: ".format('/'.join(to_join))
 
     if repeat_prompt:
         redo_prompt = prompt
@@ -55,16 +62,40 @@ def get_input(prompt, check, *, redo_prompt=None, repeat_prompt=False):
                       "".format(str(check))
 
     if callable(check):
-        def checker(r): return check(r)
+        def _checker(r): return check(r)
     elif isinstance(check, tuple):
-        def checker(r): return r in check
+        def _checker(r): return r in check
     else:
         raise ValueError(RESPONSES_ERROR.format(type(check)))
 
     response = input(prompt)
-    while not checker(response):
+    while not _checker(response):
+        print(response, type(response))
         response = input(redo_prompt if redo_prompt else prompt)
     return response
+
+
+def get_choice(prompt, choices):
+    """
+    Asks for a single choice out of multiple items.
+    Given those items, and a prompt to ask the user with
+    """
+    print()
+    checker = []
+    for offset, choice in enumerate(choices):
+        number = offset + 1
+        print("\t{}): '{}'\n".format(number, choice))
+        checker.append(str(number))
+
+    response = get_input(prompt, tuple(checker) + ('',))
+    if not response:
+        print("Exiting...")
+        exit()
+
+    offset = int(response) - 1
+    selected = choices[offset]
+
+    return selected
 
 
 def _removeGivensFromTasks(tasks, givens):

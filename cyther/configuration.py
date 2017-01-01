@@ -8,13 +8,14 @@ import os
 
 from .files import path, USER
 from .searcher import find
-from .tools import read_dict_from_file, write_dict_to_file, get_input
+from .tools import read_dict_from_file, write_dict_to_file,\
+    get_input, get_choice
 from .definitions import CONFIG_FILE_NAME, VER, DOT_VER
 
 
 class DirectoryError(Exception):
-    """A custom error used to denote an error with your include directories"""
-    none = "No include directory found for this version of python"
+    """A custom error used to denote an error with a system of directories"""
+    no_include = "No include directory found for this version of python"
     no_default = "There appears to be no default include directory; Cyther " \
                  "was not able to find a suitable directory to default to"
 
@@ -215,61 +216,64 @@ def _make_config_location(*, guided):
     return result
 
 
+# TODO Check this condition... It may not be accurate
+def _check_include_dir_identity(include_path):
+    return (VER in include_path) or (DOT_VER in include_path)
+
+
+def _filter_include_dirs(include_dirs):
+    filtered_dirs = []
+    for include_path in include_dirs:
+        if _check_include_dir_identity(include_path):
+            filtered_dirs.append(include_path)
+    return filtered_dirs
+
+
 INCLUDE_PROMPT = "Choose the number of one of the listed include directories" \
                  " above, or enter 'default' to do what Cyther thinks is best"
 
 
-def _ask_for_directory(dirs, default):
-    checker = []
-    for offset, include_path in enumerate(dirs):
-        number = offset + 1
-        print("{}): '{}'\n".format(number, include_path))
-        checker.append(number)
-
-    response = get_input(INCLUDE_PROMPT, tuple(checker) + ('default', ''))
-    if not response:
-        exit()
-        return
-    elif response == 'default':
-        if not default:
-            raise DirectoryError(DirectoryError.no_default)
-
-    offset = int(response) - 1
-    selected_dir = dirs[offset]
-
-    return selected_dir
-
-
-# TODO Implement support if there was only one include dir found by 'find'
 def _make_include_dirs(*, guided):
-    include_dirs = find(['include', 'Python.h'], content="Py_PYTHON_H")
+    unfiltered_dirs = find(['include', 'Python.h'], content="Py_PYTHON_H")
+    filtered_dirs = _filter_include_dirs(unfiltered_dirs)
 
-    include = None
-    for include_path in include_dirs:
-        # TODO This is your current condition... This may not be accurate
-        if VER in include_path or DOT_VER in include_path:
-            if not include:
-                include = os.path.dirname(include_path)
-            else:
-                if not guided:
-                    raise Exception()
-
-    if guided:
-        include = _ask_for_directory(include_dirs, include)
+    if not filtered_dirs:
+        raise DirectoryError(DirectoryError.no_include)
+    elif len(filtered_dirs) == 1:
+        return filtered_dirs[0]
+    elif not guided:
+        # Be indecisive if multiple valid directories are found
+        raise Exception()
     else:
-        if not include:
-            raise DirectoryError(DirectoryError.none)
-
-    return include
+        return get_choice(INCLUDE_PROMPT, filtered_dirs)
 
 
 def _make_runtime_dirs(*, guided):
-    return []
+    runtime_filename = _make_full_runtime()
+    runtime_dirs = find(runtime_filename)
+
+    single_runtime = None
+    for r in runtime_dirs:
+        if not single_runtime:
+            single_runtime = r
+        else:
+            if not guided:
+                raise Exception()
+
+    if guided:
+        single_runtime = get_choice(runtime_dirs, single_runtime)
+    else:
+        if not single_runtime:
+            raise DirectoryError(DirectoryError.none)
+
+    return single_runtime
 
 
-# TODO Would we want to check if the libpythonXY.a even exists?
-# TODO Or, is the checking done when getting the libs directory?
-def _make_runtime(*, guided):
+def _make_full_runtime():
+    return 'lib' + _make_runtime() + '.a'
+
+
+def _make_runtime():
     name = 'python' + VER
     return name
 
@@ -281,7 +285,7 @@ def make_config_data(*, guided):
     config_data = {}
     config_data[INCLUDE_DIRS_KEY] = _make_include_dirs(guided=guided)
     config_data[RUNTIME_DIRS_KEY] = _make_runtime_dirs(guided=guided)
-    config_data[RUNTIME_KEY] = _make_runtime(guided=guided)
+    config_data[RUNTIME_KEY] = _make_runtime()
 
     return config_data
 
@@ -296,11 +300,9 @@ def make_config(guided=False):
     config_data = make_config_data(guided=guided)
 
     write_config_file(config_path, config_data)
-    #return config_path
 
 
-# TODO Implement these keywords
-def generate_configurations(*, guided, fresh_start=False, save=False):
+def generate_configurations(*, guided=False, fresh_start=False, save=False):
     """
     Use 'get_config' to find a configuration file
     If not found, then generate it on the fly, and return it
@@ -315,5 +317,6 @@ def generate_configurations(*, guided, fresh_start=False, save=False):
 
 
 def test():
-    print(get_config())
-    print(generate_configurations(guided=False))
+    #print(get_config())
+    #print(generate_configurations(guided=False))
+    print(get_choice('Yo', ['a', 'b', 'c']))
