@@ -9,6 +9,8 @@ for it
 import os
 import time
 
+APPEND_SEP_TO_DIRS = True
+
 DRIVE = 0
 REST = 1
 
@@ -363,6 +365,8 @@ def path(path_name=None, override=None, *, root=None, name=None, ext=None,
     new_name = _process_name(path_name, identity, name, ext)
     new_directory = _process_directory(path_name, identity, root, inject)
     full_path = os.path.normpath(os.path.join(new_directory, new_name))
+    if APPEND_SEP_TO_DIRS and not new_name and full_path[-1] != os.sep:
+        full_path += os.sep
     final_path = _format_path(full_path, root, relpath, reduce)
     return final_path
 

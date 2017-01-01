@@ -89,11 +89,16 @@ def test_dict_file():
 
 def test_path():
     """
-    Tests 'path' function in 'files.py' to make sure it's working correctly
+    Tests 'path' function in 'pathway.py' to make sure it's working correctly
     """
 
     import os
-    from .files import ISFILE, ISDIR, path, get_dir, OverwriteError, normalize
+    from .pathway import ISFILE, ISDIR, path, get_dir, \
+        OverwriteError, normalize
+
+    # Turn sep appending off for testing purposes
+    import cyther.pathway
+    cyther.pathway.APPEND_SEP_TO_DIRS = False
 
     cwd = os.getcwd()
     assert path() == os.getcwd()
