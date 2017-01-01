@@ -6,7 +6,7 @@ hold critical data about where different compile-critical directories exist.
 
 import os
 
-from .files import path, USER
+from .pathway import path, USER
 from .searcher import find
 from .tools import read_dict_from_file, write_dict_to_file,\
     get_input, get_choice
