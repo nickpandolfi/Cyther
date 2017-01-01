@@ -33,13 +33,14 @@ def test_utilities():
     A function to test cyther's internal compilation and helper tools
     """
     from .aberdeen import test_generateBatches, test_path, test_dict_file, \
-        test_extract, test_find
+        test_extract, test_find, display_configure
 
     test_generateBatches()
     test_path()
     test_dict_file()
     test_extract()
     test_find()
+    display_configure()
 
     return None
 
