@@ -6,7 +6,7 @@ This module deals with operations regarding individual cyther projects
 import os
 
 from .tools import get_input
-from .files import path, ISDIR
+from .pathway import path, ISDIR
 from .definitions import CACHE_NAME
 
 

@@ -5,7 +5,7 @@ process basic instructions, whether they originate from an api usage or from
 the terminal. This is where both functionalities merge. Serious error checking.
 """
 
-from .files import File
+from .pathway import File
 from .parser import parseString
 
 

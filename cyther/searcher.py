@@ -9,7 +9,7 @@ import os
 import re
 import shutil
 
-from .files import get_system_drives, has_suffix
+from .pathway import get_system_drives, has_suffix
 
 
 def where(cmd, path=None):
