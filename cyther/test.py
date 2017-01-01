@@ -40,9 +40,8 @@ def test_utilities():
     test_dict_file()
     test_extract()
     test_find()
-    display_configure()
-
-    return None
+    print(display_configure())
+    print('<@test.py> All utility tests have been passed')
 
 
 if __name__ == '__main__':
