@@ -5,7 +5,6 @@ A module that defines the different testing procedures to be used by test.py
 
 import os
 
-print('The outside has been printed')
 
 def display_configure():
     """
@@ -14,12 +13,8 @@ def display_configure():
 
     from .configuration import generate_configurations
 
-    # Manual printing and flushing
-    import sys
-    sys.stdout.write('Manual writing')
-    sys.stdout.flush()
-
     print(generate_configurations(save=True))
+    assert 1 == 0
 
 
 def test_find():
