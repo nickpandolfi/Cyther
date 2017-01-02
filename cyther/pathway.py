@@ -214,13 +214,18 @@ def get_system_drives():
         letter = ord('A')
         while bitmask > 0:
             if bitmask & 1:
-                name = chr(letter) + ':\\'
+                name = chr(letter) + ':' + os.sep
                 if os.path.isdir(name):
                     drives.append(name)
             bitmask >>= 1
             letter += 1
     else:
-        drives.append(get_drive(os.getcwd()))
+        current_drive = get_drive(os.getcwd())
+        if current_drive:
+            drive = current_drive
+        else:
+            drive = os.sep
+        drives.append(drive)
 
     return drives
 
