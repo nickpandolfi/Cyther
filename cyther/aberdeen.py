@@ -14,6 +14,11 @@ def display_configure():
 
     from .configuration import generate_configurations
 
+    # Manual printing and flushing
+    import sys
+    sys.stdout.write('Manual writing')
+    sys.stdout.flush()
+
     print(generate_configurations(save=True))
 
 
