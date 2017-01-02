@@ -35,7 +35,6 @@ def test_utilities():
     from .aberdeen import test_generateBatches, test_path, test_dict_file, \
         test_extract, test_find, display_configure
 
-    print('Tests starting')
     test_generateBatches()
     test_path()
     test_dict_file()
