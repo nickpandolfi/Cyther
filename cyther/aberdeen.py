@@ -12,16 +12,9 @@ def display_configure():
     """
 
     from .configuration import generate_configurations
-    # print(generate_configurations(save=True))
+    print(generate_configurations(save=True))
 
-    from .searcher import find
-
-    # '/opt/python/3.6.0/include/python3.6m'
-
-    print('With content: {}'.format(str(find('Python.h',
-                                             content="Py_PYTHON_H"))))
-    print('Without content: {}'.format(str(find('Python.h'))))
-
+    # '/opt/python/3.6.0/include/python3.6m/Python.h'
 
 
 def test_find():
@@ -29,7 +22,7 @@ def test_find():
     Tests the 'find' function from cyther.searcher
     """
     from .searcher import find
-    pass
+    #assert find('')
 
 
 def test_extract():

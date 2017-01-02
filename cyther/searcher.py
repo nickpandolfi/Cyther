@@ -128,6 +128,10 @@ def find(init, start=None, PATH=None, EXEC=False, on_first=False,
     else:
         raise TypeError("Parameter 'start' must be None, tuple, or list")
 
+    print("Start: '{}'".format(start),
+          "Suffix: '{}'".format(suffix),
+          "Target: '{}'".format(target))
+
     results = []
     for top in start:
         for (dirpath, dirnames, filenames) in os.walk(top):
@@ -137,6 +141,7 @@ def find(init, start=None, PATH=None, EXEC=False, on_first=False,
                     if not content or search_file(content, file_path):
                         results.append(file_path)
 
+    print("Results before processed: '{}'".format(str(results)))
     return process_output(results, one=one)
 
 
