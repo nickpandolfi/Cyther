@@ -13,7 +13,7 @@ def display_configure():
 
     from .configuration import generate_configurations
 
-    return generate_configurations(save=True)
+    print(generate_configurations(save=True))
 
 
 def test_find():

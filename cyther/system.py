@@ -172,11 +172,6 @@ print("gcc output: '{}'".format(gcc_output))
 GCC_INFO = gcc_output.getOutput()
 GCC_VERSION = gcc_output.extractVersion()
 
-print('Heyo')
-def yolo_swag():
-    print('money')
-yolo_swag()
-
 cython_output = call(['cython', '-V'], raise_exception=True)
 print("cython output: '{}'".format(cython_output))
 CYTHON_OUTPUT = cython_output.getOutput()
