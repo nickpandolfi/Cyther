@@ -14,7 +14,6 @@ def display_configure():
     from .configuration import generate_configurations
 
     print(generate_configurations(save=True))
-    assert 1 == 0
 
 
 def test_find():
