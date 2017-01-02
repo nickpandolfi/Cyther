@@ -128,8 +128,6 @@ def find(init, start=None, PATH=None, EXEC=False, on_first=False,
     else:
         raise TypeError("Parameter 'start' must be None, tuple, or list")
 
-    print("Start: '{}'".format(start))
-
     walked = 0
     results = []
     for top in start:
@@ -141,7 +139,6 @@ def find(init, start=None, PATH=None, EXEC=False, on_first=False,
                     if not content or search_file(content, file_path):
                         results.append(file_path)
 
-    print("Walked: '{}'".format(str(walked)))
     return process_output(results, one=one)
 
 
