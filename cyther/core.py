@@ -5,7 +5,6 @@ The heart of Cyther
 
 from .system import INFO
 from .project import purge_project, clean_project
-import argparse
 
 """
 Each function must have the parameter 'args', even if they do not use it.
@@ -14,45 +13,29 @@ This is because they can be called by the parser, and parser always passes a
 """
 
 
-def polymorph(func):
-    def wrapped(*args, **kwargs):
-        if kwargs:
-            args = argparse.Namespace()
-            args.__dict__.update(kwargs)
-        return func(args)
-    return wrapped
-
-
-def info(args):
+def info(**kwargs):
     print(INFO)
 
 
-@polymorph
-def configure(args):
-    """
-    pass
-    """
+def configure(**kwargs):
     pass
 
 
-def setup(args):
+def setup(**kwargs):
+    print(kwargs)
+
+
+def make(**kwargs):
     pass
 
 
-def make(args):
+def build(**kwargs):
     pass
 
 
-@polymorph
-def build(args):
-    pass
-
-
-@polymorph
-def clean(args):
+def clean(**kwargs):
     clean_project()
 
 
-@polymorph
-def purge(args):
+def purge(**kwargs):
     purge_project()

@@ -131,8 +131,8 @@ if not DRIVE:
     DRIVE = os.path.normpath(os.sep)
 
 INCLUDE_DIRS, RUNTIME_DIRS = getIncludeAndRuntime()
-print("Include: '{}'".format(INCLUDE_DIRS))
-print("Runtime: '{}'".format(RUNTIME_DIRS))
+#print("Include: '{}'".format(INCLUDE_DIRS))
+#print("Runtime: '{}'".format(RUNTIME_DIRS))
 # L_OPTION = '-l' + extractRuntime(RUNTIME_DIRS)
 
 INCLUDE_STRING = ''
@@ -168,12 +168,12 @@ CYTHON_EXECUTABLE = where('cython')
 GCC_EXECUTABLE = where('gcc')
 
 gcc_output = call(['gcc', '-v'], raise_exception=True)
-print("gcc output: '{}'".format(gcc_output))
+#print("gcc output: '{}'".format(gcc_output))
 GCC_INFO = gcc_output.getOutput()
 GCC_VERSION = gcc_output.extractVersion()
 
 cython_output = call(['cython', '-V'], raise_exception=True)
-print("cython output: '{}'".format(cython_output))
+#print("cython output: '{}'".format(cython_output))
 CYTHON_OUTPUT = cython_output.getOutput()
 CYTHON_VERSION = cython_output.extractVersion()
 
@@ -200,5 +200,3 @@ INFO += "\n\tGCC ({}) ({}):".format(GCC_VERSION, GCC_EXECUTABLE)
 
 INFO += "\n{}".format(textwrap.indent(GCC_INFO.splitlines()[-1], '\t\t'))
 INFO += "\n"
-
-assert 1 == 0

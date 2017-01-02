@@ -65,7 +65,7 @@ help_test_utilities = "Run tests dealing with Cyther's tools used to function"
 
 test_commands = test_parser.add_subparsers()
 test_all_parser = test_commands.add_parser('all', help=help_test_all)
-test_all_parser.set_defaults(func=test_all)
+test_all_parser.set_defaults(func=lambda: print('yolo'))
 
 test_compiler_parser = test_commands.add_parser('compiler',
                                                 help=help_test_compiler)
