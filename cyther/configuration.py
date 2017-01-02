@@ -244,8 +244,8 @@ INCLUDE_PROMPT = "Choose one of the listed include directories above (by " \
 
 def _make_include_dirs(*, guided):
     unfiltered_dirs = find('Python.h', content="Py_PYTHON_H")
-    print("Unfiltered: '{}'".format(unfiltered_dirs))
     include_dirs = _filter_include_dirs(unfiltered_dirs)
+    print("Filtered dirs: '{}'".format(include_dirs))
 
     if not include_dirs:
         raise DirectoryError(DirectoryError.no_include_dirs)
