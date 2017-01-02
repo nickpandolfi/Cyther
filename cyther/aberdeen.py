@@ -12,8 +12,14 @@ def display_configure():
     """
 
     from .configuration import generate_configurations
+    # print(generate_configurations(save=True))
 
-    #print(generate_configurations(save=True))
+    from .searcher import find
+
+    # '/opt/python/3.6.0/include/python3.6m'
+
+    print(find('Python.h', content="Py_PYTHON_H"))
+
 
 
 def test_find():
