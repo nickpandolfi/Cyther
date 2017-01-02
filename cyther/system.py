@@ -200,3 +200,5 @@ INFO += "\n\tGCC ({}) ({}):".format(GCC_VERSION, GCC_EXECUTABLE)
 
 INFO += "\n{}".format(textwrap.indent(GCC_INFO.splitlines()[-1], '\t\t'))
 INFO += "\n"
+
+assert 1 == 0
