@@ -18,7 +18,9 @@ def display_configure():
 
     # '/opt/python/3.6.0/include/python3.6m'
 
-    print(find('Python.h', content="Py_PYTHON_H"))
+    print('With content: {}'.format(str(find('Python.h',
+                                             content="Py_PYTHON_H"))))
+    print('Without content: {}'.format(str(find('Python.h'))))
 
 
 
