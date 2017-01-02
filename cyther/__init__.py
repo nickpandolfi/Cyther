@@ -23,3 +23,5 @@ __license__ = "MIT"
 __email__ = "npandolfi@wpi.edu"
 
 __status__ = "Development"
+
+print('Init was run')

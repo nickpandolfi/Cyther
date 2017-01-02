@@ -5,6 +5,7 @@ A module that defines the different testing procedures to be used by test.py
 
 import os
 
+print('The outside has been printed')
 
 def display_configure():
     """
