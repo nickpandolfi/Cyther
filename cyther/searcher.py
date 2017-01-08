@@ -8,8 +8,9 @@ designed to be relatively easy to use and make a very complex task much less so
 import os
 import re
 import shutil
+import multiprocessing
 
-from .pathway import get_system_drives, has_suffix
+from .pathway import get_system_drives, has_suffix, disintegrate
 
 
 def where(cmd, path=None):
@@ -96,16 +97,7 @@ def assert_output(output, assert_equal):
         raise ValueError(ASSERT_ERROR.format(sorted_output, sorted_assert))
 
 
-# TODO Find any directory that matches a certain pattern?
-# TODO Pool this function to make it lightning quick
-# TODO ^ but this may require me to rewrite os.walk
-def find(init, start=None, PATH=None, EXEC=False, on_first=False,
-         content=None, one=False):
-    """
-    Finds a given 'target' (filename string) in the file system
-
-    on_first: End function when the first item is found, return that item
-    """
+def _find_init(init, start):
     if not init:
         raise ValueError("Parameter 'init' must not be empty")
     elif isinstance(init, str):
@@ -128,18 +120,55 @@ def find(init, start=None, PATH=None, EXEC=False, on_first=False,
     else:
         raise TypeError("Parameter 'start' must be None, tuple, or list")
 
-    walked = 0
-    results = []
-    for top in start:
-        for (dirpath, dirnames, filenames) in os.walk(top):
-            walked += 1
-            file_path = os.path.normpath(os.path.join(dirpath, target))
-            if target in filenames or EXEC and os.access(file_path, os.X_OK):
-                if not suffix or has_suffix(dirpath, suffix):
-                    if not content or search_file(content, file_path):
-                        results.append(file_path)
+    return start, target, suffix
 
-    return process_output(results, one=one)
+
+def _get_starting_points(base_start):
+    return base_start
+
+
+# TODO Make it possible to find multiple things at once (saves crazy time)
+# TODO It turns out that process_args might not be necesssary at all... ('one')
+def find(init, start=None, one=False, is_exec=False, content=None,
+         workers=None):
+    """
+    Finds a given 'target' (filename string) in the file system
+    """
+    base_start, target, suffix = _find_init(init, start)
+
+    def _condition(file_path, dirpath, dirnames, filenames):
+        if target in filenames or is_exec and os.access(file_path, os.X_OK):
+            if not suffix or has_suffix(dirpath, suffix):
+                if not content or search_file(content, file_path):
+                    return True
+        return False
+
+    def _fetch(top):
+        disintegrated_excludes = disintegrate(excludes)
+        results = []
+        for dirpath, dirnames, filenames in os.walk(top, topdown=True):
+            # This if-statement is designed to save time
+            if disintegrate(dirpath) == watch_dirs:
+                for e in disintegrated_excludes:
+                    if e[-1] in dirnames:
+                        if disintegrate(dirpath) == e[:-1]:
+                            dirnames.remove(e[-1])
+
+            file_path = os.path.normpath(os.path.join(dirpath, target))
+            if _condition(file_path, dirpath, dirnames, filenames):
+                results.append(file_path)
+        return results
+
+    starting_points, watch_dirs, excludes = _get_starting_points(base_start)
+
+    with multiprocessing.Pool(workers) as pool:
+        unzipped_results = pool.map(_fetch, starting_points)
+
+    zipped_results = [i for item in unzipped_results for i in item]
+
+    processed_results = process_output(zipped_results, one=one)
+
+    return processed_results
 
 
 def extract(pattern, string, *, assert_equal=False, one=False,
@@ -149,7 +178,13 @@ def extract(pattern, string, *, assert_equal=False, one=False,
     Used to extract a given regex pattern from a string, given several options
     """
 
-    output = get_content(pattern, string)
+    if isinstance(pattern, str):
+        output = get_content(pattern, string)
+    else:
+        # Must be a linear container
+        output = []
+        for p in pattern:
+            output += get_content(p, string)
 
     output = process_output(output, one=one, condense=condense,
                             default=default,
@@ -205,3 +240,8 @@ def extractVersion(string, default='?'):
     """
     return extract(VERSION_PATTERN, string, condense=True, default=default,
                    one=True)
+
+
+def test():
+    uzaz((('a', 'b'), ('c', 'd')))#print(find('Python.h'))
+
