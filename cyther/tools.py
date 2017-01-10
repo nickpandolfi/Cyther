@@ -6,6 +6,66 @@ class CytherError(Exception):
         super(CytherError, self).__init__(*args, **kwargs)
 
 
+def isIterable(obj):
+    """
+    Returns a boolean denoting if the object passed in is iterable
+    """
+    try:
+        _ = iter(obj)
+    except TypeError:
+        return False
+    else:
+        return True
+
+
+MULTIPLE = 'multiple'
+NONE = 'none'
+
+
+def process_output(output, *, condense=False, one=False, default=None,
+                   default_if_multiple=True, default_if_none=True):
+    """
+    Taking a iterative container (list, tuple), this function will process its
+    contents and condense if necessary. It also has functionality to try to
+    assure that the output has only one item in it if desired. If this is not
+    the case, then it will return a 'default' in place of the output, if
+    specified.
+    """
+    if condense:
+        output = list(set(output))
+
+    if one:
+        if len(output) > 1:
+            if default and default_if_multiple:
+                output = default
+            else:
+                return MULTIPLE
+        elif len(output) == 1:
+            output = output[0]
+        else:
+            if default and default_if_none:
+                return default
+            else:
+                return NONE
+
+    return output
+
+
+ASSERT_ERROR = "The search result:\n\t{}\nIs not equivalent to the assert " \
+               "test provided:\n\t{}"
+
+
+def assert_output(output, assert_equal):
+    """
+    Check that two outputs have the same contents as one another, even if they
+    aren't sorted yet
+    """
+    sorted_output = sorted(output)
+    sorted_assert = sorted(assert_equal)
+    if sorted_output != sorted_assert:
+        raise ValueError(ASSERT_ERROR.format(sorted_output, sorted_assert))
+
+
 def write_dict_to_file(file_path, obj):
     """
     Write a dictionary of string keys to a file
