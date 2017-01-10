@@ -22,7 +22,7 @@ except FileNotFoundError:
 
 
 PACKAGES = ['cyther']
-# PACKAGE_DATA = {'cyther': ['../*.txt', '../data']}
+DATA_FILES = [('test', ['test/*'])]
 ENTRY_POINTS = {'console_scripts': ['cyther = cyther.__main__:main']}
 
 
