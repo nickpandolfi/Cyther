@@ -13,7 +13,7 @@ LICENSE = 'MIT'
 
 SHORT_DESCRIPTION = "Cyther: The Cross-Platform Cython/Python/C Auto-Compiler"
 VERSION = '0.8.dev28'
-INSTALL_REQUIRES = ['cython']
+INSTALL_REQUIRES = ['cython', 'dill']
 
 try:
     LONG_DESCRIPTION = open('README.txt').read()
