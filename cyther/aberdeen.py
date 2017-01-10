@@ -31,8 +31,8 @@ def test_extract():
     amounts of values, and nothing when appropriate
     """
 
-    from .searcher import NONE, MULTIPLE, extract,\
-        extractAtCyther, extractVersion
+    from .extractor import extract, extractAtCyther, extractVersion, \
+        NONE, MULTIPLE
 
     string = \
         """

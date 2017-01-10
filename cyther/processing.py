@@ -5,7 +5,7 @@ from .commands import furtherArgsProcessing, processFiles, makeCommands
 from .definitions import WAIT_FOR_FIX, SKIPPED_COMPILATION, INTERVAL, \
     ERROR_PASSOFF, FINE, WATCH_STATS_TEMPLATE, \
     SETUP_TEMPLATE, TIMER_TEMPLATE
-from .searcher import extractAtCyther
+from .extractor import extractAtCyther
 from .system import *
 
 

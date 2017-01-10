@@ -9,7 +9,7 @@ import traceback
 import sys
 import multiprocessing
 
-from .searcher import extract, extractVersion
+from .extractor import extract, extractVersion
 
 import dill
 
