@@ -8,6 +8,9 @@ import os
 import re
 import shutil
 
+# For testing purposes
+from time import time
+
 from .tools import isIterable, process_output
 from .pathway import get_system_drives, has_suffix, disintegrate
 from .launcher import distribute
@@ -99,11 +102,12 @@ def _get_starting_points(base_start):
 # TODO Make it possible to find multiple things at once (saves crazy time)
 # TODO It turns out that process_args might not be necesssary at all... ('one')
 def find(init, start=None, one=False, is_exec=False, content=None,
-         workers=None):
+         parallelize=True, workers=None):
     """
     Finds a given 'target' (filename string) in the file system
     """
     base_start, target, suffix = _find_init(init, start)
+    print(base_start)
 
     def _condition(file_path, dirpath, filenames):
         if target in filenames or is_exec and os.access(file_path, os.X_OK):
@@ -113,7 +117,7 @@ def find(init, start=None, one=False, is_exec=False, content=None,
         return False
 
     starting_points, watch_dirs, excludes = _get_starting_points(base_start)
-    disintegrated_excludes = disintegrate(excludes)
+    disintegrated_excludes = [disintegrate(e) for e in excludes]
 
     def _filter(dirnames, dirpath):
         if disintegrate(dirpath) in watch_dirs:
@@ -133,7 +137,13 @@ def find(init, start=None, one=False, is_exec=False, content=None,
                 results.append(file_path)
         return results
 
-    unzipped_results = distribute(_fetch, starting_points, workers=workers)
+    st = time()
+    if parallelize:
+        unzipped_results = distribute(_fetch, starting_points, workers=workers)
+    else:
+        unzipped_results = [_fetch(point) for point in base_start]
+    et = time()
+    print(et - st)
 
     zipped_results = [i for item in unzipped_results for i in item]
     processed_results = process_output(zipped_results, one=one)
@@ -141,5 +151,16 @@ def find(init, start=None, one=False, is_exec=False, content=None,
     return processed_results
 
 
-def test():
-    print(find(['include', 'Python.h']))
+def bloop(p):
+    start = time()
+    i = find(['include', 'Python.h'], parallelize=p)
+    end = time()
+    return end - start
+
+
+def test(prit=False):
+    t1 = bloop(True)
+    t2 = bloop(False)
+    if prit:
+        print("Time (parallelized): '{}'".format(t1))
+        print("Time (not parallelized): '{}'".format(t2))
