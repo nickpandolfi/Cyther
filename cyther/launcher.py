@@ -7,8 +7,11 @@ subprocess and handling its output correctly and efficiently
 import subprocess
 import traceback
 import sys
+import multiprocessing
 
 from .searcher import extract, extractVersion
+
+import dill
 
 
 class Result:
@@ -31,6 +34,9 @@ class Result:
         return extract(pattern, self.getOutput(), **kwargs)
 
     def extractVersion(self, default='?'):
+        """
+        Extracts a version number from the standard outputs
+        """
         return extractVersion(self.getOutput(), default=default)
 
     def getStdout(self):
@@ -170,8 +176,30 @@ def multiCall(*commands, dependent=True, bundle=False,
 
     return processed_response
 
-if __name__ == '__main__':
-    result = Result()
-    result.stdout = "Version: 1.1.1\nversion 1.1.000\nversion: \n0.0.900\n"
-    version_number = result.extractVersion()
-    print(version_number)
+
+def _run_pickled(pickled):
+    function, item = dill.loads(pickled)
+    return function(item)
+
+
+def distribute(function, iterable, *, workers=4):
+    """
+    A version of multiprocessing.Pool.map that works using dill to pickle the
+    function and iterable
+    """
+    with multiprocessing.Pool(workers) as pool:
+        processes = []
+        for item in iterable:
+            pickled = dill.dumps((function, item))
+            process = pool.apply_async(_run_pickled, (pickled,))
+            processes.append(process)
+
+        results = [process.get() for process in processes]
+    return results
+
+
+def test():
+    def f(x):
+        return x ** 2
+
+    print(distribute(f, [1, 2, 3]))
