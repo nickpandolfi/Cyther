@@ -1,4 +1,9 @@
 
+"""
+Provides the tools for Cyther's basic operations (functions that dont have
+a specific theme to them; miscellaneous
+"""
+
 
 class CytherError(Exception):
     """A custom error used to denote that an exception was Cyther related"""

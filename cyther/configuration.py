@@ -8,9 +8,10 @@ import os
 
 from .pathway import path, USER
 from .searcher import find
+from .definitions import CONFIG_FILE_NAME, VER, DOT_VER
+
 from .tools import read_dict_from_file, write_dict_to_file,\
     get_input, get_choice
-from .definitions import CONFIG_FILE_NAME, VER, DOT_VER
 
 
 class DirectoryError(Exception):
