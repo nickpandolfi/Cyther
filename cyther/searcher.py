@@ -158,9 +158,22 @@ def bloop(p):
     return end - start
 
 
-def test(prit=False):
+def cachunk(prit=False):
     t1 = bloop(True)
     t2 = bloop(False)
     if prit:
         print("Time (parallelized): '{}'".format(t1))
         print("Time (not parallelized): '{}'".format(t2))
+
+
+def test():
+    function = lambda i: [x ** 2 for x in list(range(1000000))]
+    t1s = time()
+    a = distribute(lambda x: x ** 2, to_process)
+    t1e = time()
+    print("Time (parallelized): '{}'".format(t1e - t1s))
+    t2s = time()
+    b = [x ** 2 for x in to_process]
+    t2e = time()
+    print("Time (not parallelized): '{}'".format(t2e - t2s))
+    assert a == b

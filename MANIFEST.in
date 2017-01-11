@@ -1,3 +1,2 @@
 include README.txt README.md LICENSE.txt CHANGELOG.txt TODO.txt
 include .travis.yml .codeclimate.yml packages_diagram.png
-include test test/*

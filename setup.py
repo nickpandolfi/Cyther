@@ -12,7 +12,7 @@ LICENSE = 'MIT'
 
 
 SHORT_DESCRIPTION = "Cyther: The Cross-Platform Cython/Python/C Auto-Compiler"
-VERSION = '0.8.dev28'
+VERSION = '0.8.dev29'
 INSTALL_REQUIRES = ['cython', 'dill']
 
 try:
