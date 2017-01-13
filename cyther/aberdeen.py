@@ -12,7 +12,8 @@ def display_resources():
     to test cyther (randomtreetest.c) was included
     """
     from .tools import find_resource
-    print(find_resource('randomtreetest.c'))
+    print("Resource 'randomtreetest.c': {}"
+          "".format(find_resource('randomtreetest.c')))
 
 
 def display_configure():
