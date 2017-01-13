@@ -1,8 +1,5 @@
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup
 
 NAME = 'cyther'
 AUTHOR = 'Nicholas C. Pandolfi'
@@ -12,7 +9,7 @@ LICENSE = 'MIT'
 
 
 SHORT_DESCRIPTION = "Cyther: The Cross-Platform Cython/Python/C Auto-Compiler"
-VERSION = '0.8.dev29'
+VERSION = '0.8.dev37'
 INSTALL_REQUIRES = ['cython', 'dill']
 
 try:
@@ -22,7 +19,9 @@ except FileNotFoundError:
 
 
 PACKAGES = ['cyther']
-DATA_FILES = [('test', ['test/*'])]
+
+PACKAGE_DATA = {'cyther': ['test/*']}
+
 ENTRY_POINTS = {'console_scripts': ['cyther = cyther.__main__:main']}
 
 
@@ -55,6 +54,11 @@ setup(name=NAME,
       description=SHORT_DESCRIPTION,
       long_description=LONG_DESCRIPTION,
       packages=PACKAGES,
+
+      package_data=PACKAGE_DATA,
+      include_package_data=True,
+      zip_safe=False,
+
       entry_points=ENTRY_POINTS,
       platforms=PLATFORMS,
       author=AUTHOR,
