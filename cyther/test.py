@@ -33,7 +33,7 @@ def test_utilities():
     A function to test cyther's internal compilation and helper tools
     """
     from .aberdeen import test_generateBatches, test_path, test_dict_file, \
-        test_extract, test_find, display_configure
+        test_extract, test_find, display_configure, display_resources
     from .direct import display_direct
 
     test_generateBatches()
@@ -43,6 +43,7 @@ def test_utilities():
     test_find()
     display_configure()
     display_direct()
+    display_resources()
     print('<@test.py> All utility tests have been passed')
 
 
