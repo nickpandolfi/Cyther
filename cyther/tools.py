@@ -4,11 +4,26 @@ Provides the tools for Cyther's basic operations (functions that dont have
 a specific theme to them; miscellaneous
 """
 
+import os
+import pkg_resources
+
 
 class CytherError(Exception):
     """A custom error used to denote that an exception was Cyther related"""
     def __init__(self, *args, **kwargs):
         super(CytherError, self).__init__(*args, **kwargs)
+
+
+def find_resource(r, *, pkg='cyther'):
+    """
+    Finds a given cyther resource in the 'test' subdirectory in
+    'cyther' package
+    """
+    file_path = pkg_resources.resource_filename(pkg, os.path.join('test', r))
+    if not os.path.isfile(file_path):
+        msg = "Resource '{}' does not exist"
+        raise FileNotFoundError(msg.format(file_path))
+    return file_path
 
 
 def isIterable(obj):
