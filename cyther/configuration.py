@@ -226,10 +226,9 @@ def _make_config_location(*, guided):
 
 
 def _check_include_dir_identity(include_path):
-    a = extractMajorMinor(include_path) == [DOT_VER]
-    b = VER in include_path
-    c = 'include' in include_path
-    return (a or b) and c
+    a = VER in include_path or DOT_VER in include_path
+    b = 'include' in include_path
+    return a and b
 
 
 def _filter_include_dirs(include_dirs):
@@ -237,6 +236,13 @@ def _filter_include_dirs(include_dirs):
     for include_path in include_dirs:
         if _check_include_dir_identity(include_path):
             filtered_dirs.append(os.path.dirname(include_path))
+
+    if len(filtered_dirs) > 1:
+        refiltered_dirs = []
+        for include_path in filtered_dirs:
+            if extractMajorMinor(include_path) == [DOT_VER]:
+                refiltered_dirs.append(include_path)
+        filtered_dirs = refiltered_dirs
     return filtered_dirs
 
 
