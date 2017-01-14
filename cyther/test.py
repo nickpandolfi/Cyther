@@ -41,8 +41,8 @@ def test_utilities():
     test_dict_file()
     test_extract()
     #test_find()
-    display_configure()
     display_direct()
+    display_configure()
     display_resources()
     print('<@test.py> All utility tests have been passed')
 

@@ -107,7 +107,6 @@ def find(init, start=None, one=False, is_exec=False, content=None,
     Finds a given 'target' (filename string) in the file system
     """
     base_start, target, suffix = _find_init(init, start)
-    print(base_start)
 
     def _condition(file_path, dirpath, filenames):
         if target in filenames or is_exec and os.access(file_path, os.X_OK):
@@ -143,7 +142,7 @@ def find(init, start=None, one=False, is_exec=False, content=None,
     else:
         unzipped_results = [_fetch(point) for point in base_start]
     et = time()
-    print(et - st)
+    #print(et - st)
 
     zipped_results = [i for item in unzipped_results for i in item]
     processed_results = process_output(zipped_results, one=one)
