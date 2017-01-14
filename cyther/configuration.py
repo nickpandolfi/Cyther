@@ -8,6 +8,7 @@ import os
 
 from .pathway import path, USER
 from .searcher import find
+from .extractor import extractMajorMinor
 from .definitions import CONFIG_FILE_NAME, VER, DOT_VER
 
 from .tools import read_dict_from_file, write_dict_to_file,\
@@ -224,11 +225,11 @@ def _make_config_location(*, guided):
     return result
 
 
-# TODO Check this condition... It may not be accurate
 def _check_include_dir_identity(include_path):
-    condition1 = (VER in include_path) or (DOT_VER in include_path)
-    condition2 = 'include' in include_path
-    return condition1 and condition2
+    a = extractMajorMinor(include_path) == [DOT_VER]
+    b = VER in include_path
+    c = 'include' in include_path
+    return (a or b) and c
 
 
 def _filter_include_dirs(include_dirs):
@@ -245,6 +246,7 @@ INCLUDE_PROMPT = "Choose one of the listed include directories above (by " \
 
 def _make_include_dirs(*, guided):
     unfiltered_dirs = find('Python.h', content="Py_PYTHON_H")
+    print("Unfiltered dirs: '{}'".format(unfiltered_dirs))
     include_dirs = _filter_include_dirs(unfiltered_dirs)
     print("Filtered dirs: '{}'".format(include_dirs))
 

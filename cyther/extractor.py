@@ -80,7 +80,8 @@ def extractAtCyther(string):
     return code
 
 
-VERSION_PATTERN = r"[Vv]ersion:?\s+(?P<content>([0-9]+\.){1,}((dev)?[0-9]+))"
+VERSION_PATTERN = r"[Vv]((\s*)|(ersion:?\s+))" \
+                  r"(?P<content>(\d+\.){1,}((dev)?\d+))"
 
 
 def extractVersion(string, default='?'):
@@ -89,3 +90,14 @@ def extractVersion(string, default='?'):
     """
     return extract(VERSION_PATTERN, string, condense=True, default=default,
                    one=True)
+
+
+MAJORMINOR_PATTERN = r"(?<=[^\d\.])(?P<content>\d\.\d)"
+
+
+def extractMajorMinor(dirpath):
+    """
+    Extracts the version number (excluding the patch number) from a path
+    Ex) python/thing/3.5.1/include -> '3.5'
+    """
+    return extract(MAJORMINOR_PATTERN, dirpath, condense=True, one=True)
