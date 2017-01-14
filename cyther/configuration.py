@@ -252,9 +252,7 @@ INCLUDE_PROMPT = "Choose one of the listed include directories above (by " \
 
 def _make_include_dirs(*, guided):
     unfiltered_dirs = find('Python.h', content="Py_PYTHON_H")
-    print("Unfiltered dirs: '{}'".format(unfiltered_dirs))
     include_dirs = _filter_include_dirs(unfiltered_dirs)
-    print("Filtered dirs: '{}'".format(include_dirs))
 
     if not include_dirs:
         raise DirectoryError(DirectoryError.no_include_dirs)
@@ -267,9 +265,9 @@ def _make_include_dirs(*, guided):
         return get_choice(INCLUDE_PROMPT, include_dirs)
 
 
-def _filter_runtime_dirs(rumtime_dirs):
+def _filter_runtime_dirs(runtime_dirs):
     filtered_dirs = []
-    for include_path in rumtime_dirs:
+    for include_path in runtime_dirs:
         filtered_dirs.append(os.path.dirname(include_path))
     return filtered_dirs
 
@@ -282,7 +280,9 @@ RUNTIME_DIRS_PROMPT = "Choose one of the listed runtime search directories " \
 def _make_runtime_dirs(*, guided):
     # Dont need to filter on this one
     unfiltered_dirs = find(_make_full_runtime())
+    print("Unfiltered: '{}'".format(unfiltered_dirs))
     runtime_dirs = _filter_runtime_dirs(unfiltered_dirs)
+    print("Filtered dirs: '{}'".format(runtime_dirs))
 
     if not runtime_dirs:
         raise DirectoryError(DirectoryError.no_runtime_dirs)
